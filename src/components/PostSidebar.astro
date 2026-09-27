@@ -1,0 +1,167 @@
+---
+import type { MarkdownHeading } from "astro";
+import { getCollection } from "astro:content";
+import Tag from "@/components/Tag.astro";
+import { useTranslations } from "@/i18n";
+import { getUniqueTags } from "@/utils/getUniqueTags";
+
+type Props = {
+  headings: MarkdownHeading[];
+};
+
+const { headings } = Astro.props;
+const t = useTranslations(Astro.currentLocale);
+const tags = getUniqueTags(await getCollection("posts"));
+const tocHeadings = headings.filter(
+  heading => heading.depth >= 2 && heading.depth <= 4 && heading.slug
+);
+const firstDepth = Math.min(...tocHeadings.map(heading => heading.depth));
+let sectionNumber = 0;
+---
+
+<aside class="min-w-0 space-y-8 lg:sticky lg:top-6 lg:self-start">
+  {
+    tocHeadings.length > 0 && (
+      <section>
+        <h2 class="border-border mb-3 border-b pb-2 text-sm font-semibold">
+          {t.post.tableOfContents}
+        </h2>
+        <nav
+          id="post-toc"
+          aria-label={t.post.tableOfContents}
+          class="max-h-48 overflow-y-auto pe-1 lg:max-h-[min(55vh,36rem)]"
+        >
+          <ol class="space-y-0.5">
+            {tocHeadings.map(heading => {
+              const level = heading.depth - firstDepth;
+              if (level === 0) sectionNumber += 1;
+              return (
+                <li>
+                  <a
+                    href={`#${heading.slug}`}
+                    data-heading-id={heading.slug}
+                    data-depth={heading.depth}
+                    class:list={[
+                      "toc-link border-s-border text-muted-foreground hover:border-s-accent hover:text-accent flex min-w-0 items-start gap-2 border-s-2 py-1.5 pe-1 text-sm leading-snug transition-colors",
+                      level === 0 ? "ps-2" : level === 1 ? "ps-5" : "ps-8",
+                    ]}
+                  >
+                    <span
+                      class="text-accent mt-px w-4 shrink-0 text-center text-xs"
+                      aria-hidden="true"
+                    >
+                      {level === 0 ? sectionNumber : level === 1 ? "•" : "·"}
+                    </span>
+                    <span class="min-w-0 wrap-break-word">{heading.text}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ol>
+        </nav>
+      </section>
+    )
+  }
+
+  {
+    tags.length > 0 && (
+      <section>
+        <h2 class="border-border mb-3 border-b pb-2 text-sm font-semibold">
+          {t.nav.tags}
+        </h2>
+        <ul class="flex flex-wrap gap-x-3 gap-y-2">
+          {tags.map(({ tag, tagName }) => (
+            <Tag {tag} {tagName} size="sm" transitionName={false} />
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</aside>
+
+<style>
+  .toc-link[data-visible="true"] {
+    border-inline-start-color: var(--color-accent);
+    color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-muted) 55%, transparent);
+  }
+</style>
+
+<script>
+  let removeListeners = () => {};
+
+  function initTableOfContents() {
+    removeListeners();
+    const nav = document.getElementById("post-toc");
+    const article = document.getElementById("article");
+    if (!nav || !article) return;
+
+    const links = Array.from(
+      nav.querySelectorAll<HTMLAnchorElement>("[data-heading-id]")
+    );
+    const sections = links.flatMap(link => {
+      const heading = document.getElementById(link.dataset.headingId ?? "");
+      return heading && article.contains(heading)
+        ? [{ link, heading, depth: Number(link.dataset.depth) }]
+        : [];
+    });
+
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const viewportTop = 0;
+      const viewportBottom = window.innerHeight;
+      const articleBottom = article.getBoundingClientRect().bottom;
+
+      const visible = sections.map((section, index) => {
+        const next = sections[index + 1];
+        const top = section.heading.getBoundingClientRect().top;
+        const bottom =
+          next?.heading.getBoundingClientRect().top ?? articleBottom;
+        return top < viewportBottom && bottom > viewportTop;
+      });
+
+      for (let index = sections.length - 1; index >= 0; index--) {
+        const firstChild = sections[index + 1];
+        if (firstChild?.depth > sections[index].depth && visible[index + 1]) {
+          visible[index] = true;
+        }
+        sections[index].link.dataset.visible = String(visible[index]);
+      }
+
+      const activeLinks = sections
+        .filter((_, index) => visible[index])
+        .map(section => section.link);
+      if (activeLinks.length === 0) return;
+
+      const navRect = nav.getBoundingClientRect();
+      const firstRect = activeLinks[0].getBoundingClientRect();
+      const lastRect =
+        activeLinks[activeLinks.length - 1].getBoundingClientRect();
+      const activeHeight = lastRect.bottom - firstRect.top;
+      let shift = 0;
+      if (activeHeight > nav.clientHeight || firstRect.top < navRect.top + 4) {
+        shift = firstRect.top - navRect.top - 4;
+      } else if (lastRect.bottom > navRect.bottom - 4) {
+        shift = lastRect.bottom - navRect.bottom + 4;
+      }
+      if (Math.abs(shift) > 2) {
+        nav.scrollTo({ top: nav.scrollTop + shift, behavior: "smooth" });
+      }
+    };
+    const scheduleUpdate = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    removeListeners = () => {
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      cancelAnimationFrame(frame);
+    };
+  }
+
+  document.addEventListener("astro:page-load", initTableOfContents);
+</script>

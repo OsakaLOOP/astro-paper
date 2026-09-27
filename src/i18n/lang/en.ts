@@ -10,6 +10,7 @@ export default {
     search: "Search",
   },
   post: {
+    tableOfContents: "On this page",
     publishedAt: "Published at",
     updatedAt: "Updated",
     sharePostIntro: "Share this post:",

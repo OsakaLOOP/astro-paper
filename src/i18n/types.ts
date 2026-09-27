@@ -8,6 +8,7 @@ export interface UIStrings {
     search: string;
   };
   post: {
+    tableOfContents: string;
     publishedAt: string;
     updatedAt: string;
     sharePostIntro: string;

@@ -111,11 +111,11 @@ const ogImage = ogImageUrl
 
   <div
     class:list={[
-      "app-layout grid min-w-0 gap-8 lg:grid-cols-[14rem_minmax(0,48rem)] lg:justify-center lg:gap-12",
+      "app-layout grid min-w-0 gap-8 lg:grid-cols-[14rem_minmax(0,48rem)] lg:justify-start lg:gap-12",
       { "mt-8": !config.features.showBackButton },
     ]}
   >
-    <PostSidebar {headings} />
+    <PostSidebar {headings} postTags={tags} />
     <main id="main-content" class="min-w-0" data-pagefind-body>
       <h1
         style={{ viewTransitionName: toTransitionName(post.id) }}

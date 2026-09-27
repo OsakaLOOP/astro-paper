@@ -7,7 +7,9 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
-  --font-app: var(--font-google-sans-code);
+  --color-highlight: #39c5bb;
+  --color-highlight-text: var(--highlight-text);
+  --font-app: "Google Sans Code", monospace;
 }
 
 /* Light theme values */
@@ -20,6 +22,7 @@
   --muted: #e6e6e6;
   --muted-foreground: #6b7280;
   --border: #ece9e9;
+  --highlight-text: #197e78;
 }
 
 /* Dark theme values */
@@ -31,4 +34,5 @@
   --muted: #343f60;
   --muted-foreground: #afb9ca;
   --border: #ab4b08;
+  --highlight-text: #2aa89f;
 }

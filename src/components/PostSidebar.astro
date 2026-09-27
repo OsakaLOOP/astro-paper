@@ -4,14 +4,36 @@ import { getCollection } from "astro:content";
 import Tag from "@/components/Tag.astro";
 import { useTranslations } from "@/i18n";
 import { getUniqueTags } from "@/utils/getUniqueTags";
+import { postFilter } from "@/utils/postFilter";
+import { slugifyStr } from "@/utils/slugify";
 
 type Props = {
   headings: MarkdownHeading[];
+  postTags: string[];
 };
 
-const { headings } = Astro.props;
+const { headings, postTags } = Astro.props;
 const t = useTranslations(Astro.currentLocale);
-const tags = getUniqueTags(await getCollection("posts"));
+const posts = (await getCollection("posts")).filter(postFilter);
+const counts = new Map<string, number>();
+for (const post of posts) {
+  for (const tag of new Set(post.data.tags.map(slugifyStr))) {
+    counts.set(tag, (counts.get(tag) ?? 0) + 1);
+  }
+}
+const currentTags = new Set(postTags.map(slugifyStr));
+const tags = getUniqueTags(posts)
+  .map(tag => ({
+    ...tag,
+    count: counts.get(tag.tag) ?? 0,
+    highlighted: currentTags.has(tag.tag),
+  }))
+  .sort(
+    (a, b) =>
+      Number(b.highlighted) - Number(a.highlighted) ||
+      b.count - a.count ||
+      a.tag.localeCompare(b.tag)
+  );
 const tocHeadings = headings.filter(
   heading => heading.depth >= 2 && heading.depth <= 4 && heading.slug
 );
@@ -29,35 +51,40 @@ let sectionNumber = 0;
         <nav
           id="post-toc"
           aria-label={t.post.tableOfContents}
-          class="max-h-48 overflow-y-auto pe-1 lg:max-h-[min(55vh,36rem)]"
+          class="max-h-48 overflow-y-auto pe-1 pt-1 lg:max-h-[min(55vh,36rem)]"
         >
-          <ol class="space-y-0.5">
-            {tocHeadings.map(heading => {
-              const level = heading.depth - firstDepth;
-              if (level === 0) sectionNumber += 1;
-              return (
-                <li>
-                  <a
-                    href={`#${heading.slug}`}
-                    data-heading-id={heading.slug}
-                    data-depth={heading.depth}
-                    class:list={[
-                      "toc-link border-s-border text-muted-foreground hover:border-s-accent hover:text-accent flex min-w-0 items-start gap-2 border-s-2 py-1.5 pe-1 text-sm leading-snug transition-colors",
-                      level === 0 ? "ps-2" : level === 1 ? "ps-5" : "ps-8",
-                    ]}
-                  >
-                    <span
-                      class="text-accent mt-px w-4 shrink-0 text-center text-xs"
-                      aria-hidden="true"
+          <div id="toc-track" class="relative py-1">
+            <span id="toc-focus" class="toc-focus" aria-hidden="true" />
+            <ol class="relative space-y-0.5">
+              {tocHeadings.map(heading => {
+                const level = heading.depth - firstDepth;
+                if (level === 0) sectionNumber += 1;
+                return (
+                  <li>
+                    <a
+                      href={`#${heading.slug}`}
+                      data-heading-id={heading.slug}
+                      data-depth={heading.depth}
+                      class:list={[
+                        "toc-link text-muted-foreground hover:text-foreground flex min-w-0 items-start gap-2 px-2 py-1.5 text-sm leading-snug transition-colors",
+                        level === 0 ? "ps-2" : level === 1 ? "ps-5" : "ps-8",
+                      ]}
                     >
-                      {level === 0 ? sectionNumber : level === 1 ? "•" : "·"}
-                    </span>
-                    <span class="min-w-0 wrap-break-word">{heading.text}</span>
-                  </a>
-                </li>
-              );
-            })}
-          </ol>
+                      <span
+                        class="text-muted-foreground mt-px w-4 shrink-0 text-center text-xs"
+                        aria-hidden="true"
+                      >
+                        {level === 0 ? sectionNumber : level === 1 ? "•" : "·"}
+                      </span>
+                      <span class="min-w-0 wrap-break-word">
+                        {heading.text}
+                      </span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
         </nav>
       </section>
     )
@@ -69,9 +96,16 @@ let sectionNumber = 0;
         <h2 class="border-border mb-3 border-b pb-2 text-sm font-semibold">
           {t.nav.tags}
         </h2>
-        <ul class="flex flex-wrap gap-x-3 gap-y-2">
-          {tags.map(({ tag, tagName }) => (
-            <Tag {tag} {tagName} size="sm" transitionName={false} />
+        <ul class="flex flex-wrap gap-x-3 gap-y-3">
+          {tags.map(({ tag, tagName, count, highlighted }) => (
+            <Tag
+              {tag}
+              {tagName}
+              {count}
+              {highlighted}
+              size="sm"
+              transitionName={false}
+            />
           ))}
         </ul>
       </section>
@@ -81,9 +115,33 @@ let sectionNumber = 0;
 
 <style>
   .toc-link[data-visible="true"] {
-    border-inline-start-color: var(--color-accent);
-    color: var(--color-accent);
-    background: color-mix(in srgb, var(--color-muted) 55%, transparent);
+    color: var(--color-highlight-text);
+  }
+
+  .toc-link[data-visible="true"] > span:first-child {
+    color: var(--color-highlight-text);
+  }
+
+  .toc-focus {
+    position: absolute;
+    inset-inline: 4px;
+    top: 0;
+    height: var(--focus-height, 0px);
+    transform: translateY(var(--focus-y, 0px));
+    border: 2px dashed var(--color-highlight);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 180ms ease;
+  }
+
+  .toc-focus[data-active="true"] {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toc-focus {
+      transition: none;
+    }
   }
 </style>
 
@@ -93,8 +151,10 @@ let sectionNumber = 0;
   function initTableOfContents() {
     removeListeners();
     const nav = document.getElementById("post-toc");
+    const track = document.getElementById("toc-track");
+    const focus = document.getElementById("toc-focus");
     const article = document.getElementById("article");
-    if (!nav || !article) return;
+    if (!nav || !track || !focus || !article) return;
 
     const links = Array.from(
       nav.querySelectorAll<HTMLAnchorElement>("[data-heading-id]")
@@ -107,6 +167,47 @@ let sectionNumber = 0;
     });
 
     let frame = 0;
+    let focusFrame = 0;
+    let focusTop = 0;
+    let focusBottom = 0;
+    let targetTop = 0;
+    let targetBottom = 0;
+    const paintFocus = () => {
+      focus.style.setProperty("--focus-y", `${focusTop}px`);
+      focus.style.setProperty("--focus-height", `${focusBottom - focusTop}px`);
+    };
+    const animateFocus = () => {
+      focusTop += (targetTop - focusTop) * 0.22;
+      focusBottom += (targetBottom - focusBottom) * 0.22;
+      if (
+        Math.abs(targetTop - focusTop) < 0.5 &&
+        Math.abs(targetBottom - focusBottom) < 0.5
+      ) {
+        focusTop = targetTop;
+        focusBottom = targetBottom;
+        focusFrame = 0;
+      } else {
+        focusFrame = requestAnimationFrame(animateFocus);
+      }
+      paintFocus();
+    };
+    const moveFocus = (top: number, bottom: number) => {
+      targetTop = top;
+      targetBottom = bottom;
+      if (
+        focus.dataset.active !== "true" ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        cancelAnimationFrame(focusFrame);
+        focusFrame = 0;
+        focusTop = top;
+        focusBottom = bottom;
+        paintFocus();
+      } else if (!focusFrame) {
+        focusFrame = requestAnimationFrame(animateFocus);
+      }
+      focus.dataset.active = "true";
+    };
     const update = () => {
       frame = 0;
       const viewportTop = 0;
@@ -132,18 +233,28 @@ let sectionNumber = 0;
       const activeLinks = sections
         .filter((_, index) => visible[index])
         .map(section => section.link);
-      if (activeLinks.length === 0) return;
+      if (activeLinks.length === 0) {
+        focus.dataset.active = "false";
+        cancelAnimationFrame(focusFrame);
+        focusFrame = 0;
+        return;
+      }
 
       const navRect = nav.getBoundingClientRect();
+      const trackRect = track.getBoundingClientRect();
       const firstRect = activeLinks[0].getBoundingClientRect();
       const lastRect =
         activeLinks[activeLinks.length - 1].getBoundingClientRect();
+      moveFocus(
+        Math.max(0, firstRect.top - trackRect.top - 4),
+        lastRect.bottom - trackRect.top + 4
+      );
       const activeHeight = lastRect.bottom - firstRect.top;
       let shift = 0;
-      if (activeHeight > nav.clientHeight || firstRect.top < navRect.top + 4) {
-        shift = firstRect.top - navRect.top - 4;
-      } else if (lastRect.bottom > navRect.bottom - 4) {
-        shift = lastRect.bottom - navRect.bottom + 4;
+      if (activeHeight > nav.clientHeight || firstRect.top < navRect.top + 8) {
+        shift = firstRect.top - navRect.top - 8;
+      } else if (lastRect.bottom > navRect.bottom - 8) {
+        shift = lastRect.bottom - navRect.bottom + 8;
       }
       if (Math.abs(shift) > 2) {
         nav.scrollTo({ top: nav.scrollTop + shift, behavior: "smooth" });
@@ -160,6 +271,7 @@ let sectionNumber = 0;
       window.removeEventListener("scroll", scheduleUpdate);
       window.removeEventListener("resize", scheduleUpdate);
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(focusFrame);
     };
   }
 

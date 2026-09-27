@@ -1,5 +1,8 @@
 # 参考来源
 
+- [Google Sans Code 国内镜像样式表](https://fonts.loli.net/css2?family=Google+Sans+Code:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap)：页面字体由国内镜像提供。
+- [Google Sans Code 字体文件镜像](https://gstatic.loli.net/s/googlesanscode/v20/pxihyogzv91QhV44Z_GQBHsGf5PuckJMZfIVTPZaiXEp_ht12EVEHsN1sCQNcmTVsw.ttf)：OG 图片使用本地留存的常规与粗体字重文件。
+- [Astro 本地字体提供器](https://docs.astro.build/en/reference/font-provider-reference/#local)：OG 图片生成沿用 Astro 字体数据接口。
 - [Firefly 使用文档：侧边栏](https://docs-firefly.cuteleaf.cn/zh/guide/sidebar)：确认文章目录和标签云属于可配置侧栏组件，文章目录仅用于文章详情页。
 - [Firefly 使用文档：侧边栏小组件](https://docs-firefly.cuteleaf.cn/zh/guide/widgets)：确认标签组件展示文章标签，目录组件使用文章标题。
 - [Firefly 使用文档导航](https://docs-firefly.cuteleaf.cn/zh/guide/getting-started)：以下索引按文档导航整理。

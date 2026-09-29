@@ -2,13 +2,30 @@ import { Pool } from "pg";
 import { buildApp } from "./app.js";
 import { registerBff } from "./identity.js";
 import type { FastifyInstance, FastifyRequest } from "fastify";
+import { createHmac } from "node:crypto";
 if (process.getBuiltinModule("fs").existsSync(".env")) process.loadEnvFile(".env");
 function required(key: string) { const value = process.env[key]; if (!value) throw new Error(`Missing ${key}`); return value; }
 const pool = new Pool({ connectionString: required("SITE_DATABASE_URL"), max: 3, connectionTimeoutMillis: 3000, statement_timeout: 5000 });
 const origins = required("FRONTEND_ORIGINS").split(",").map(s => new URL(s.trim()).origin);
+const mailUrl = process.env.SM_MAIL_URL;
+const mailSecret = process.env.SM_MAIL_SECRET;
+const sendMail = mailUrl && mailSecret ? async (message: import("./app.js").MailMessage) => {
+  const timestamp = Math.floor(Date.now() / 1000);
+  const payload = { event_id: message.eventId, to: message.to, subject: message.subject, text: message.text, html: message.html };
+  const body = JSON.stringify(payload);
+  const signature = createHmac("sha256", mailSecret).update(`${message.eventId}.${timestamp}.${body}`).digest("hex");
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await fetch(mailUrl, { method: "POST", headers: { "Content-Type": "application/json", "X-SM-Timestamp": String(timestamp), "X-SM-Signature": signature }, body });
+      if (response.ok) return;
+    } catch { /* retry the short service-to-service request */ }
+    await new Promise(resolve => setTimeout(resolve, 250 * (attempt + 1)));
+  }
+  throw new Error("SM mail request failed after retries");
+} : undefined;
 let bff: Awaited<ReturnType<typeof registerBff>>;
 let app: Awaited<ReturnType<typeof buildApp>>;
-app = await buildApp({ pool, origins, logger: true, moderatorIds: (process.env.MODERATOR_IDS ?? "").split(","), getUser: (request: FastifyRequest, fresh?: boolean) => bff.getUser(request, fresh) });
+app = await buildApp({ pool, origins, logger: true, moderatorIds: (process.env.MODERATOR_IDS ?? "").split(","), authorEmail: process.env.AUTHOR_EMAIL, authorUserId: process.env.AUTHOR_USER_ID, notificationsEnabled: process.env.COMMENT_NOTIFICATIONS_ENABLED !== "false", sendMail, getUser: (request: FastifyRequest, fresh?: boolean) => bff.getUser(request, fresh) });
 await app.register(async (blog: FastifyInstance) => {
   bff = await registerBff(blog, { issuer: required("SITE_ISSUER"), clientId: required("SITE_CLIENT_ID"), clientSecret: required("SITE_CLIENT_SECRET"), secret: required("SITE_SESSION_SECRET"), origin: required("SITE_API_URL").replace(/\/$/, ""), frontendOrigins: origins, pool, schema: "site_blog" });
 }, { prefix: "/blog" });

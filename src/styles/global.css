@@ -55,8 +55,11 @@
   scroll-margin-block: 1rem;
 }
 
-.auth-control { display: flex; align-items: center; gap: .65rem; font-size: .8rem; }
-.auth-link { color: var(--accent); text-decoration: underline; text-decoration-style: wavy; text-underline-offset: 4px; background: none; border: 0; padding: .25rem 0; cursor: pointer; }
+.auth-control { display: flex; align-items: center; gap: .55rem; font-size: .8rem; }
+.auth-link, .auth-name { color: var(--foreground); text-decoration: none; }
+.auth-link:hover, .auth-name:hover { color: var(--accent); }
+.auth-button { border: 0; background: transparent; padding: 0; cursor: pointer; font: inherit; }
+.auth-divider { color: var(--muted-foreground); }
 .auth-name { max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .comments { border-top: 1px dashed var(--border); margin-top: 3rem; padding: 2.5rem 0 1rem; }
 .comments-heading { display: flex; justify-content: space-between; align-items: end; margin-bottom: 1.5rem; }
@@ -65,14 +68,31 @@
 .comments-count { color: var(--muted-foreground); font-size: .8rem; }
 .comments-editor { border: 1px solid var(--border); padding: 1rem; margin-bottom: 1.5rem; }
 .comments-editor textarea { width: 100%; resize: vertical; border: 0; background: transparent; color: inherit; outline: 0; line-height: 1.7; }
+.comments-tabs { display: flex; gap: 1rem; margin-bottom: .5rem; font-size: .8rem; }
+.comments-tab { color: var(--muted-foreground); background: none; border: 0; padding: 0; }
+.comments-tab[aria-selected="true"] { color: var(--accent); }
+.comment-preview { min-height: 5rem; line-height: 1.7; }
 .comments-editor-footer { display: flex; align-items: center; justify-content: space-between; color: var(--muted-foreground); font-size: .75rem; }
-.comment-submit { border: 1px solid var(--accent); color: var(--accent); background: transparent; padding: .45rem .75rem; font-weight: 600; }
+.comment-submit { border: 1px dashed var(--accent); color: var(--accent); background: transparent; padding: .45rem .75rem; font-weight: 600; }
 .comments-login { border: 1px solid var(--border); padding: 1rem; color: var(--muted-foreground); font-size: .9rem; }
 .comments-login a { color: var(--accent); margin-left: .5rem; text-decoration: underline; cursor: pointer; }
 .comment { padding: 1rem 0; border-bottom: 1px solid var(--border); }
 .comment-meta { display: flex; align-items: center; gap: .75rem; font-size: .85rem; }
 .comment-meta time { color: var(--muted-foreground); font-size: .75rem; }
 .comment p { margin: .5rem 0; line-height: 1.7; word-break: break-word; }
-.comment-action { color: var(--muted-foreground); background: none; border: 0; padding: 0 .75rem 0 0; font-size: .75rem; text-decoration: underline; cursor: pointer; }
+.comment-action { color: var(--muted-foreground); background: none; border: 0; padding: 0 .75rem 0 0; font-size: .75rem; cursor: pointer; }
+.comment-action:hover { color: var(--accent); }
+.comment { margin-inline-start: min(6rem, calc(var(--comment-depth, 0) * 2rem)); }
+.comment-reply { margin-top: .5rem; padding: .35rem .65rem; border-inline-start: 2px solid var(--border); color: var(--muted-foreground); font-size: .75rem; }
+.comment-subscribe { display: flex; gap: .5rem; align-items: center; margin: .8rem 0 0; color: var(--muted-foreground); font-size: .75rem; }
+.account-page { max-width: 42rem; margin: 0 auto; padding: 3rem 1rem; }
+.account-header { border-bottom: 1px dashed var(--border); padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+.account-section { border-bottom: 1px solid var(--border); padding: 1.25rem 0; }
+.account-section h2 { font-size: 1.1rem; margin: 0 0 .75rem; }
+.account-muted { color: var(--muted-foreground); font-size: .85rem; }
+.account-field { display: grid; gap: .35rem; margin: .8rem 0; font-size: .85rem; }
+.account-field input { border: 1px solid var(--border); padding: .55rem .65rem; background: transparent; color: inherit; }
+.account-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .65rem 0; }
+.account-check { accent-color: var(--accent); }
 .comments-empty, .comments-loading { color: var(--muted-foreground); font-size: .9rem; }
 @media (max-width: 640px) { .comments-heading { align-items: center; } .auth-control { padding: .65rem 1rem; justify-content: center; } }

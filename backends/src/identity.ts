@@ -76,7 +76,8 @@ export async function registerBff(app: FastifyInstance, options: BffOptions) {
         }
       }
       await connection.query("COMMIT");
-      return { id: session.user_id as string, profile: session.profile as Record<string, unknown> };
+      const local = (await options.pool.query<{ display_name: string }>(`SELECT display_name FROM "${options.schema}".profiles WHERE user_id=$1`, [session.user_id])).rows[0];
+      return { id: session.user_id as string, profile: { ...(session.profile as Record<string, unknown>), ...(local ? { name: local.display_name } : {}) } };
     } catch (error) { await connection.query("ROLLBACK"); throw error; } finally { connection.release(); }
   }
   app.get("/auth/me", async (request, reply) => { const user = await getUser(request); return user ? { id: user.id, name: String(user.profile.name ?? "读者") } : reply.code(401).send({ error: "AUTH_REQUIRED" }); });

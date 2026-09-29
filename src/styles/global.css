@@ -28,11 +28,13 @@
     scrollbar-width: auto;
     scrollbar-color: var(--color-muted) transparent;
   }
+
   a,
   button,
   #main-content {
     @apply outline-accent outline-offset-1 focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-dashed;
   }
+
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
@@ -47,8 +49,35 @@
   @apply max-w-app mx-auto w-full px-4;
 }
 
-@utility active-nav {
-  @apply underline decoration-wavy decoration-2 underline-offset-8;
+@utility nav-link {
+  @apply relative no-underline;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -0.5rem;
+    height: 0.5rem;
+    background: currentColor;
+    mask-image: url("../assets/icons/IconUnderline.svg");
+    mask-repeat: no-repeat;
+    mask-position: left center;
+    mask-size: 100% 100%;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 1000ms linear;
+    will-change: transform;
+  }
+
+  &[data-active="true"]::after {
+    transform: scaleX(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      transition: none;
+    }
+  }
 }
 
 :target {

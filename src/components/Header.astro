@@ -1,6 +1,5 @@
 ---
 import { getRelativeLocaleUrl } from "astro:i18n";
-import IconUnderline from "@/assets/icons/IconUnderline.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import IconArchive from "@/assets/icons/IconArchive.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
@@ -44,6 +43,7 @@ const isActive = (path: string) => {
 
 <header
   class="app-layout flex flex-col items-center justify-between sm:flex-row"
+  transition:persist
 >
   <div
     class="border-border bg-background relative flex w-full items-baseline justify-between border-b py-4 sm:items-center sm:py-6"
@@ -77,7 +77,8 @@ const isActive = (path: string) => {
         <li class="col-span-2">
           <a
             href={getRelativeLocaleUrl(locale, "posts")}
-            class:list={{ "active-nav": isActive("/posts") }}
+            class="nav-link"
+            data-active={isActive("/posts")}
           >
             {t.nav.posts}
           </a>
@@ -85,7 +86,8 @@ const isActive = (path: string) => {
         <li class="col-span-2">
           <a
             href={getRelativeLocaleUrl(locale, "tags")}
-            class:list={{ "active-nav": isActive("/tags") }}
+            class="nav-link"
+            data-active={isActive("/tags")}
           >
             {t.nav.tags}
           </a>
@@ -93,7 +95,8 @@ const isActive = (path: string) => {
         <li class="col-span-2">
           <a
             href={getRelativeLocaleUrl(locale, "about")}
-            class:list={{ "active-nav": isActive("/about") }}
+            class="nav-link"
+            data-active={isActive("/about")}
           >
             {t.nav.about}
           </a>
@@ -104,20 +107,14 @@ const isActive = (path: string) => {
               <LinkButton
                 href={getRelativeLocaleUrl(locale, "archives")}
                 class:list={[
-                  "focus-outline flex size-full justify-center p-3 sm:relative sm:size-8 sm:p-0",
-                  { "active-nav": isActive("/archives") },
+                  "nav-link focus-outline flex size-full justify-center p-3 sm:relative sm:size-8 sm:p-0",
                 ]}
+                data-active={isActive("/archives")}
                 title={t.nav.archives}
                 aria-label={t.nav.archives}
               >
                 <IconArchive class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" />
                 <span class="sm:sr-only">{t.nav.archives}</span>
-                {isActive("/archives") && (
-                  <IconUnderline
-                    aria-hidden="true"
-                    class="scale-125 max-sm:hidden sm:absolute sm:bottom-0 sm:w-6"
-                  />
-                )}
               </LinkButton>
             </li>
           )
@@ -127,18 +124,13 @@ const isActive = (path: string) => {
             <li class="col-span-1 flex items-center justify-center">
               <LinkButton
                 href={getRelativeLocaleUrl(locale, "search")}
-                class:list={["focus-outline relative size-8"]}
+                class:list={["nav-link focus-outline relative size-8"]}
+                data-active={isActive("/search")}
                 title={t.nav.search}
                 aria-label={t.nav.search}
               >
                 <IconSearch class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" />
                 <span class="sr-only">{t.nav.search}</span>
-                {isActive("/search") && (
-                  <IconUnderline
-                    aria-hidden="true"
-                    class="absolute bottom-0 w-6 scale-125 max-sm:inset-s-2"
-                  />
-                )}
               </LinkButton>
             </li>
           )
@@ -218,9 +210,29 @@ const isActive = (path: string) => {
     });
   }
 
+  function syncActiveNav() {
+    const currentPath = new URL(window.location.href).pathname.replace(
+      /\/+$/,
+      ""
+    );
+
+    document.querySelectorAll<HTMLAnchorElement>("#menu-items a.nav-link").forEach(
+      link => {
+        const targetPath = new URL(link.href).pathname.replace(/\/+$/, "");
+        const active =
+          currentPath === targetPath ||
+          (targetPath !== "" && currentPath.startsWith(`${targetPath}/`));
+        link.dataset.active = String(active);
+      }
+    );
+  }
+
   toggleNav();
   document.addEventListener("astro:after-swap", toggleNav);
 
   handleSkipToContent();
   document.addEventListener("astro:after-swap", handleSkipToContent);
+
+  syncActiveNav();
+  document.addEventListener("astro:after-swap", syncActiveNav);
 </script>

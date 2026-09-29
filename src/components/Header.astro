@@ -45,6 +45,7 @@ const isActive = (path: string) => {
 <header
   class="app-layout flex flex-col items-center justify-between sm:flex-row"
   transition:persist
+  transition:animate="none"
 >
   <div
     class="border-border bg-background relative flex w-full items-baseline justify-between border-b py-4 sm:items-center sm:py-6"
@@ -224,9 +225,35 @@ const isActive = (path: string) => {
         const active =
           currentPath === targetPath ||
           (targetPath !== "" && currentPath.startsWith(`${targetPath}/`));
+
+        if (active && link.dataset.navTransition === "erase") {
+          link.dataset.navTransition = "reset";
+          link.dataset.active = "false";
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (link.dataset.navTransition !== "reset") return;
+              delete link.dataset.navTransition;
+              link.dataset.active = "true";
+            });
+          });
+          return;
+        }
+
+        if (!active && link.dataset.active === "true") {
+          link.dataset.navTransition = "erase";
+        } else if (!active && link.dataset.navTransition === "reset") {
+          delete link.dataset.navTransition;
+        }
+
         link.dataset.active = String(active);
       }
     );
+  }
+
+  function syncActiveNavAfterSwap() {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(syncActiveNav);
+    });
   }
 
   toggleNav();
@@ -236,5 +263,5 @@ const isActive = (path: string) => {
   document.addEventListener("astro:after-swap", handleSkipToContent);
 
   syncActiveNav();
-  document.addEventListener("astro:after-swap", syncActiveNav);
+  document.addEventListener("astro:after-swap", syncActiveNavAfterSwap);
 </script>

@@ -63,14 +63,20 @@
     mask-repeat: no-repeat;
     mask-position: left center;
     mask-size: 100% 100%;
-    transform: scaleX(0);
-    transform-origin: left center;
-    transition: transform 1000ms linear;
-    will-change: transform;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 300ms ease-in-out;
+  }
+
+  &[data-nav-transition="erase"]::after {
+    clip-path: inset(0 0 0 100%);
+  }
+
+  &[data-nav-transition="reset"]::after {
+    transition: none;
   }
 
   &[data-active="true"]::after {
-    transform: scaleX(1);
+    clip-path: inset(0 0 0 0);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -84,24 +90,153 @@
   scroll-margin-block: 1rem;
 }
 
- .auth-control { display: flex; align-items: center; gap: .65rem; font-size: .8rem; }
-.auth-link { color: var(--accent); text-decoration: underline; text-decoration-style: wavy; text-underline-offset: 4px; background: none; border: 0; padding: .25rem 0; cursor: pointer; }
-.auth-name { max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.comments { border-top: 1px dashed var(--border); margin-top: 3rem; padding: 2.5rem 0 1rem; }
-.comments-heading { display: flex; justify-content: space-between; align-items: end; margin-bottom: 1.5rem; }
-.comments-heading h2 { margin: .25rem 0 0; font-size: 1.5rem; }
-.comments-kicker { color: var(--accent); font: 700 .7rem/1 "Google Sans Code", monospace; letter-spacing: .12em; margin: 0; }
-.comments-count { color: var(--muted-foreground); font-size: .8rem; }
-.comments-editor { border: 1px solid var(--border); padding: 1rem; margin-bottom: 1.5rem; }
-.comments-editor textarea { width: 100%; resize: vertical; border: 0; background: transparent; color: inherit; outline: 0; line-height: 1.7; }
-.comments-editor-footer { display: flex; align-items: center; justify-content: space-between; color: var(--muted-foreground); font-size: .75rem; }
-.comment-submit { border: 1px solid var(--accent); color: var(--accent); background: transparent; padding: .45rem .75rem; font-weight: 600; }
-.comments-login { border: 1px solid var(--border); padding: 1rem; color: var(--muted-foreground); font-size: .9rem; }
-.comments-login a { color: var(--accent); margin-left: .5rem; text-decoration: underline; cursor: pointer; }
-.comment { padding: 1rem 0; border-bottom: 1px solid var(--border); }
-.comment-meta { display: flex; align-items: center; gap: .75rem; font-size: .85rem; }
-.comment-meta time { color: var(--muted-foreground); font-size: .75rem; }
-.comment p { margin: .5rem 0; line-height: 1.7; word-break: break-word; }
-.comment-action { color: var(--muted-foreground); background: none; border: 0; padding: 0 .75rem 0 0; font-size: .75rem; text-decoration: underline; cursor: pointer; }
- .comments-empty, .comments-loading { color: var(--muted-foreground); font-size: .9rem; }
- @media (max-width: 640px) { .comments-heading { align-items: center; } .auth-control { padding: .65rem 1rem; justify-content: center; } }
+.auth-control {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  font-size: .8rem;
+}
+
+.auth-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-underline-offset: 4px;
+  background: none;
+  border: 0;
+  padding: .25rem 0;
+  cursor: pointer;
+}
+
+.auth-name {
+  max-width: 9rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comments {
+  border-top: 1px dashed var(--border);
+  margin-top: 3rem;
+  padding: 2.5rem 0 1rem;
+}
+
+.comments-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  margin-bottom: 1.5rem;
+}
+
+.comments-heading h2 {
+  margin: .25rem 0 0;
+  font-size: 1.5rem;
+}
+
+.comments-kicker {
+  color: var(--accent);
+  font: 700 .7rem/1 "Google Sans Code", monospace;
+  letter-spacing: .12em;
+  margin: 0;
+}
+
+.comments-count {
+  color: var(--muted-foreground);
+  font-size: .8rem;
+}
+
+.comments-editor {
+  border: 1px solid var(--border);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.comments-editor textarea {
+  width: 100%;
+  resize: vertical;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  outline: 0;
+  line-height: 1.7;
+}
+
+.comments-editor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted-foreground);
+  font-size: .75rem;
+}
+
+.comment-submit {
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  background: transparent;
+  padding: .45rem .75rem;
+  font-weight: 600;
+}
+
+.comments-login {
+  border: 1px solid var(--border);
+  padding: 1rem;
+  color: var(--muted-foreground);
+  font-size: .9rem;
+}
+
+.comments-login a {
+  color: var(--accent);
+  margin-left: .5rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.comment {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  font-size: .85rem;
+}
+
+.comment-meta time {
+  color: var(--muted-foreground);
+  font-size: .75rem;
+}
+
+.comment p {
+  margin: .5rem 0;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.comment-action {
+  color: var(--muted-foreground);
+  background: none;
+  border: 0;
+  padding: 0 .75rem 0 0;
+  font-size: .75rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.comments-empty,
+.comments-loading {
+  color: var(--muted-foreground);
+  font-size: .9rem;
+}
+
+@media (max-width: 640px) {
+  .comments-heading {
+    align-items: center;
+  }
+
+  .auth-control {
+    padding: .65rem 1rem;
+    justify-content: center;
+  }
+}

@@ -47,8 +47,41 @@
   @apply max-w-app mx-auto w-full px-4;
 }
 
-@utility active-nav {
-  @apply underline decoration-wavy decoration-2 underline-offset-8;
+@utility nav-link {
+  @apply relative no-underline;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: -0.5rem;
+    height: 0.5rem;
+    background: currentColor;
+    mask-image: url("../assets/icons/IconUnderline.svg");
+    mask-repeat: no-repeat;
+    mask-position: left center;
+    mask-size: 100% 100%;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 300ms ease-in-out;
+  }
+
+  &[data-nav-transition="erase"]::after {
+    clip-path: inset(0 0 0 100%);
+  }
+
+  &[data-nav-transition="reset"]::after {
+    transition: none;
+  }
+
+  &[data-active="true"]::after {
+    clip-path: inset(0 0 0 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      transition: none;
+    }
+  }
 }
 
 :target {

@@ -82,6 +82,14 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       DOMPurify.sanitize(marked.parse(value, { async: false }) as string, {
         USE_PROFILES: { html: true },
       });
+    let signedIn = false;
+    let identityLoaded = false;
+    const showIdentity = (authenticated: boolean) => {
+      signedIn = authenticated;
+      identityLoaded = true;
+      editor.hidden = !authenticated;
+      login.hidden = authenticated;
+    };
     section.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach(tab =>
       tab.addEventListener("click", () => {
         const isPreview = tab.dataset.tab === "preview";
@@ -95,7 +103,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
         if (isPreview) preview.innerHTML = renderMarkdown(input.value);
       })
     );
-    async function load() {
+    async function loadComments() {
       const response = await fetch(
         `${api}/blog/comments?post=${encodeURIComponent(post)}`,
         { credentials: "include" }
@@ -104,6 +112,9 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       const payload = await response.json();
       count.textContent = `${payload.total} comments`;
       subscribe.checked = payload.subscribed;
+      if (identityLoaded && Boolean(payload.viewer) !== signedIn) {
+        showIdentity(Boolean(payload.viewer));
+      }
       const items = payload.items as any[];
       const ids = new Set(items.map(item => item.id));
       const byParent = new Map<string | null, any[]>();
@@ -124,9 +135,16 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       list.innerHTML =
         ordered.join("") ||
         `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
-      const me = await fetch(`${api}/blog/auth/me`, { credentials: "include" });
-      if (me.ok) editor.hidden = false;
-      else login.hidden = false;
+    }
+    async function loadIdentity() {
+      try {
+        const response = await fetch(`${api}/blog/auth/me`, {
+          credentials: "include",
+        });
+        showIdentity(response.ok);
+      } catch {
+        showIdentity(false);
+      }
     }
     subscribe.addEventListener("change", async () => {
       await fetch(
@@ -183,7 +201,9 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
           delete section.dataset.editId;
           delete section.dataset.editVersion;
           input.placeholder = "Leave a comment…";
-          await load();
+          await loadComments();
+        } else if (response.status === 401) {
+          await loadIdentity();
         }
       });
     list.addEventListener("click", async event => {
@@ -194,12 +214,13 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       const id = target.dataset.delete;
       if (id) {
         if (!confirm("Delete this comment?")) return;
-        await fetch(`${api}/blog/comments/${id}`, {
+        const response = await fetch(`${api}/blog/comments/${id}`, {
           method: "DELETE",
           credentials: "include",
           headers: { Origin: location.origin },
         });
-        await load();
+        if (response.status === 401) await loadIdentity();
+        await loadComments();
         return;
       }
       if (target.dataset.reply) {
@@ -218,7 +239,8 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
         input.focus();
       }
     });
-    load().catch(() => {
+    loadIdentity();
+    loadComments().catch(() => {
       list.innerHTML = `<p class="comments-empty">Comments are temporarily unavailable.</p>`;
       count.textContent = "";
     });

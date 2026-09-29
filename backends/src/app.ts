@@ -58,11 +58,18 @@ export async function buildApp(options: AppOptions) {
   await app.register(async api => {
     api.addHook("onRequest", async request => { if (!["GET", "HEAD", "OPTIONS"].includes(request.method) && !options.origins.includes(request.headers.origin ?? "")) throw new HttpError(403, "ORIGIN_REJECTED"); });
     api.get<{ Querystring: { post: string; after?: string; limit?: number } }>("/blog/comments", { schema: { querystring: { type: "object", additionalProperties: false, required: ["post"], properties: { post, after: uuid, limit: { type: "integer", minimum: 1, maximum: 50, default: 20 } } } } }, async request => {
-      const viewer = await options.getUser(request); const admin = viewer ? isAdmin(viewer) : false; const limit = request.query.limit ?? 20;
-      const rows = (await options.pool.query(`SELECT ${fields} FROM site_blog.comments WHERE post_slug=$1${admin ? "" : " AND deleted_at IS NULL"} AND ($2::uuid IS NULL OR (created_at,id) > (SELECT created_at,id FROM site_blog.comments WHERE id=$2 AND post_slug=$1)) ORDER BY created_at,id LIMIT $3`, [request.query.post, request.query.after ?? null, limit + 1])).rows;
-      const more = rows.length > limit; if (more) rows.pop(); const count = (await options.pool.query("SELECT count(*)::int AS total FROM site_blog.comments WHERE post_slug=$1 AND deleted_at IS NULL", [request.query.post])).rows[0].total;
+      const viewer = await options.getUser(request);
+      const admin = viewer ? isAdmin(viewer) : false;
+      const limit = request.query.limit ?? 20;
+      const visibility = admin ? "" : viewer ? " AND (deleted_at IS NULL OR user_id=$4)" : " AND deleted_at IS NULL";
+      const values = [request.query.post, request.query.after ?? null, limit + 1, viewer?.id ?? null];
+      const rows = (await options.pool.query(`SELECT ${fields} FROM site_blog.comments WHERE post_slug=$1${visibility} AND ($2::uuid IS NULL OR (created_at,id) > (SELECT created_at,id FROM site_blog.comments WHERE id=$2 AND post_slug=$1)) ORDER BY created_at,id LIMIT $3`, values)).rows;
+      const more = rows.length > limit;
+      if (more) rows.pop();
+      const count = (await options.pool.query("SELECT count(*)::int AS total FROM site_blog.comments WHERE post_slug=$1 AND deleted_at IS NULL", [request.query.post])).rows[0].total;
       const subscribed = viewer ? Boolean((await options.pool.query("SELECT 1 FROM site_blog.comment_subscriptions WHERE user_id=$1 AND post_slug=$2 AND enabled", [viewer.id, request.query.post])).rowCount) : false;
-      return { items: rows.map(({ user_id, author_email, ...item }) => ({ ...item, can_edit: !item.deleted_at && viewer?.id === user_id, can_delete: !item.deleted_at && Boolean(viewer && (viewer.id === user_id || admin)), is_admin: admin })), total: count, subscribed, next_cursor: more ? rows.at(-1)?.id : null };
+      const items = rows.map(({ user_id, author_email, ...item }) => ({ ...item, can_edit: !item.deleted_at && viewer?.id === user_id, can_delete: !item.deleted_at && Boolean(viewer && (viewer.id === user_id || admin)), is_admin: admin }));
+      return { items, total: count, subscribed, viewer: viewer ? { id: viewer.id, is_admin: admin } : null, next_cursor: more ? rows.at(-1)?.id : null };
     });
     api.post<{ Body: { id: string; post: string; body: string; parent_id?: string; subscribe?: boolean } }>("/blog/comments", { config: { rateLimit: { max: 8, timeWindow: "1 minute" } }, schema: { body: { type: "object", additionalProperties: false, required: ["id", "post", "body"], properties: { id: uuid, post, body, parent_id: uuid, subscribe: { type: "boolean" } } } } }, async (request, reply) => {
       const user = await current(request); const p = await getProfile(user); const input = request.body;

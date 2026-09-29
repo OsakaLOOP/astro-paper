@@ -7,11 +7,11 @@ featured: true
 draft: false
 tags:
   - Essay
-  - philosophy
-  - sociology
-  - neurodiversity
+  - Philosophy
+  - Sociology
+  - Neurodiversity
 
-description: An essay on Loopo:433 focusing on the sharedness of experience, neurodiversity and rewarding patterns of humanity.
+description: An essay on Loopo:443 focusing on the sharedness of experience, neurodiversity and rewarding patterns of humanity.
 ---
 
 我相信，万物的**特殊性**，远大于**普遍性**。

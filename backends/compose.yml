@@ -1,0 +1,33 @@
+name: blog
+services:
+  comments:
+    build: .
+    image: blog-comments:local
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      HOST: 0.0.0.0
+    networks: [database, ingress]
+    ports: ["127.0.0.1:4100:4100"]
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+    mem_limit: 192m
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4100/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options: { max-size: 10m, max-file: '3' }
+networks:
+  database:
+    external: true
+    name: sm_database
+  ingress:
+    external: true
+    name: sm_ingress

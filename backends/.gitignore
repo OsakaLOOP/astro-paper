@@ -1,0 +1,6 @@
+.env
+.env.*
+!.env.example
+.generated-secrets
+dist
+node_modules

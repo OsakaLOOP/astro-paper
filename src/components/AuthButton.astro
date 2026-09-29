@@ -1,0 +1,35 @@
+---
+const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
+const me = `${api}/blog/auth/me`;
+---
+
+<div class="auth-control" data-auth-api={api} data-auth-me={me}>
+  <a
+    class="auth-link"
+    href={`${api}/blog/auth/login?returnTo=${encodeURIComponent(Astro.url.href)}`}
+    >登录</a
+  >
+</div>
+<script>
+  const controls = [...document.querySelectorAll<HTMLElement>(".auth-control")];
+  for (const control of controls) {
+    const me = control.dataset.authMe;
+    const api = control.dataset.authApi;
+    if (!me || !api) continue;
+    fetch(me, { credentials: "include" })
+      .then(async response => {
+        if (!response.ok) return;
+        const user = await response.json();
+        control.innerHTML = `<span class="auth-name">${String(user.name ?? "读者").replace(/[&<>"']/g, "")}</span><button class="auth-link" type="button">退出</button>`;
+        control.querySelector("button")?.addEventListener("click", async () => {
+          await fetch(`${api}/blog/auth/logout`, {
+            method: "POST",
+            credentials: "include",
+            headers: { Origin: location.origin },
+          });
+          location.reload();
+        });
+      })
+      .catch(() => {});
+  }
+</script>

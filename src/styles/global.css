@@ -1,7 +1,24 @@
 @import "tailwindcss";
+@import "@fontsource-variable/noto-sans-sc";
 @import "./theme.css";
 @import "./typography.css";
 @import "rehype-callouts/theme/obsidian";
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("../assets/fonts/google-sans-code-400.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Google Sans Code";
+  src: url("../assets/fonts/google-sans-code-700.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 

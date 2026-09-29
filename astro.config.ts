@@ -83,6 +83,33 @@ export default defineConfig({
       styles: ["normal"],
       formats: ["ttf"],
     },
+    {
+      name: "Noto Sans SC",
+      cssVariable: "--font-og-cjk",
+      provider: fontProviders.local(),
+      options: {
+        variants: [
+          {
+            src: [
+              "./src/assets/fonts/noto-sans-sc-chinese-simplified-400-normal.woff",
+            ],
+            weight: 400,
+            style: "normal",
+          },
+          {
+            src: [
+              "./src/assets/fonts/noto-sans-sc-chinese-simplified-700-normal.woff",
+            ],
+            weight: 700,
+            style: "normal",
+          },
+        ],
+      },
+      fallbacks: ["sans-serif"],
+      weights: [400, 700],
+      styles: ["normal"],
+      formats: ["woff"],
+    },
   ],
   env: {
     schema: {

@@ -43,6 +43,22 @@ export const GET: APIRoute = async ({ props, url }) => {
       res.arrayBuffer()
     ),
   ]);
+  const cjkFonts = fontData["--font-og-cjk"];
+  const cjkRegularPath = getFontPathByWeight(cjkFonts, 400);
+  const cjkBoldPath = getFontPathByWeight(cjkFonts, 700);
+
+  if (cjkRegularPath === undefined || cjkBoldPath === undefined) {
+    throw new Error("Cannot find the CJK font path.");
+  }
+
+  const [cjkRegularData, cjkBoldData] = await Promise.all([
+    fetch(experimental_getFontFileURL(cjkRegularPath, url)).then(res =>
+      res.arrayBuffer()
+    ),
+    fetch(experimental_getFontFileURL(cjkBoldPath, url)).then(res =>
+      res.arrayBuffer()
+    ),
+  ]);
 
   const svg = await satori(
     {
@@ -181,6 +197,18 @@ export const GET: APIRoute = async ({ props, url }) => {
         {
           name: "Google Sans Code",
           data: boldData,
+          weight: 700,
+          style: "normal",
+        },
+        {
+          name: "Noto Sans SC",
+          data: cjkRegularData,
+          weight: 400,
+          style: "normal",
+        },
+        {
+          name: "Noto Sans SC",
+          data: cjkBoldData,
           weight: 700,
           style: "normal",
         },

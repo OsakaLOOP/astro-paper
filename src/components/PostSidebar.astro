@@ -41,10 +41,12 @@ const firstDepth = Math.min(...tocHeadings.map(heading => heading.depth));
 let sectionNumber = 0;
 ---
 
-<aside class="min-w-0 space-y-8 lg:sticky lg:top-6 lg:self-start">
+<aside
+  class="contents lg:sticky lg:top-6 lg:block lg:min-w-0 lg:space-y-8 lg:self-start"
+>
   {
     tocHeadings.length > 0 && (
-      <section>
+      <section class="order-1 lg:order-none">
         <h2 class="border-border mb-3 border-b pb-2 text-sm font-semibold">
           {t.post.tableOfContents}
         </h2>
@@ -92,7 +94,7 @@ let sectionNumber = 0;
 
   {
     tags.length > 0 && (
-      <section>
+      <section class="order-3 lg:order-none">
         <h2 class="border-border mb-3 border-b pb-2 text-sm font-semibold">
           {t.nav.tags}
         </h2>

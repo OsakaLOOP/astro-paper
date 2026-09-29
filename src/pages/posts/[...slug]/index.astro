@@ -116,7 +116,11 @@ const ogImage = ogImageUrl
     ]}
   >
     <PostSidebar {headings} postTags={tags} />
-    <main id="main-content" class="min-w-0" data-pagefind-body>
+    <main
+      id="main-content"
+      class="order-2 min-w-0 lg:order-none"
+      data-pagefind-body
+    >
       <h1
         style={{ viewTransitionName: toTransitionName(post.id) }}
         class="text-accent inline-block text-2xl font-bold sm:text-3xl"

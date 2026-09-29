@@ -10,9 +10,9 @@ preferences; it never reads SM's database directly.
 ## Account entry and account page
 
 The header shows a `Log in` LinkButton when signed out. When signed in it shows the
-user's display name and a compact menu with `Profile`, `Comment notifications`,
-and `Log out`. The links use the same hover, focus, dashed underline, and spacing
-rules as `LinkButton`; persistent underlines are not used.
+user's display name as a link to `/account` and a compact `Log out` action. The
+links use the same hover, focus, dashed underline, and spacing rules as
+`LinkButton`; persistent underlines are not used.
 
 `/account` has three short sections:
 
@@ -20,9 +20,8 @@ rules as `LinkButton`; persistent underlines are not used.
   link to SM security settings. Password and authentication profile changes stay
   in SM; the blog does not copy or modify identity credentials.
 - **Comment notifications**: one global switch and a list of subscribed articles.
-  Each row shows the article title, last activity, and a `Remove` action.
-- **Sessions**: a single `Log out` action. Authentication and password changes
-  remain on SM.
+  Each row shows the article slug and a `Remove` action. The same subscription
+  can also be changed from the article comment editor.
 
 ## Comment behavior
 
@@ -33,8 +32,9 @@ The backend stores the original Markdown for editing and notification excerpts.
 
 Each comment can show `Reply`, `Edit`, and `Delete` according to the current user.
 Replies are comments with `parent_id`, rendered directly below their parent with a
-small indentation and a visible `Replying to ...` context. Reply depth is capped at
-three; deeper replies attach to the level-three comment.
+small indentation and a visible `Replying to a comment above` context. Visual
+indentation is capped at three levels; deeper replies keep their real parent but
+stay aligned with the third level.
 
 Deleted comments are hard-redacted in place: the body is cleared at deletion time.
 Ordinary readers receive no deleted row at all. The author can delete their own
@@ -74,7 +74,7 @@ transport failures; SM owns delivery retries and Message-ID generation.
 ## Acceptance checklist
 
 - Header login/profile/logout actions are LinkButton-consistent and keyboard usable.
-- `/account` edits the SM display name and manages global/article subscriptions.
+- `/account` edits the blog display name and manages global/article subscriptions.
 - Markdown preview and rendered comments are sanitized.
 - Replies render in threads and are persisted with `parent_id`.
 - Ordinary readers cannot see deleted rows or deleted content.

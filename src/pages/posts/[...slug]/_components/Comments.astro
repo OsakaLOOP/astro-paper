@@ -1,0 +1,116 @@
+---
+const { postSlug } = Astro.props;
+const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
+---
+
+<section
+  class="comments"
+  id="comments"
+  data-comments-api={api}
+  data-post={postSlug}
+>
+  <div class="comments-heading">
+    <div><p class="comments-kicker">DISCUSSION</p><h2>评论</h2></div><span
+      class="comments-count"
+      data-count>加载中</span>
+  </div>
+  <div class="comments-editor" data-editor hidden>
+    <textarea data-input maxlength="2000" rows="4" placeholder="写下你的想法…"
+    ></textarea>
+    <div class="comments-editor-footer">
+      <span>支持 Markdown</span><button
+        type="button"
+        class="comment-submit"
+        data-submit>发布评论</button>
+    </div>
+  </div>
+  <div class="comments-login" data-login hidden>
+    <span>登录后参与讨论。</span><a data-login-link>登录</a>
+  </div>
+  <div class="comments-list" data-list>
+    <p class="comments-loading">正在加载评论…</p>
+  </div>
+</section>
+<script>
+  const sections = [...document.querySelectorAll<HTMLElement>(".comments")];
+  for (const section of sections) {
+    const api = section.dataset.commentsApi!,
+      post = section.dataset.post!;
+    const list = section.querySelector<HTMLElement>("[data-list]")!,
+      editor = section.querySelector<HTMLElement>("[data-editor]")!,
+      login = section.querySelector<HTMLElement>("[data-login]")!;
+    const input = section.querySelector<HTMLTextAreaElement>("[data-input]")!,
+      count = section.querySelector<HTMLElement>("[data-count]")!;
+    const safe = (v: unknown) =>
+      String(v ?? "").replace(
+        /[&<>"']/g,
+        c =>
+          ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          })[c]!
+      );
+    const link = section.querySelector<HTMLAnchorElement>("[data-login-link]")!;
+    link.href = `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href + "#comments")}`;
+    async function load() {
+      const response = await fetch(
+        `${api}/blog/comments?post=${encodeURIComponent(post)}`,
+        { credentials: "include" }
+      );
+      if (!response.ok) throw new Error();
+      const payload = await response.json();
+      count.textContent = `${payload.total} 条`;
+      list.innerHTML = payload.items.length
+        ? payload.items
+            .map(
+              (item: any) =>
+                `<article class="comment" data-comment-id="${safe(item.id)}"><div class="comment-meta"><strong>${safe(item.author_name)}</strong><time>${new Date(item.created_at).toLocaleDateString()}</time></div><p>${safe(item.deleted_at ? "该评论已删除" : item.body).replace(/\n/g, "<br>")}</p>${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}">编辑</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">删除</button>` : ""}</article>`
+            )
+            .join("")
+        : `<p class="comments-empty">还没有评论，留下第一条吧。</p>`;
+      const me = await fetch(`${api}/blog/auth/me`, { credentials: "include" });
+      if (me.ok) editor.hidden = false;
+      else {
+        login.hidden = false;
+      }
+    }
+    section
+      .querySelector("[data-submit]")
+      ?.addEventListener("click", async () => {
+        const value = input.value.trim();
+        if (!value) return;
+        const response = await fetch(`${api}/blog/comments`, {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Origin: location.origin,
+          },
+          body: JSON.stringify({ id: crypto.randomUUID(), post, body: value }),
+        });
+        if (response.ok) {
+          input.value = "";
+          await load();
+        }
+      });
+    list.addEventListener("click", async event => {
+      const target = event.target as HTMLElement;
+      const id = target.dataset.delete;
+      if (id && confirm("删除这条评论？")) {
+        await fetch(`${api}/blog/comments/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+          headers: { Origin: location.origin },
+        });
+        await load();
+      }
+    });
+    load().catch(() => {
+      list.innerHTML = `<p class="comments-empty">评论暂时无法加载。</p>`;
+      count.textContent = "";
+    });
+  }
+</script>

@@ -1,6 +1,7 @@
 ---
 import type { HTMLAttributes } from "astro/types";
 import Socials from "./Socials.astro";
+import LinkButton from "@/components/LinkButton.astro";
 import { useTranslations } from "@/i18n";
 
 type Props = {
@@ -22,9 +23,34 @@ const currentYear = new Date().getFullYear();
   >
     <Socials />
     <div class="my-2 flex flex-col items-center whitespace-nowrap sm:flex-row">
-      <span>{t.footer.copyright} &#169; {currentYear}</span>
+      <span
+        aria-label="Copyleft icon"
+        style={{ display: "inline-block", transform: "rotateY(180deg)" }}
+        >&copy;</span
+      >
+      <span> Loopo {currentYear}</span>
       <span class="hidden sm:inline">&nbsp;|&nbsp;</span>
-      <span>{t.footer.allRightsReserved}</span>
+      <span
+        >{" "}
+        <LinkButton
+          class="hover:text-accent underline decoration-dashed underline-offset-4"
+          href="https://beian.miit.gov.cn/"
+        >
+          苏ICP备2025213499号-2
+        </LinkButton>{" "}</span
+      >
+      <span class="hidden sm:inline">&nbsp;|&nbsp;</span>
+      <span
+        >{" "}
+        <LinkButton
+          class="hover:text-accent underline decoration-dashed underline-offset-4"
+          href="https://icp.gov.moe/?keyword=20269156"
+        >
+          萌ICP备20269156号～(∠・ω< )⌒☆
+        </LinkButton>{" "}</span
+      >
+      <span class="hidden sm:inline">&nbsp;|&nbsp;</span>
+      <span>{t.footer.allRightsReversed} CC BY-NC 4.0</span>
     </div>
   </div>
 </footer>

@@ -1,0 +1,9 @@
+{
+  "id": "blog_comments",
+  "service_id": "blog",
+  "schema_name": "site_blog",
+  "view_name": "comments_v1",
+  "user_column": "user_id",
+  "sort_column": "id",
+  "columns": ["id", "post_slug", "body", "created_at"]
+}

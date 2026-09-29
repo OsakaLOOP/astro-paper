@@ -12,6 +12,8 @@ For comment reminders, set `SM_MAIL_URL=https://auth.loopo.cc/internal/site-mail
 use the same random value for `SM_MAIL_SECRET` and SM's `BLOG_MAIL_SECRET`.
 `AUTHOR_EMAIL` receives all article comment notices; `AUTHOR_USER_ID` enables
 moderator deletion for the SM author account. Apply migrations in filename order,
-including `004_notifications.sql`, before restarting the container.
+including `004_notifications.sql`, before restarting the container. The blog
+migrations are site-owned and must be applied with the SM migration role; they
+are not part of SM's `core.schema_migrations` table.
 
 For local development set `SITE_ISSUER=http://127.0.0.1:3000/api/auth`, `SITE_API_URL=http://127.0.0.1:4100`, and `FRONTEND_ORIGINS=http://127.0.0.1:4321`.

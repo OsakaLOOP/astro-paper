@@ -3,12 +3,11 @@ const { postSlug } = Astro.props;
 const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
 ---
 <section class="comments" id="comments" data-comments-api={api} data-post={postSlug}>
-  <div class="comments-heading"><div><p class="comments-kicker">DISCUSSION</p><h2>Comments</h2></div><span class="comments-count" data-count>Loading</span></div>
+  <div class="comments-heading"><h2>Comments</h2><span class="comments-count" data-count>Loading</span></div>
   <div class="comments-editor" data-editor hidden>
     <div class="comments-tabs"><button class="comments-tab" data-tab="write" aria-selected="true">Write</button><button class="comments-tab" data-tab="preview" aria-selected="false">Preview</button></div>
     <textarea data-input maxlength="2000" rows="4" placeholder="Leave a comment…"></textarea><div class="comment-preview" data-preview hidden></div>
-    <label class="comment-subscribe"><input type="checkbox" data-subscribe /> Email me about new comments on this article</label>
-    <div class="comments-editor-footer"><span>Markdown supported</span><button type="button" class="comment-submit" data-submit>Send</button></div>
+    <div class="comments-editor-footer"><label class="comment-subscribe"><input type="checkbox" data-subscribe /><span class="comment-check" aria-hidden="true"></span><span>Email me about new comments on this article</span></label><button type="button" class="comment-submit" data-submit>Send</button></div>
   </div>
   <div class="comments-login" data-login hidden><span>Log in to join the discussion.</span> <a data-login-link>Log in</a></div>
   <div class="comments-list" data-list><p class="comments-loading">Loading comments…</p></div>

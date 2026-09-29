@@ -7,7 +7,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
 <Layout title="Account | Loopo:443" description="Manage your profile and comment notifications.">
   <Header />
   <main id="main-content" class="account-page" data-account-api={api}>
-    <div class="account-header"><p class="comments-kicker">ACCOUNT</p><h1>Account</h1><p class="account-muted">Manage your profile and comment notifications.</p></div>
+    <div class="account-header"><h1>Account</h1></div>
     <p class="account-muted" data-state>Loading your account…</p>
     <section class="account-section" data-profile hidden><h2>Profile</h2><label class="account-field">Display name<input data-name maxlength="120" /></label><p class="account-muted" data-email></p><button class="comment-submit" data-save>Save changes</button></section>
     <section class="account-section" data-notifications hidden><h2>Comment notifications</h2><label class="account-row"><span>Email me about comments I follow</span><input class="account-check" type="checkbox" data-global /></label><label class="account-row" data-site-switch hidden><span>Enable comment notification emails site-wide</span><input class="account-check" type="checkbox" data-site-global /></label><div data-subscriptions></div></section>
@@ -25,7 +25,8 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     const esc = (value: unknown) => String(value ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]!));
     async function load() {
       const response = await fetch(`${api}/blog/account`, { credentials: "include" });
-      if (!response.ok) { state.innerHTML = `<a class="auth-name" href="${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href)}">Log in to manage your account</a>`; return; }
+      if (response.status === 401) { state.innerHTML = `<a class="auth-name" href="${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href)}">Log in to manage your account</a>`; return; }
+      if (!response.ok) throw new Error(`Account request failed: ${response.status}`);
       const data = await response.json(); state.hidden = true; profile.hidden = notifications.hidden = security.hidden = false; name.value = data.user.name; email.textContent = data.user.email; global.checked = data.notifications_enabled; siteSwitch.hidden = !data.is_admin; siteGlobal.checked = data.site_notifications_enabled;
       subscriptions.innerHTML = data.subscriptions.length ? data.subscriptions.map((item: {post_slug:string}) => `<div class="account-row"><a class="auth-name" href="/posts/${encodeURIComponent(item.post_slug)}/#comments">${esc(item.post_slug)}</a><button class="comment-action" data-remove="${esc(item.post_slug)}">Remove</button></div>`).join("") : `<p class="account-muted">No article subscriptions yet.</p>`;
       accountPage.querySelector<HTMLAnchorElement>("[data-security-link]")!.href = "https://auth.loopo.cc/sign-in";

@@ -2,37 +2,225 @@
 const { postSlug } = Astro.props;
 const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
 ---
-<section class="comments" id="comments" data-comments-api={api} data-post={postSlug}>
-  <div class="comments-heading"><h2>Comments</h2><span class="comments-count" data-count>Loading</span></div>
-  <div class="comments-editor" data-editor hidden>
-    <div class="comments-tabs"><button class="comments-tab" data-tab="write" aria-selected="true">Write</button><button class="comments-tab" data-tab="preview" aria-selected="false">Preview</button></div>
-    <textarea data-input maxlength="2000" rows="4" placeholder="Leave a comment…"></textarea><div class="comment-preview" data-preview hidden></div>
-    <div class="comments-editor-footer"><label class="comment-subscribe"><input type="checkbox" data-subscribe /><span class="comment-check" aria-hidden="true"></span><span>Email me about new comments on this article</span></label><button type="button" class="comment-submit" data-submit>Send</button></div>
+
+<section
+  class="comments"
+  id="comments"
+  data-comments-api={api}
+  data-post={postSlug}
+>
+  <div class="comments-heading">
+    <h2>Leave a comment</h2><span class="comments-count" data-count
+      >Loading</span
+    >
   </div>
-  <div class="comments-login" data-login hidden><span>Log in to join the discussion.</span> <a data-login-link>Log in</a></div>
-  <div class="comments-list" data-list><p class="comments-loading">Loading comments…</p></div>
+  <div class="comments-editor" data-editor hidden>
+    <div class="comments-tabs">
+      <button class="comments-tab" data-tab="write" aria-selected="true"
+        >Write</button
+      ><button class="comments-tab" data-tab="preview" aria-selected="false"
+        >Preview(Markdown)</button
+      >
+    </div>
+    <textarea
+      data-input
+      maxlength="2000"
+      rows="4"
+      placeholder="Leave a comment…"></textarea><div
+      class="comment-preview"
+      data-preview
+      hidden
+    >
+    </div>
+    <div class="comments-editor-footer">
+      <label class="comment-subscribe"
+        ><input type="checkbox" data-subscribe /><span
+          class="comment-check"
+          aria-hidden="true"></span><span
+          >Email me about new comments on this article</span
+        ></label
+      ><button type="button" class="comment-submit" data-submit>Send</button>
+    </div>
+  </div>
+  <div class="comments-login" data-login hidden>
+    <span>Log in to join the discussion.</span>
+    <a data-login-link>Log in</a>
+  </div>
+  <div class="comments-list" data-list>
+    <p class="comments-loading">Loading comments…</p>
+  </div>
 </section>
 <script>
   import { marked } from "marked";
   import DOMPurify from "dompurify";
   const sections = [...document.querySelectorAll<HTMLElement>(".comments")];
   for (const section of sections) {
-    const api = section.dataset.commentsApi!, post = section.dataset.post!, list = section.querySelector<HTMLElement>("[data-list]")!, editor = section.querySelector<HTMLElement>("[data-editor]")!, login = section.querySelector<HTMLElement>("[data-login]")!, input = section.querySelector<HTMLTextAreaElement>("[data-input]")!, preview = section.querySelector<HTMLElement>("[data-preview]")!, count = section.querySelector<HTMLElement>("[data-count]")!, subscribe = section.querySelector<HTMLInputElement>("[data-subscribe]")!;
-    const safe = (value: unknown) => String(value ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]!));
-    section.querySelector<HTMLAnchorElement>("[data-login-link]")!.href = `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href + "#comments")}`;
-    const renderMarkdown = (value: string) => DOMPurify.sanitize(marked.parse(value, { async: false }) as string, { USE_PROFILES: { html: true } });
-    section.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach(tab => tab.addEventListener("click", () => { const isPreview = tab.dataset.tab === "preview"; section.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach(item => item.setAttribute("aria-selected", String(item === tab))); input.hidden = isPreview; preview.hidden = !isPreview; if (isPreview) preview.innerHTML = renderMarkdown(input.value); }));
+    const api = section.dataset.commentsApi!,
+      post = section.dataset.post!,
+      list = section.querySelector<HTMLElement>("[data-list]")!,
+      editor = section.querySelector<HTMLElement>("[data-editor]")!,
+      login = section.querySelector<HTMLElement>("[data-login]")!,
+      input = section.querySelector<HTMLTextAreaElement>("[data-input]")!,
+      preview = section.querySelector<HTMLElement>("[data-preview]")!,
+      count = section.querySelector<HTMLElement>("[data-count]")!,
+      subscribe = section.querySelector<HTMLInputElement>("[data-subscribe]")!;
+    const safe = (value: unknown) =>
+      String(value ?? "").replace(
+        /[&<>"']/g,
+        c =>
+          ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          })[c]!
+      );
+    section.querySelector<HTMLAnchorElement>("[data-login-link]")!.href =
+      `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href + "#comments")}`;
+    const renderMarkdown = (value: string) =>
+      DOMPurify.sanitize(marked.parse(value, { async: false }) as string, {
+        USE_PROFILES: { html: true },
+      });
+    section.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach(tab =>
+      tab.addEventListener("click", () => {
+        const isPreview = tab.dataset.tab === "preview";
+        section
+          .querySelectorAll<HTMLButtonElement>("[data-tab]")
+          .forEach(item =>
+            item.setAttribute("aria-selected", String(item === tab))
+          );
+        input.hidden = isPreview;
+        preview.hidden = !isPreview;
+        if (isPreview) preview.innerHTML = renderMarkdown(input.value);
+      })
+    );
     async function load() {
-      const response = await fetch(`${api}/blog/comments?post=${encodeURIComponent(post)}`, { credentials: "include" }); if (!response.ok) throw new Error(); const payload = await response.json(); count.textContent = `${payload.total} comments`; subscribe.checked = payload.subscribed;
-      const items = payload.items as any[]; const ids = new Set(items.map(item => item.id)); const byParent = new Map<string | null, any[]>(); for (const item of items) { const key = item.parent_id && ids.has(item.parent_id) ? item.parent_id : null; byParent.set(key, [...(byParent.get(key) ?? []), item]); }
-      const render = (item: any, depth: number): string => `<article class="comment" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}"><div class="comment-meta"><strong>${safe(item.author_name)}</strong><time>${new Date(item.created_at).toLocaleDateString()}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by a moderator.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}${item.parent_id ? `<div class="comment-reply">Replying to a comment above</div>` : ""}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
-      const ordered: string[] = []; const flatten = (item: any, depth: number) => { ordered.push(render(item, depth)); for (const child of byParent.get(item.id) ?? []) flatten(child, depth + 1); }; for (const item of byParent.get(null) ?? []) flatten(item, 0);
-      list.innerHTML = ordered.join("") || `<p class="comments-empty">No comments yet. Be the first to share your thoughts.</p>`;
-      const me = await fetch(`${api}/blog/auth/me`, { credentials: "include" }); if (me.ok) editor.hidden = false; else login.hidden = false;
+      const response = await fetch(
+        `${api}/blog/comments?post=${encodeURIComponent(post)}`,
+        { credentials: "include" }
+      );
+      if (!response.ok) throw new Error();
+      const payload = await response.json();
+      count.textContent = `${payload.total} comments`;
+      subscribe.checked = payload.subscribed;
+      const items = payload.items as any[];
+      const ids = new Set(items.map(item => item.id));
+      const byParent = new Map<string | null, any[]>();
+      for (const item of items) {
+        const key =
+          item.parent_id && ids.has(item.parent_id) ? item.parent_id : null;
+        byParent.set(key, [...(byParent.get(key) ?? []), item]);
+      }
+      const render = (item: any, depth: number): string =>
+        `<article class="comment" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}"><div class="comment-meta"><strong>${safe(item.author_name)}</strong><time>${new Date(item.created_at).toLocaleDateString()}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by a moderator.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}${item.parent_id ? `<div class="comment-reply">Replying to a comment above</div>` : ""}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
+      const ordered: string[] = [];
+      const flatten = (item: any, depth: number) => {
+        ordered.push(render(item, depth));
+        for (const child of byParent.get(item.id) ?? [])
+          flatten(child, depth + 1);
+      };
+      for (const item of byParent.get(null) ?? []) flatten(item, 0);
+      list.innerHTML =
+        ordered.join("") ||
+        `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
+      const me = await fetch(`${api}/blog/auth/me`, { credentials: "include" });
+      if (me.ok) editor.hidden = false;
+      else login.hidden = false;
     }
-    subscribe.addEventListener("change", async () => { await fetch(`${api}/blog/account/subscriptions/${encodeURIComponent(post)}`, { method:"PUT", credentials:"include", headers:{"Content-Type":"application/json", Origin:location.origin}, body:JSON.stringify({enabled:subscribe.checked}) }); });
-    section.querySelector("[data-submit]")?.addEventListener("click", async () => { const value = input.value.trim(); if (!value) return; const parent = section.dataset.replyTo; const editId = section.dataset.editId; const response = editId ? await fetch(`${api}/blog/comments/${editId}`, { method:"PATCH", credentials:"include", headers:{"Content-Type":"application/json", Origin:location.origin}, body:JSON.stringify({body:value,version:Number(section.dataset.editVersion)}) }) : await fetch(`${api}/blog/comments`, { method:"POST", credentials:"include", headers:{"Content-Type":"application/json", Origin:location.origin}, body:JSON.stringify({ id:crypto.randomUUID(), post, body:value, parent_id:parent || undefined, subscribe:subscribe.checked }) }); if (response.ok) { input.value = ""; delete section.dataset.replyTo; delete section.dataset.editId; delete section.dataset.editVersion; input.placeholder = "Leave a comment…"; await load(); } });
-    list.addEventListener("click", async event => { const target = (event.target as HTMLElement).closest<HTMLElement>("[data-delete],[data-reply],[data-edit]"); if (!target) return; const id = target.dataset.delete; if (id) { if (!confirm("Delete this comment?")) return; await fetch(`${api}/blog/comments/${id}`, { method:"DELETE", credentials:"include", headers:{Origin:location.origin} }); await load(); return; } if (target.dataset.reply) { section.dataset.replyTo = target.dataset.reply; input.focus(); input.placeholder = "Reply to this comment…"; return; } if (target.dataset.edit) { const article = target.closest<HTMLElement>(".comment")!; const content = article.querySelector<HTMLElement>(".comment-content")!; section.dataset.editId = target.dataset.edit; section.dataset.editVersion = target.dataset.version; input.value = content.innerText; input.placeholder = "Edit your comment…"; input.focus(); } });
-    load().catch(() => { list.innerHTML = `<p class="comments-empty">Comments are temporarily unavailable.</p>`; count.textContent = ""; });
+    subscribe.addEventListener("change", async () => {
+      await fetch(
+        `${api}/blog/account/subscriptions/${encodeURIComponent(post)}`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Origin: location.origin,
+          },
+          body: JSON.stringify({ enabled: subscribe.checked }),
+        }
+      );
+    });
+    section
+      .querySelector("[data-submit]")
+      ?.addEventListener("click", async () => {
+        const value = input.value.trim();
+        if (!value) return;
+        const parent = section.dataset.replyTo;
+        const editId = section.dataset.editId;
+        const response = editId
+          ? await fetch(`${api}/blog/comments/${editId}`, {
+              method: "PATCH",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+                Origin: location.origin,
+              },
+              body: JSON.stringify({
+                body: value,
+                version: Number(section.dataset.editVersion),
+              }),
+            })
+          : await fetch(`${api}/blog/comments`, {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+                Origin: location.origin,
+              },
+              body: JSON.stringify({
+                id: crypto.randomUUID(),
+                post,
+                body: value,
+                parent_id: parent || undefined,
+                subscribe: subscribe.checked,
+              }),
+            });
+        if (response.ok) {
+          input.value = "";
+          delete section.dataset.replyTo;
+          delete section.dataset.editId;
+          delete section.dataset.editVersion;
+          input.placeholder = "Leave a comment…";
+          await load();
+        }
+      });
+    list.addEventListener("click", async event => {
+      const target = (event.target as HTMLElement).closest<HTMLElement>(
+        "[data-delete],[data-reply],[data-edit]"
+      );
+      if (!target) return;
+      const id = target.dataset.delete;
+      if (id) {
+        if (!confirm("Delete this comment?")) return;
+        await fetch(`${api}/blog/comments/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+          headers: { Origin: location.origin },
+        });
+        await load();
+        return;
+      }
+      if (target.dataset.reply) {
+        section.dataset.replyTo = target.dataset.reply;
+        input.focus();
+        input.placeholder = "Reply to this comment…";
+        return;
+      }
+      if (target.dataset.edit) {
+        const article = target.closest<HTMLElement>(".comment")!;
+        const content = article.querySelector<HTMLElement>(".comment-content")!;
+        section.dataset.editId = target.dataset.edit;
+        section.dataset.editVersion = target.dataset.version;
+        input.value = content.innerText;
+        input.placeholder = "Edit your comment…";
+        input.focus();
+      }
+    });
+    load().catch(() => {
+      list.innerHTML = `<p class="comments-empty">Comments are temporarily unavailable.</p>`;
+      count.textContent = "";
+    });
   }
 </script>

@@ -10,7 +10,11 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
   description="Manage your profile and comment notifications."
 >
   <Header />
-  <main id="main-content" class="account-page" data-account-api={api}>
+  <main
+    id="main-content"
+    class="account-page app-layout"
+    data-account-api={api}
+  >
     <div class="account-header">
       <h1 class="text-2xl font-semibold sm:text-3xl">Account</h1>
     </div>
@@ -25,25 +29,30 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
           maxlength="500"
           placeholder="https://example.com"
         /></label
-      ><p class="account-muted" data-email></p><button
-        class="comment-submit"
-        data-save>Save changes</button
+      ><p class="account-email account-muted">
+        <span>Email</span><span data-email></span>
+      </p><button class="comment-submit account-save" data-save
+        >Save changes</button
       >
     </section>
     <section class="account-section" data-notifications hidden>
-      <h2>Comment notifications</h2><label class="account-row"
-        ><span>Email me about comments I follow</span><input
-          class="account-check"
-          type="checkbox"
-          data-global
-        /></label
-      ><label class="account-row" data-site-switch hidden
-        ><span>Enable comment notification emails site-wide</span><input
-          class="account-check"
-          type="checkbox"
-          data-site-global
-        /></label
-      ><div data-subscriptions></div>
+      <h2>Comment notifications</h2><div class="account-row">
+        <label class="comment-subscribe"
+          ><input type="checkbox" data-global /><span
+            class="comment-check"
+            aria-hidden="true"></span><span
+            >Email me about comments I follow</span
+          ></label
+        >
+      </div><div class="account-row" data-site-switch hidden>
+        <label class="comment-subscribe"
+          ><input type="checkbox" data-site-global /><span
+            class="comment-check"
+            aria-hidden="true"></span><span
+            >Enable comment notification emails site-wide</span
+          ></label
+        >
+      </div><div data-subscriptions></div>
     </section>
     <section class="account-section" data-security hidden>
       <h2>Security</h2><p class="account-muted">
@@ -108,7 +117,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
         ? data.subscriptions
             .map(
               (item: { post_slug: string }) =>
-                `<div class="account-row"><a class="auth-name" href="/posts/${encodeURIComponent(item.post_slug)}/#comments">${esc(item.post_slug)}</a><button class="comment-action" data-remove="${esc(item.post_slug)}">Remove</button></div>`
+                `<div class="account-row"><a class="auth-name nav-link" data-active="false" href="/posts/${encodeURIComponent(item.post_slug)}/#comments">${esc(item.post_slug)}</a><button class="comment-action" data-remove="${esc(item.post_slug)}">Remove</button></div>`
             )
             .join("")
         : `<p class="account-muted">No article subscriptions yet.</p>`;

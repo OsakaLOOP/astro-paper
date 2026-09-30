@@ -1,0 +1,30 @@
+<div class="emoji-picker" data-emoji-picker>
+  <button
+    type="button"
+    class="emoji-trigger"
+    data-emoji-trigger
+    aria-expanded="false"
+    aria-controls="emoji-panel"
+    aria-label="Insert emoji"
+  >
+    Emoji
+  </button>
+  <div
+    class="emoji-panel"
+    data-emoji-panel
+    id="emoji-panel"
+    role="dialog"
+    aria-label="Emoji picker"
+    hidden
+  >
+    <div
+      class="emoji-tabs"
+      data-emoji-tabs
+      role="tablist"
+      aria-label="Emoji groups"
+    >
+    </div>
+    <div class="emoji-contents" data-emoji-contents></div>
+    <p class="emoji-empty" data-emoji-empty hidden>Emoji are unavailable.</p>
+  </div>
+</div>

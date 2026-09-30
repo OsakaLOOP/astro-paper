@@ -4,6 +4,8 @@ import {
   fontProviders,
   svgoOptimizer,
 } from "astro/config";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
@@ -16,9 +18,17 @@ import {
 } from "@shikijs/transformers";
 import { transformerFileName } from "./src/utils/transformers/fileName";
 import config from "./astro-paper.config";
+import { rehypeEmoji, type EmojiManifest } from "./src/utils/emoji";
 
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+
+const emojiManifest = JSON.parse(
+  readFileSync(
+    fileURLToPath(new URL("./public/emoji/manifest.json", import.meta.url)),
+    "utf8"
+  )
+) as EmojiManifest;
 
 export default defineConfig({
   site: config.site.url,
@@ -38,12 +48,9 @@ export default defineConfig({
   },
   markdown: {
     processor: unified({
-      rehypePlugins: [rehypeCallouts],
+      remarkPlugins: [remarkMath],
+      rehypePlugins: [rehypeCallouts, rehypeKatex, rehypeEmoji(emojiManifest)],
     }),
-    remarkPlugins: [
-         remarkMath, // [!code ++]
-    ], 
-    rehypePlugins: [rehypeKatex], // [!code ++]
     shikiConfig: {
       themes: { light: "min-light", dark: "night-owl" },
       defaultColor: false,

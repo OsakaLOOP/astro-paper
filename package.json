@@ -11,6 +11,8 @@
     "preview": "astro preview",
     "sync": "astro sync",
     "astro": "astro",
+    "emoji:generate": "node scripts/generate-emoji-manifest.mjs",
+    "emoji:rename": "node scripts/generate-emoji-manifest.mjs --rename",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "lint": "eslint ."

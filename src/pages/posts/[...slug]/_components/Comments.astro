@@ -1,6 +1,7 @@
 ---
 const { postSlug } = Astro.props;
 const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
+const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
 ---
 
 <section
@@ -8,6 +9,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
   id="comments"
   data-comments-api={api}
   data-post={postSlug}
+  data-comments-debug={debug ? "true" : undefined}
 >
   <div class="comments-heading">
     <h2>Leave a comment</h2><span class="comments-count" data-count
@@ -64,6 +66,13 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       preview = section.querySelector<HTMLElement>("[data-preview]")!,
       count = section.querySelector<HTMLElement>("[data-count]")!,
       subscribe = section.querySelector<HTMLInputElement>("[data-subscribe]")!;
+    const debugEnabled = section.dataset.commentsDebug === "true";
+    const startedAt = performance.now();
+    const debugLog = (event: string, details: Record<string, unknown> = {}) => {
+      if (!debugEnabled) return;
+      console.debug(`[comments][${new Date().toISOString()}][+${(performance.now() - startedAt).toFixed(1)}ms] ${event}`, details);
+    };
+    debugLog("init", { post });
     const safe = (value: unknown) =>
       String(value ?? "").replace(
         /[&<>"']/g,
@@ -89,6 +98,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       identityLoaded = true;
       editor.hidden = !authenticated;
       login.hidden = authenticated;
+      debugLog("identity-state", { authenticated });
     };
     section.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach(tab =>
       tab.addEventListener("click", () => {
@@ -104,12 +114,16 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       })
     );
     async function loadComments() {
+      const requestStarted = performance.now();
+      debugLog("comments-request-start");
       const response = await fetch(
         `${api}/blog/comments?post=${encodeURIComponent(post)}`,
         { credentials: "include" }
       );
+      debugLog("comments-response", { status: response.status, ms: +(performance.now() - requestStarted).toFixed(1) });
       if (!response.ok) throw new Error();
       const payload = await response.json();
+      debugLog("comments-payload", { total: payload.total, items: payload.items?.length, viewer: Boolean(payload.viewer) });
       count.textContent = `${payload.total} comments`;
       subscribe.checked = payload.subscribed;
       if (identityLoaded && Boolean(payload.viewer) !== signedIn) {
@@ -135,12 +149,16 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       list.innerHTML =
         ordered.join("") ||
         `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
+      debugLog("comments-rendered", { items: ordered.length });
     }
     async function loadIdentity() {
+      const requestStarted = performance.now();
+      debugLog("identity-request-start");
       try {
         const response = await fetch(`${api}/blog/auth/me`, {
           credentials: "include",
         });
+        debugLog("identity-response", { status: response.status, ms: +(performance.now() - requestStarted).toFixed(1) });
         showIdentity(response.ok);
       } catch {
         showIdentity(false);

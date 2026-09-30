@@ -10,7 +10,7 @@ export type MailMessage = { eventId: string; to: string; subject: string; text: 
 export interface AppOptions {
   pool: Pool; origins: string[]; getUser: (request: FastifyRequest, fresh?: boolean) => Promise<Identity | null>;
   moderatorIds?: string[]; authorEmail?: string; authorUserId?: string; notificationsEnabled?: boolean;
-  sendMail?: (message: MailMessage) => Promise<void>; logger?: boolean;
+  sendMail?: (message: MailMessage) => Promise<void>; logger?: boolean; commentsDebug?: boolean;
 }
 const uuid = { type: "string", format: "uuid" };
 const post = { type: "string", minLength: 1, maxLength: 240, pattern: "^[a-zA-Z0-9_\\-/\\u0080-\\uffff]+$" };
@@ -26,6 +26,10 @@ function mailTemplate(article: string, url: string, author: string, content: str
 }
 export async function buildApp(options: AppOptions) {
   const app = Fastify({ logger: options.logger ? { redact: ["req.headers.cookie", "req.headers.authorization", "res.headers.set-cookie"] } : false, bodyLimit: 16_384, trustProxy: ["172.30.0.2/32"], requestTimeout: 10_000 });
+  const debugComments = (request: FastifyRequest, event: string, startedAt: number, details: Record<string, unknown> = {}) => {
+    if (!options.commentsDebug) return;
+    request.log.info({ scope: "comments", event, elapsed_ms: +(performance.now() - startedAt).toFixed(1), ...details }, "comments trace");
+  };
   await app.register(cors, { origin: options.origins, credentials: true, methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"], allowedHeaders: ["Content-Type"], maxAge: 600 });
   await app.register(rateLimit, { max: 100, timeWindow: "1 minute" });
   app.addHook("onSend", async (_req, reply) => { reply.header("Cache-Control", "no-store").header("X-Content-Type-Options", "nosniff"); });
@@ -58,18 +62,25 @@ export async function buildApp(options: AppOptions) {
   await app.register(async api => {
     api.addHook("onRequest", async request => { if (!["GET", "HEAD", "OPTIONS"].includes(request.method) && !options.origins.includes(request.headers.origin ?? "")) throw new HttpError(403, "ORIGIN_REJECTED"); });
     api.get<{ Querystring: { post: string; after?: string; limit?: number } }>("/blog/comments", { schema: { querystring: { type: "object", additionalProperties: false, required: ["post"], properties: { post, after: uuid, limit: { type: "integer", minimum: 1, maximum: 50, default: 20 } } } } }, async request => {
+      const startedAt = performance.now();
+      debugComments(request, "request-start", startedAt, { post: request.query.post });
       const viewer = await options.getUser(request);
+      debugComments(request, "identity-resolved", startedAt, { authenticated: Boolean(viewer) });
       const admin = viewer ? isAdmin(viewer) : false;
       const limit = request.query.limit ?? 20;
       const visibility = admin ? "" : viewer ? " AND (deleted_at IS NULL OR user_id=$4)" : " AND deleted_at IS NULL";
       const values = [request.query.post, request.query.after ?? null, limit + 1, viewer?.id ?? null];
       const rows = (await options.pool.query(`SELECT ${fields} FROM site_blog.comments WHERE post_slug=$1${visibility} AND ($2::uuid IS NULL OR (created_at,id) > (SELECT created_at,id FROM site_blog.comments WHERE id=$2 AND post_slug=$1)) ORDER BY created_at,id LIMIT $3`, values)).rows;
+      debugComments(request, "comments-queried", startedAt, { rows: rows.length });
       const more = rows.length > limit;
       if (more) rows.pop();
       const count = (await options.pool.query("SELECT count(*)::int AS total FROM site_blog.comments WHERE post_slug=$1 AND deleted_at IS NULL", [request.query.post])).rows[0].total;
+      debugComments(request, "count-queried", startedAt, { total: count });
       const subscribed = viewer ? Boolean((await options.pool.query("SELECT 1 FROM site_blog.comment_subscriptions WHERE user_id=$1 AND post_slug=$2 AND enabled", [viewer.id, request.query.post])).rowCount) : false;
       const items = rows.map(({ user_id, author_email, ...item }) => ({ ...item, can_edit: !item.deleted_at && viewer?.id === user_id, can_delete: !item.deleted_at && Boolean(viewer && (viewer.id === user_id || admin)), is_admin: admin }));
-      return { items, total: count, subscribed, viewer: viewer ? { id: viewer.id, is_admin: admin } : null, next_cursor: more ? rows.at(-1)?.id : null };
+      const result = { items, total: count, subscribed, viewer: viewer ? { id: viewer.id, is_admin: admin } : null, next_cursor: more ? rows.at(-1)?.id : null };
+      debugComments(request, "response-ready", startedAt, { items: items.length });
+      return result;
     });
     api.post<{ Body: { id: string; post: string; body: string; parent_id?: string; subscribe?: boolean } }>("/blog/comments", { config: { rateLimit: { max: 8, timeWindow: "1 minute" } }, schema: { body: { type: "object", additionalProperties: false, required: ["id", "post", "body"], properties: { id: uuid, post, body, parent_id: uuid, subscribe: { type: "boolean" } } } } }, async (request, reply) => {
       const user = await current(request); const p = await getProfile(user); const input = request.body;

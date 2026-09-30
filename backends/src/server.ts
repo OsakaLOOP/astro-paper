@@ -25,7 +25,7 @@ const sendMail = mailUrl && mailSecret ? async (message: import("./app.js").Mail
 } : undefined;
 let bff: Awaited<ReturnType<typeof registerBff>>;
 let app: Awaited<ReturnType<typeof buildApp>>;
-app = await buildApp({ pool, origins, logger: true, moderatorIds: (process.env.MODERATOR_IDS ?? "").split(","), authorEmail: process.env.AUTHOR_EMAIL, authorUserId: process.env.AUTHOR_USER_ID, notificationsEnabled: process.env.COMMENT_NOTIFICATIONS_ENABLED !== "false", sendMail, getUser: (request: FastifyRequest, fresh?: boolean) => bff.getUser(request, fresh) });
+app = await buildApp({ pool, origins, logger: true, commentsDebug: process.env.COMMENTS_DEBUG === "true", moderatorIds: (process.env.MODERATOR_IDS ?? "").split(","), authorEmail: process.env.AUTHOR_EMAIL, authorUserId: process.env.AUTHOR_USER_ID, notificationsEnabled: process.env.COMMENT_NOTIFICATIONS_ENABLED !== "false", sendMail, getUser: (request: FastifyRequest, fresh?: boolean) => bff.getUser(request, fresh) });
 await app.register(async (blog: FastifyInstance) => {
   bff = await registerBff(blog, { issuer: required("SITE_ISSUER"), clientId: required("SITE_CLIENT_ID"), clientSecret: required("SITE_CLIENT_SECRET"), secret: required("SITE_SESSION_SECRET"), origin: required("SITE_API_URL").replace(/\/$/, ""), frontendOrigins: origins, pool, schema: "site_blog" });
 }, { prefix: "/blog" });

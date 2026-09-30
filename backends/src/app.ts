@@ -27,7 +27,6 @@ export interface AppOptions {
   moderatorIds?: string[];
   authorEmail?: string;
   authorUserId?: string;
-  notificationsEnabled?: boolean;
   autoSubscribeCommentsDefault?: boolean;
   contentNotificationsDefault?: boolean;
   commandSecret?: string;
@@ -209,21 +208,13 @@ export async function buildApp(options: AppOptions) {
     ).rows[0];
     return { name, email, website_url: profile?.website_url ?? "" };
   };
-  const siteNotificationsEnabled = async () => {
-    const row = (
-      await options.pool.query<{ enabled: boolean }>(
-        "SELECT enabled FROM site_blog.site_preferences WHERE key='comment_notifications'"
-      )
-    ).rows[0];
-    return row?.enabled ?? options.notificationsEnabled ?? true;
-  };
   const send = async (
     to: string,
     subject: string,
     text: string,
     html: string
   ) => {
-    if (!(await siteNotificationsEnabled()) || !options.sendMail) return;
+    if (!options.sendMail) return;
     await options.sendMail({ eventId: randomUUID(), to, subject, text, html });
   };
   const postUrl = (slug: string) =>
@@ -241,7 +232,7 @@ export async function buildApp(options: AppOptions) {
       parent_id?: string;
     }
   ) {
-    if (!(await siteNotificationsEnabled()) || !options.sendMail) return;
+    if (!options.sendMail) return;
     const recipients = new Map<string, string>();
     const senderEmail = comment.author_email.trim().toLowerCase();
     if (
@@ -559,16 +550,10 @@ export async function buildApp(options: AppOptions) {
     api.get("/blog/account", async request => {
       const user = await current(request);
       const p = await getProfile(user);
-      const admin = isAdmin(user);
       const setting = (
         await options.pool.query(
           "SELECT enabled,auto_subscribe_comments,content_notifications_enabled FROM site_blog.notification_settings WHERE user_id=$1",
           [user.id]
-        )
-      ).rows[0];
-      const global = (
-        await options.pool.query(
-          "SELECT enabled FROM site_blog.site_preferences WHERE key='comment_notifications'"
         )
       ).rows[0];
       const subscriptions = (
@@ -579,12 +564,11 @@ export async function buildApp(options: AppOptions) {
       ).rows;
       return {
         user: { id: user.id, ...p },
-        is_admin: admin,
+        is_admin: isAdmin(user),
         notifications_enabled: setting?.enabled ?? true,
         auto_subscribe_comments: setting?.auto_subscribe_comments ?? false,
         content_notifications_enabled:
           setting?.content_notifications_enabled ?? false,
-        site_notifications_enabled: global?.enabled ?? true,
         subscriptions,
       };
     });
@@ -595,7 +579,6 @@ export async function buildApp(options: AppOptions) {
         notifications_enabled?: boolean;
         auto_subscribe_comments?: boolean;
         content_notifications_enabled?: boolean;
-        site_notifications_enabled?: boolean;
       };
     }>(
       "/blog/account",
@@ -610,7 +593,6 @@ export async function buildApp(options: AppOptions) {
               notifications_enabled: { type: "boolean" },
               auto_subscribe_comments: { type: "boolean" },
               content_notifications_enabled: { type: "boolean" },
-              site_notifications_enabled: { type: "boolean" },
             },
           },
         },
@@ -646,13 +628,6 @@ export async function buildApp(options: AppOptions) {
               request.body.content_notifications_enabled ?? null,
             ]
           );
-        if (request.body.site_notifications_enabled !== undefined) {
-          if (!admin) throw new HttpError(403, "ADMIN_REQUIRED");
-          await options.pool.query(
-            "UPDATE site_blog.site_preferences SET enabled=$1,updated_at=now() WHERE key='comment_notifications'",
-            [request.body.site_notifications_enabled]
-          );
-        }
         return {
           ok: true,
           name: request.body.name?.trim() ?? p.name,
@@ -664,7 +639,6 @@ export async function buildApp(options: AppOptions) {
           auto_subscribe_comments: request.body.auto_subscribe_comments,
           content_notifications_enabled:
             request.body.content_notifications_enabled,
-          site_notifications_enabled: request.body.site_notifications_enabled,
         };
       }
     );

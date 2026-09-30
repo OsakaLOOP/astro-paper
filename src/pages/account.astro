@@ -74,14 +74,6 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
             >Email me about new articles and content updates</span
           ></label
         >
-      </div><div class="account-row" data-site-switch hidden>
-        <label class="comment-subscribe"
-          ><input type="checkbox" data-site-global /><span
-            class="comment-check"
-            aria-hidden="true"></span><span
-            >Enable comment notification emails site-wide</span
-          ></label
-        >
       </div><div data-subscriptions></div>
     </section>
     <section class="account-section" data-security hidden>
@@ -123,8 +115,6 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
       contentNotifications = page.querySelector<HTMLInputElement>(
         "[data-content-notifications]"
       )!,
-      siteGlobal = page.querySelector<HTMLInputElement>("[data-site-global]")!,
-      siteSwitch = page.querySelector<HTMLElement>("[data-site-switch]")!,
       subscriptions = page.querySelector<HTMLElement>("[data-subscriptions]")!;
     const esc = (value: unknown) =>
       String(value ?? "").replace(
@@ -157,8 +147,6 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
       global.checked = data.notifications_enabled;
       autoComments.checked = data.auto_subscribe_comments;
       contentNotifications.checked = data.content_notifications_enabled;
-      siteSwitch.hidden = !data.is_admin;
-      siteGlobal.checked = data.site_notifications_enabled;
       subscriptions.innerHTML = data.subscriptions.length
         ? data.subscriptions
             .map((item: { post_slug: string }) => {
@@ -206,10 +194,6 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
         void update({
           content_notifications_enabled: contentNotifications.checked,
         })
-    );
-    siteGlobal.addEventListener(
-      "change",
-      () => void update({ site_notifications_enabled: siteGlobal.checked })
     );
     subscriptions.addEventListener("click", async event => {
       const button = (event.target as HTMLElement).closest<HTMLButtonElement>(

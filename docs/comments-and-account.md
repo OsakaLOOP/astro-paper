@@ -19,7 +19,8 @@ links use the same hover, focus, dashed underline, and spacing rules as
 - **Profile**: a blog display name used for comments, the SM email address, and a
   link to SM security settings. Password and authentication profile changes stay
   in SM; the blog does not copy or modify identity credentials.
-- **Comment notifications**: one global switch and a list of subscribed articles.
+- **Notifications**: comment mail, first-comment auto-subscription, and new
+  article/content mail, plus a list of subscribed articles.
   Each row shows the article slug and a `Remove` action. The same subscription
   can also be changed from the article comment editor.
 
@@ -178,10 +179,8 @@ separate deletion notice. Deletion notices are never sent for self-deletion and 
 not expose the deleted body. A notification is queued once per recipient and event
 through SM's existing mail worker. Failed delivery is retried by SM.
 
-The global switch is admin-only and stored by the blog service. It defaults to on,
-is available in the account admin view, and is enforced server-side for every
-comment notification event. Article/content mail is independently controlled by
-each user's third setting.
+Comment mail is controlled by each user's first setting. Article/content mail is
+independently controlled by each user's third setting.
 
 ## SM mail integration
 
@@ -214,7 +213,6 @@ or merge.
 - Ordinary readers cannot see deleted rows or deleted content.
 - Author self-delete and admin delete-anywhere are enforced server-side.
 - New comment, direct reply, and admin deletion events follow the recipient rules.
-- Global notification off prevents all new event mail.
 - Content notification hooks send only to users who opt in.
 - SM mail queue receives signed requests and handles retries.
 - Root Astro build and backend typecheck pass.

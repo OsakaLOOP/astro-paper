@@ -4,14 +4,49 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
 ---
-<Layout title="Account | Loopo:443" description="Manage your profile and comment notifications.">
+
+<Layout
+  title="Account | Loopo:443"
+  description="Manage your profile and comment notifications."
+>
   <Header />
   <main id="main-content" class="account-page" data-account-api={api}>
-    <div class="account-header"><h1>Account</h1></div>
+    <div class="account-header">
+      <h1 class="text-2xl font-semibold sm:text-3xl">Account</h1>
+    </div>
     <p class="account-muted" data-state>Loading your account…</p>
-    <section class="account-section" data-profile hidden><h2>Profile</h2><label class="account-field">Display name<input data-name maxlength="120" /></label><p class="account-muted" data-email></p><button class="comment-submit" data-save>Save changes</button></section>
-    <section class="account-section" data-notifications hidden><h2>Comment notifications</h2><label class="account-row"><span>Email me about comments I follow</span><input class="account-check" type="checkbox" data-global /></label><label class="account-row" data-site-switch hidden><span>Enable comment notification emails site-wide</span><input class="account-check" type="checkbox" data-site-global /></label><div data-subscriptions></div></section>
-    <section class="account-section" data-security hidden><h2>Security</h2><p class="account-muted">Password, email verification, and two-factor authentication are managed by SM.</p><a class="auth-name" data-security-link>Open SM security settings ↗</a></section>
+    <section class="account-section" data-profile hidden>
+      <h2>Profile</h2><label class="account-field"
+        >Display name<input data-name maxlength="120" /></label
+      ><label class="account-field"
+        >Website<input data-website type="url" maxlength="500" placeholder="https://example.com" /></label
+      ><p class="account-muted" data-email></p><button
+        class="comment-submit"
+        data-save>Save changes</button
+      >
+    </section>
+    <section class="account-section" data-notifications hidden>
+      <h2>Comment notifications</h2><label class="account-row"
+        ><span>Email me about comments I follow</span><input
+          class="account-check"
+          type="checkbox"
+          data-global
+        /></label
+      ><label class="account-row" data-site-switch hidden
+        ><span>Enable comment notification emails site-wide</span><input
+          class="account-check"
+          type="checkbox"
+          data-site-global
+        /></label
+      ><div data-subscriptions></div>
+    </section>
+    <section class="account-section" data-security hidden>
+      <h2>Security</h2><p class="account-muted">
+        Password, email verification, and two-factor authentication are managed
+        by SM.
+      </p><a class="auth-name" data-security-link>Open SM security settings ↗</a
+      >
+    </section>
   </main>
   <Footer />
 </Layout>
@@ -21,24 +56,107 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     if (!page || page.dataset.accountInitialized) return;
     page.dataset.accountInitialized = "true";
     const accountPage = page;
-    const api = page.dataset.accountApi!, state = page.querySelector<HTMLElement>("[data-state]")!;
-    const profile = page.querySelector<HTMLElement>("[data-profile]")!, notifications = page.querySelector<HTMLElement>("[data-notifications]")!, security = page.querySelector<HTMLElement>("[data-security]")!;
-    const name = page.querySelector<HTMLInputElement>("[data-name]")!, email = page.querySelector<HTMLElement>("[data-email]")!, global = page.querySelector<HTMLInputElement>("[data-global]")!, siteGlobal = page.querySelector<HTMLInputElement>("[data-site-global]")!, siteSwitch = page.querySelector<HTMLElement>("[data-site-switch]")!, subscriptions = page.querySelector<HTMLElement>("[data-subscriptions]")!;
-    const esc = (value: unknown) => String(value ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]!));
+    const api = page.dataset.accountApi!,
+      state = page.querySelector<HTMLElement>("[data-state]")!;
+    const profile = page.querySelector<HTMLElement>("[data-profile]")!,
+      notifications = page.querySelector<HTMLElement>("[data-notifications]")!,
+      security = page.querySelector<HTMLElement>("[data-security]")!;
+    const name = page.querySelector<HTMLInputElement>("[data-name]")!,
+      website = page.querySelector<HTMLInputElement>("[data-website]")!,
+      email = page.querySelector<HTMLElement>("[data-email]")!,
+      global = page.querySelector<HTMLInputElement>("[data-global]")!,
+      siteGlobal = page.querySelector<HTMLInputElement>("[data-site-global]")!,
+      siteSwitch = page.querySelector<HTMLElement>("[data-site-switch]")!,
+      subscriptions = page.querySelector<HTMLElement>("[data-subscriptions]")!;
+    const esc = (value: unknown) =>
+      String(value ?? "").replace(
+        /[&<>"']/g,
+        c =>
+          ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;",
+          })[c]!
+      );
     async function load() {
-      const response = await fetch(`${api}/blog/account`, { credentials: "include" });
-      if (response.status === 401) { state.innerHTML = `<a class="auth-name" href="${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href)}">Log in to manage your account</a>`; return; }
-      if (!response.ok) throw new Error(`Account request failed: ${response.status}`);
-      const data = await response.json(); state.hidden = true; profile.hidden = notifications.hidden = security.hidden = false; name.value = data.user.name; email.textContent = data.user.email; global.checked = data.notifications_enabled; siteSwitch.hidden = !data.is_admin; siteGlobal.checked = data.site_notifications_enabled;
-      subscriptions.innerHTML = data.subscriptions.length ? data.subscriptions.map((item: {post_slug:string}) => `<div class="account-row"><a class="auth-name" href="/posts/${encodeURIComponent(item.post_slug)}/#comments">${esc(item.post_slug)}</a><button class="comment-action" data-remove="${esc(item.post_slug)}">Remove</button></div>`).join("") : `<p class="account-muted">No article subscriptions yet.</p>`;
-      accountPage.querySelector<HTMLAnchorElement>("[data-security-link]")!.href = "https://auth.loopo.cc/sign-in";
+      const response = await fetch(`${api}/blog/account`, {
+        credentials: "include",
+      });
+      if (response.status === 401) {
+        state.innerHTML = `<a class="auth-name" href="${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href)}">Log in to manage your account</a>`;
+        return;
+      }
+      if (!response.ok)
+        throw new Error(`Account request failed: ${response.status}`);
+      const data = await response.json();
+      state.hidden = true;
+      profile.hidden = notifications.hidden = security.hidden = false;
+      name.value = data.user.name;
+      website.value = data.user.website_url ?? "";
+      email.textContent = data.user.email;
+      global.checked = data.notifications_enabled;
+      siteSwitch.hidden = !data.is_admin;
+      siteGlobal.checked = data.site_notifications_enabled;
+      subscriptions.innerHTML = data.subscriptions.length
+        ? data.subscriptions
+            .map(
+              (item: { post_slug: string }) =>
+                `<div class="account-row"><a class="auth-name" href="/posts/${encodeURIComponent(item.post_slug)}/#comments">${esc(item.post_slug)}</a><button class="comment-action" data-remove="${esc(item.post_slug)}">Remove</button></div>`
+            )
+            .join("")
+        : `<p class="account-muted">No article subscriptions yet.</p>`;
+      accountPage.querySelector<HTMLAnchorElement>(
+        "[data-security-link]"
+      )!.href = "https://auth.loopo.cc/sign-in";
     }
-    async function update(body: object) { await fetch(`${api}/blog/account`, { method:"PATCH", credentials:"include", headers:{"Content-Type":"application/json", Origin:location.origin}, body:JSON.stringify(body) }); }
-    page.querySelector("[data-save]")?.addEventListener("click", () => update({ name: name.value.trim() }));
-    global.addEventListener("change", () => void update({ notifications_enabled: global.checked }));
-    siteGlobal.addEventListener("change", () => void update({ site_notifications_enabled: siteGlobal.checked }));
-    subscriptions.addEventListener("click", async event => { const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-remove]"); if (!button) return; await fetch(`${api}/blog/account/subscriptions/${encodeURIComponent(button.dataset.remove!)}`, { method:"PUT", credentials:"include", headers:{"Content-Type":"application/json", Origin:location.origin}, body:JSON.stringify({enabled:false}) }); await load(); });
-    load().catch(() => { state.textContent = "Account is temporarily unavailable."; });
+    async function update(body: object) {
+      await fetch(`${api}/blog/account`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: location.origin,
+        },
+        body: JSON.stringify(body),
+      });
+    }
+    page
+      .querySelector("[data-save]")
+      ?.addEventListener("click", () =>
+        update({ name: name.value.trim(), website_url: website.value.trim() })
+      );
+    global.addEventListener(
+      "change",
+      () => void update({ notifications_enabled: global.checked })
+    );
+    siteGlobal.addEventListener(
+      "change",
+      () => void update({ site_notifications_enabled: siteGlobal.checked })
+    );
+    subscriptions.addEventListener("click", async event => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
+        "[data-remove]"
+      );
+      if (!button) return;
+      await fetch(
+        `${api}/blog/account/subscriptions/${encodeURIComponent(button.dataset.remove!)}`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Origin: location.origin,
+          },
+          body: JSON.stringify({ enabled: false }),
+        }
+      );
+      await load();
+    });
+    load().catch(() => {
+      state.textContent = "Account is temporarily unavailable.";
+    });
   }
   document.addEventListener("astro:page-load", initAccountPage);
   initAccountPage();

@@ -10,6 +10,7 @@ tags:
   - Philosophy
   - Sociology
   - Neurodiversity
+  - Archived
 
 description: An essay on Loopo:443 focusing on the sharedness of experience, neurodiversity and rewarding patterns of humanity.
 ---

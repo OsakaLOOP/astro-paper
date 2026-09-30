@@ -7,6 +7,7 @@ featured: true
 draft: false
 tags:
   - Miscellaneous
+  - Archived
 
 description: First post on Loopo:443.
 ---

@@ -1,0 +1,33 @@
+---
+title: 开发记录 / Dev notes
+author: Loopo
+pubDatetime: 2026-09-30T10:40:00+08:00
+slug: dev-notes
+featured: true
+draft: false
+tags:
+  - dev
+  - In progress
+description: A continous archive for the development and features of Loopo:443, still in progress.
+---
+
+> gpt-sol-6.1 真的很好用, 所以很长一段时间我大概不会放弃对各种小功能小巧思的追逐的...
+
+## 2026-09
+
+字体栈, 选用了 Google Sans Code 和思源黑体.
+
+看隔壁 Firefly 的一堆自定义组件很眼馋, 于是许愿了聚焦目录和标签云, 并适配了风格.
+
+Header 里 AstroPaper 的下划线提示只有渐入渐出, 改成了更符合书写/擦除语义的 svg 遮罩变换. 比较 tricky 的是需要延迟 2 帧触发, css真的一言难尽.
+
+果然还是做了账户和评论系统, 跳转到名为 `SM` 的站点时请不要吃惊, 因为 Server Management. 目前最大并发是10, 但是因为/me和/comments两次请求, 实际就只有5.
+
+真的服了 gpt 总喜欢小标题+大标题+一长串解释文本的 ui 习惯, 不知所云, belike:
+
+<div class="account-header"><p class="comments-kicker">ACCOUNT</p><h1>Account</h1><p class="account-muted">Manage your profile and comment notifications.</p></div>
+
+
+## 2026-10
+
+*Work in progress*

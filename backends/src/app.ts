@@ -36,9 +36,14 @@ const post = {
   pattern: "^[a-zA-Z0-9_\\-/\\u0080-\\uffff]+$",
 };
 const body = { type: "string", minLength: 1, maxLength: 2000, pattern: "\\S" };
+const websiteUrl = {
+  type: "string",
+  maxLength: 500,
+  pattern: "^(?:https?://[^\\s]+)?$",
+};
 const params = { type: "object", required: ["id"], properties: { id: uuid } };
 const fields =
-  "id,post_slug,user_id,author_name,author_email,body,parent_id,created_at,updated_at,deleted_at,version";
+  "id,post_slug,user_id,author_name,author_url,author_email,body,parent_id,created_at,updated_at,deleted_at,version";
 const esc = (value: string) =>
   value.replace(
     /[&<>\"']/g,
@@ -151,7 +156,13 @@ export async function buildApp(options: AppOptions) {
       "INSERT INTO site_blog.notification_settings(user_id,email) VALUES($1,$2) ON CONFLICT(user_id) DO UPDATE SET email=excluded.email",
       [user.id, email]
     );
-    return { name, email };
+    const profile = (
+      await options.pool.query<{ website_url: string | null }>(
+        "SELECT website_url FROM site_blog.profiles WHERE user_id=$1",
+        [user.id]
+      )
+    ).rows[0];
+    return { name, email, website_url: profile?.website_url ?? "" };
   };
   const siteNotificationsEnabled = async () => {
     const row = (
@@ -177,6 +188,7 @@ export async function buildApp(options: AppOptions) {
     comment: {
       user_id: string;
       author_name: string;
+      author_url?: string | null;
       author_email: string;
       body: string;
       parent_id?: string;
@@ -368,12 +380,13 @@ export async function buildApp(options: AppOptions) {
         )
           throw new HttpError(400, "INVALID_REPLY");
         const result = await options.pool.query(
-          "INSERT INTO site_blog.comments(id,post_slug,user_id,author_name,author_email,body,parent_id) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(id) DO NOTHING RETURNING id",
+          "INSERT INTO site_blog.comments(id,post_slug,user_id,author_name,author_url,author_email,body,parent_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(id) DO NOTHING RETURNING id",
           [
             input.id,
             input.post,
             user.id,
             p.name,
+            p.website_url || null,
             p.email,
             input.body.trim(),
             input.parent_id ?? null,
@@ -388,6 +401,7 @@ export async function buildApp(options: AppOptions) {
         void notifyComment(input.post, {
           user_id: user.id,
           author_name: p.name,
+          author_url: p.website_url || null,
           author_email: p.email,
           body: input.body.trim(),
           parent_id: input.parent_id,
@@ -498,6 +512,7 @@ export async function buildApp(options: AppOptions) {
     api.patch<{
       Body: {
         name?: string;
+        website_url?: string;
         notifications_enabled?: boolean;
         site_notifications_enabled?: boolean;
       };
@@ -510,6 +525,7 @@ export async function buildApp(options: AppOptions) {
             additionalProperties: false,
             properties: {
               name: { type: "string", minLength: 1, maxLength: 120 },
+              website_url: websiteUrl,
               notifications_enabled: { type: "boolean" },
               site_notifications_enabled: { type: "boolean" },
             },
@@ -524,6 +540,11 @@ export async function buildApp(options: AppOptions) {
           await options.pool.query(
             "UPDATE site_blog.profiles SET display_name=$2,updated_at=now() WHERE user_id=$1",
             [user.id, request.body.name.trim()]
+          );
+        if (request.body.website_url !== undefined)
+          await options.pool.query(
+            "UPDATE site_blog.profiles SET website_url=$2,updated_at=now() WHERE user_id=$1",
+            [user.id, request.body.website_url.trim() || null]
           );
         if (request.body.notifications_enabled !== undefined)
           await options.pool.query(
@@ -540,6 +561,10 @@ export async function buildApp(options: AppOptions) {
         return {
           ok: true,
           name: request.body.name?.trim() ?? p.name,
+          website_url:
+            request.body.website_url !== undefined
+              ? request.body.website_url.trim()
+              : p.website_url,
           notifications_enabled: request.body.notifications_enabled,
           site_notifications_enabled: request.body.site_notifications_enabled,
         };

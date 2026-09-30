@@ -115,5 +115,22 @@ const rssHref = getRelativeLocaleUrl(
     <script>
       import "@/scripts/theme";
     </script>
+    <script is:inline>
+      document.addEventListener("astro:before-preparation", () => {
+        const viewportHeight = window.innerHeight;
+
+        document.querySelectorAll("[style]").forEach(element => {
+          const transitionName = getComputedStyle(element).viewTransitionName;
+          if (!transitionName || transitionName === "none") return;
+
+          const { top, bottom } = element.getBoundingClientRect();
+          const outsideViewport = bottom <= 0 || top >= viewportHeight;
+          if (outsideViewport) {
+            // 视口外的共享元素不参与本次位移动画，避免长距离快速移动。
+            element.style.viewTransitionName = "none";
+          }
+        });
+      });
+    </script>
   </body>
 </html>

@@ -46,7 +46,9 @@ const locale = Astro.currentLocale ?? config.site.lang;
       highlighted ? (
         <span class="decoration-highlight underline decoration-wavy decoration-2 underline-offset-4 [text-decoration-skip-ink:none]">
           #{tagName}
-          {count !== undefined && ` (${count})`}
+          {count !== undefined && (
+            <sup class="text-muted-foreground text-xs">{count}</sup>
+          )}
         </span>
       ) : (
         <>
@@ -59,7 +61,7 @@ const locale = Astro.currentLocale ?? config.site.lang;
           />
           {tagName}
           {count !== undefined && (
-            <span class="text-muted-foreground ms-1 text-xs">({count})</span>
+            <sup class="text-muted-foreground text-xs">{count}</sup>
           )}
         </>
       )

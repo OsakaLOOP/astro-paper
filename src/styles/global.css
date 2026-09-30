@@ -283,6 +283,52 @@
 .emoji-content[hidden] {
   display: none;
 }
+.emoji-picker[data-touch="true"] .emoji-contents {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding: 0;
+  touch-action: pan-x pan-y;
+}
+.emoji-picker[data-touch="true"] .emoji-contents::-webkit-scrollbar {
+  display: none;
+}
+.emoji-picker[data-touch="true"] .emoji-content {
+  flex: 0 0 100%;
+  min-width: 0;
+  max-height: min(20rem, calc(100dvh - 13rem));
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  scrollbar-width: thin;
+  padding: 0.1rem 0.1rem 0.25rem;
+}
+.emoji-swipe-hint {
+  position: absolute;
+  inset-inline: 0.1rem;
+  inset-block-start: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted-foreground);
+  opacity: 0.35;
+  pointer-events: none;
+}
+.emoji-swipe-hint[hidden] {
+  display: none;
+}
+.emoji-swipe-hint svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+.emoji-swipe-hint[data-at-start="true"] svg:first-child,
+.emoji-swipe-hint[data-at-end="true"] svg:last-child {
+  visibility: hidden;
+}
 .emoji-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(3.25rem, 1fr));

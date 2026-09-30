@@ -113,10 +113,16 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         emojiContents = picker.querySelector<HTMLElement>(
           "[data-emoji-contents]"
         )!,
-        emojiEmpty = picker.querySelector<HTMLElement>("[data-emoji-empty]")!;
+        emojiEmpty = picker.querySelector<HTMLElement>("[data-emoji-empty]")!,
+        emojiSwipeHint = picker.querySelector<HTMLElement>(
+          "[data-emoji-swipe-hint]"
+        )!;
       const debugEnabled = section.dataset.commentsDebug === "true";
       const startedAt = performance.now();
       let emojiManifest: EmojiManifest | null = null;
+      let touchInteraction = window.matchMedia("(hover: none)").matches;
+      let activeEmojiGroup = "";
+      picker.dataset.touch = String(touchInteraction);
       let emojiIndex: ReadonlyMap<string, EmojiItem> = new Map();
       let rerenderComments: (() => void) | undefined;
       const debugLog = (
@@ -197,9 +203,11 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       const setEmojiPanelOpen = (open: boolean, restoreFocus = false) => {
         emojiPanel.hidden = !open;
         emojiTrigger.setAttribute("aria-expanded", String(open));
-        if (open) {
+        if (open && !touchInteraction) {
           picker
-            .querySelector<HTMLButtonElement>("[data-emoji-id]")
+            .querySelector<HTMLButtonElement>(
+              "[data-emoji-content]:not([hidden]) [data-emoji-id]"
+            )
             ?.focus({ preventScroll: true });
         } else if (restoreFocus) {
           emojiTrigger.focus({ preventScroll: true });
@@ -217,7 +225,23 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         cancelEmojiClose();
         closeTimer = window.setTimeout(() => setEmojiPanelOpen(false), 120);
       };
-      const activateEmojiGroup = (groupId: string) => {
+      const emojiScrollBehavior = (): ScrollBehavior =>
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "instant"
+          : "smooth";
+      const scrollToEmojiGroup = (behavior: ScrollBehavior) => {
+        if (!touchInteraction || emojiPanel.hidden) return;
+        const index = emojiManifest?.groups.findIndex(
+          group => group.id === activeEmojiGroup
+        );
+        if (index === undefined || index < 0) return;
+        emojiContents.scrollTo({
+          left: index * emojiContents.getBoundingClientRect().width,
+          behavior,
+        });
+      };
+      const activateEmojiGroup = (groupId: string, scroll = true) => {
+        activeEmojiGroup = groupId;
         emojiTabs
           .querySelectorAll<HTMLButtonElement>("[data-emoji-tab]")
           .forEach(tab => {
@@ -228,8 +252,41 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         emojiContents
           .querySelectorAll<HTMLElement>("[data-emoji-content]")
           .forEach(content => {
-            content.hidden = content.dataset.emojiContent !== groupId;
+            const active = content.dataset.emojiContent === groupId;
+            content.hidden = !touchInteraction && !active;
+            content.inert = touchInteraction && !active;
           });
+        const groups = emojiManifest?.groups ?? [];
+        const index = groups.findIndex(group => group.id === groupId);
+        emojiSwipeHint.hidden = !touchInteraction || groups.length < 2;
+        emojiSwipeHint.dataset.atStart = String(index === 0);
+        emojiSwipeHint.dataset.atEnd = String(index === groups.length - 1);
+        if (!touchInteraction) return;
+        if (scroll) scrollToEmojiGroup(emojiScrollBehavior());
+        const activeTab = emojiTabs.querySelector<HTMLElement>(
+          '[aria-selected="true"]'
+        );
+        if (activeTab && !emojiPanel.hidden) {
+          const tabRect = activeTab.getBoundingClientRect();
+          const tabsRect = emojiTabs.getBoundingClientRect();
+          if (tabRect.left < tabsRect.left || tabRect.right > tabsRect.right)
+            emojiTabs.scrollBy({
+              left:
+                tabRect.left -
+                tabsRect.left -
+                (tabsRect.width - tabRect.width) / 2,
+              behavior: emojiScrollBehavior(),
+            });
+        }
+      };
+      const setEmojiInteraction = (touch: boolean) => {
+        cancelEmojiClose();
+        if (touchInteraction === touch) return;
+        touchInteraction = touch;
+        picker.dataset.touch = String(touch);
+        activateEmojiGroup(activeEmojiGroup, false);
+        if (touch) scrollToEmojiGroup("instant");
+        else emojiContents.scrollLeft = 0;
       };
       const renderEmojiPicker = (manifest: EmojiManifest | null) => {
         emojiTabs.replaceChildren();
@@ -273,12 +330,15 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
             image.alt = item.alt;
             image.loading = "lazy";
             image.decoding = "async";
+            image.draggable = false;
             button.append(image);
             grid.append(button);
           }
           content.append(grid);
           emojiContents.append(content);
         }
+        if (manifest.groups[0])
+          activateEmojiGroup(manifest.groups[0].id, false);
       };
       const pickerId = `emoji-panel-${sectionIndex}`;
       emojiPanel.id = pickerId;
@@ -288,27 +348,44 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         () => {
           cancelEmojiClose();
           setEmojiPanelOpen(Boolean(emojiPanel.hidden));
+          scrollToEmojiGroup("instant");
         },
         listenerOptions
       );
       picker.addEventListener(
         "pointerenter",
-        () => {
-          cancelEmojiClose();
+        event => {
+          if (
+            event.pointerType !== "mouse" ||
+            !window.matchMedia("(hover: hover)").matches
+          )
+            return;
+          setEmojiInteraction(false);
           setEmojiPanelOpen(true);
         },
         listenerOptions
       );
       picker.addEventListener(
         "pointerleave",
-        scheduleEmojiClose,
+        event => {
+          if (event.pointerType === "mouse" && !touchInteraction)
+            scheduleEmojiClose();
+        },
         listenerOptions
+      );
+      picker.addEventListener(
+        "pointerdown",
+        event => setEmojiInteraction(event.pointerType !== "mouse"),
+        { capture: true, ...listenerOptions }
       );
       picker.addEventListener("focusin", cancelEmojiClose, listenerOptions);
       picker.addEventListener(
         "focusout",
         event => {
-          if (!picker.contains(event.relatedTarget as Node | null))
+          if (
+            !touchInteraction &&
+            !picker.contains(event.relatedTarget as Node | null)
+          )
             scheduleEmojiClose();
         },
         listenerOptions
@@ -334,6 +411,29 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           passive: true,
           ...listenerOptions,
         }
+      );
+      emojiContents.addEventListener(
+        "scroll",
+        () => {
+          if (!touchInteraction || !emojiContents.clientWidth) return;
+          const index = Math.round(
+            emojiContents.scrollLeft /
+              emojiContents.getBoundingClientRect().width
+          );
+          const group = emojiManifest?.groups[index];
+          if (group && group.id !== activeEmojiGroup)
+            activateEmojiGroup(group.id, false);
+        },
+        { passive: true, ...listenerOptions }
+      );
+      const emojiResizeObserver = new ResizeObserver(() =>
+        scrollToEmojiGroup("instant")
+      );
+      emojiResizeObserver.observe(emojiContents);
+      lifecycle.signal.addEventListener(
+        "abort",
+        () => emojiResizeObserver.disconnect(),
+        { once: true }
       );
       picker.addEventListener(
         "click",

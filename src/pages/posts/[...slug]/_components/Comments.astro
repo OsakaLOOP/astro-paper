@@ -151,7 +151,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           .map(item => item.id)
           .sort((left, right) => right.length - left.length)
           .map(escapeRegExp)
-          .join("|")}))\\)`,
+          .join("|")})\\)`,
         "gu"
       );
       const source = value.replace(tokenPattern, (_, id: string) => {

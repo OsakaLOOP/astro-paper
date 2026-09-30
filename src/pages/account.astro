@@ -1,8 +1,20 @@
 ---
+import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
+import config from "@/config";
+import { getPostSlug, getPostUrl } from "@/utils/getPostPaths";
+import { postFilter } from "@/utils/postFilter";
+
 const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
+const locale = Astro.currentLocale ?? config.site.lang;
+const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
+  slug: getPostSlug(post.id, post.filePath).replace(/^\/+|\/+$/g, ""),
+  title: post.data.title,
+  url: getPostUrl(post.id, post.filePath, locale),
+}));
 ---
 
 <Layout
@@ -14,6 +26,8 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     id="main-content"
     class="account-page app-layout"
     data-account-api={api}
+    data-account-posts={JSON.stringify(posts)}
+    data-account-posts-base={getRelativeLocaleUrl(locale, "posts/")}
   >
     <div class="account-header">
       <h1 class="text-2xl font-semibold sm:text-3xl">Account</h1>
@@ -70,6 +84,14 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     if (!page || page.dataset.accountInitialized) return;
     page.dataset.accountInitialized = "true";
     const accountPage = page;
+    const posts = new Map<string, { slug: string; title: string; url: string }>(
+      JSON.parse(page.dataset.accountPosts ?? "[]").map(
+        (post: { slug: string; title: string; url: string }) => [
+          post.slug,
+          post,
+        ]
+      )
+    );
     const api = page.dataset.accountApi!,
       state = page.querySelector<HTMLElement>("[data-state]")!;
     const profile = page.querySelector<HTMLElement>("[data-profile]")!,
@@ -115,10 +137,15 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       siteGlobal.checked = data.site_notifications_enabled;
       subscriptions.innerHTML = data.subscriptions.length
         ? data.subscriptions
-            .map(
-              (item: { post_slug: string }) =>
-                `<div class="account-row"><a class="auth-name nav-link" data-active="false" href="/posts/${encodeURIComponent(item.post_slug)}/#comments">${esc(item.post_slug)}</a><button class="comment-action" data-remove="${esc(item.post_slug)}">Remove</button></div>`
-            )
+            .map((item: { post_slug: string }) => {
+              const slug = item.post_slug.replace(/^\/+|\/+$/g, "");
+              const post = posts.get(slug);
+              const path =
+                post?.url ??
+                `${accountPage.dataset.accountPostsBase!.replace(/\/+$/, "")}/${slug.split("/").map(encodeURIComponent).join("/")}/`;
+              const title = post?.title ?? slug;
+              return `<div class="account-row account-subscription"><a class="account-subscription-link" href="${esc(path)}#comments"><span class="account-subscription-title">${esc(title)}</span><span class="account-subscription-path">${esc(path)}</span></a><button class="comment-action" data-remove="${esc(item.post_slug)}">Remove</button></div>`;
+            })
             .join("")
         : `<p class="account-muted">No article subscriptions yet.</p>`;
       accountPage.querySelector<HTMLAnchorElement>(

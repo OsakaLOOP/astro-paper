@@ -113,8 +113,13 @@
 .auth-divider {
   color: var(--muted-foreground);
 }
-.auth-name {
+.auth-control .auth-name {
+  display: block;
+  min-width: 0;
   max-width: 9rem;
+}
+.auth-name-label {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -540,6 +545,31 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.65rem 0;
+}
+.account-subscription {
+  align-items: flex-start;
+}
+.account-subscription-link {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 0.25rem;
+  color: var(--foreground);
+  overflow-wrap: anywhere;
+}
+.account-subscription-link:hover .account-subscription-title {
+  color: var(--accent);
+}
+.account-subscription-title {
+  font-size: 0.85rem;
+}
+.account-subscription-path {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+.account-subscription .comment-action {
+  flex-shrink: 0;
+  padding: 0;
 }
 .comments-empty,
 .comments-loading,

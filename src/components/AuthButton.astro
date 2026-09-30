@@ -59,9 +59,17 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       if (!isCurrent()) return;
       if (!user || typeof user.id !== "string" || typeof user.name !== "string")
         throw new BlogRequestError("response");
-      control.innerHTML = `<a class="auth-name nav-link" data-auth-link href="/account"></a><span class="auth-divider" aria-hidden="true">·</span><button class="auth-link auth-button" type="button" data-auth-logout>Log out</button>`;
-      control.querySelector<HTMLAnchorElement>(".auth-name")!.textContent =
-        user.name || "Reader";
+      let accountLink =
+        control.querySelector<HTMLAnchorElement>("[data-auth-link]");
+      if (!accountLink) {
+        control.innerHTML = `<a class="auth-name nav-link" data-auth-link href="/account"><span class="auth-name-label"></span></a><span class="auth-divider" aria-hidden="true">·</span><button class="auth-link auth-button" type="button" data-auth-logout>Log out</button>`;
+        accountLink =
+          control.querySelector<HTMLAnchorElement>("[data-auth-link]")!;
+      }
+      const displayName = user.name || "Reader";
+      accountLink.querySelector<HTMLElement>(".auth-name-label")!.textContent =
+        displayName;
+      accountLink.title = displayName;
       document.dispatchEvent(new CustomEvent("auth:updated"));
     } catch (error) {
       if (!isCurrent()) return;

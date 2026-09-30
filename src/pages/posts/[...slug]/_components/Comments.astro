@@ -70,7 +70,10 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
     const startedAt = performance.now();
     const debugLog = (event: string, details: Record<string, unknown> = {}) => {
       if (!debugEnabled) return;
-      console.debug(`[comments][${new Date().toISOString()}][+${(performance.now() - startedAt).toFixed(1)}ms] ${event}`, details);
+      console.debug(
+        `[comments][${new Date().toISOString()}][+${(performance.now() - startedAt).toFixed(1)}ms] ${event}`,
+        details
+      );
     };
     debugLog("init", { post });
     const safe = (value: unknown) =>
@@ -91,11 +94,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       DOMPurify.sanitize(marked.parse(value, { async: false }) as string, {
         USE_PROFILES: { html: true },
       });
-    let signedIn = false;
-    let identityLoaded = false;
     const showIdentity = (authenticated: boolean) => {
-      signedIn = authenticated;
-      identityLoaded = true;
       editor.hidden = !authenticated;
       login.hidden = authenticated;
       debugLog("identity-state", { authenticated });
@@ -120,15 +119,20 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         `${api}/blog/comments?post=${encodeURIComponent(post)}`,
         { credentials: "include" }
       );
-      debugLog("comments-response", { status: response.status, ms: +(performance.now() - requestStarted).toFixed(1) });
+      debugLog("comments-response", {
+        status: response.status,
+        ms: +(performance.now() - requestStarted).toFixed(1),
+      });
       if (!response.ok) throw new Error();
       const payload = await response.json();
-      debugLog("comments-payload", { total: payload.total, items: payload.items?.length, viewer: Boolean(payload.viewer) });
+      debugLog("comments-payload", {
+        total: payload.total,
+        items: payload.items?.length,
+        viewer: Boolean(payload.viewer),
+      });
       count.textContent = `${payload.total} comments`;
       subscribe.checked = payload.subscribed;
-      if (identityLoaded && Boolean(payload.viewer) !== signedIn) {
-        showIdentity(Boolean(payload.viewer));
-      }
+      showIdentity(Boolean(payload.viewer));
       const items = payload.items as any[];
       const ids = new Set(items.map(item => item.id));
       const byParent = new Map<string | null, any[]>();
@@ -150,19 +154,6 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         ordered.join("") ||
         `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
       debugLog("comments-rendered", { items: ordered.length });
-    }
-    async function loadIdentity() {
-      const requestStarted = performance.now();
-      debugLog("identity-request-start");
-      try {
-        const response = await fetch(`${api}/blog/auth/me`, {
-          credentials: "include",
-        });
-        debugLog("identity-response", { status: response.status, ms: +(performance.now() - requestStarted).toFixed(1) });
-        showIdentity(response.ok);
-      } catch {
-        showIdentity(false);
-      }
     }
     subscribe.addEventListener("change", async () => {
       await fetch(
@@ -221,7 +212,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           input.placeholder = "Leave a comment…";
           await loadComments();
         } else if (response.status === 401) {
-          await loadIdentity();
+          showIdentity(false);
         }
       });
     list.addEventListener("click", async event => {
@@ -237,7 +228,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           credentials: "include",
           headers: { Origin: location.origin },
         });
-        if (response.status === 401) await loadIdentity();
+        if (response.status === 401) showIdentity(false);
         await loadComments();
         return;
       }
@@ -257,7 +248,6 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         input.focus();
       }
     });
-    loadIdentity();
     loadComments().catch(() => {
       list.innerHTML = `<p class="comments-empty">Comments are temporarily unavailable.</p>`;
       count.textContent = "";

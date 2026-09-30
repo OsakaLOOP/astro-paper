@@ -309,21 +309,25 @@
 }
 .emoji-swipe-hint {
   position: absolute;
-  inset-inline: 0.1rem;
+  inset-inline: 0.35rem;
   inset-block-start: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: space-between;
   color: var(--muted-foreground);
-  opacity: 0.35;
+  opacity: 0.55;
   pointer-events: none;
 }
 .emoji-swipe-hint[hidden] {
   display: none;
 }
 .emoji-swipe-hint svg {
-  width: 0.75rem;
-  height: 0.75rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--background) 60%, transparent);
+  box-shadow: 0 1px 5px rgb(0 0 0 / 0.08);
 }
 .emoji-swipe-hint[data-at-start="true"] svg:first-child,
 .emoji-swipe-hint[data-at-end="true"] svg:last-child {

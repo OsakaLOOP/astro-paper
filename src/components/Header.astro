@@ -162,7 +162,9 @@ const isActive = (path: string) => {
 </header>
 
 <script>
-  function toggleNav() {
+  const boundMenuButtons = new WeakSet<HTMLButtonElement>();
+
+  function initNav() {
     const menuBtn = document.querySelector<HTMLButtonElement>("#menu-btn");
     const menuItems = document.querySelector("#menu-items");
     const menuAuth = document.querySelector("#menu-auth");
@@ -174,17 +176,22 @@ const isActive = (path: string) => {
     const openLabel = menuBtn.dataset.labelOpen ?? "Open menu";
     const closeLabel = menuBtn.dataset.labelClose ?? "Close menu";
 
+    const setMenuOpen = (open: boolean) => {
+      menuBtn.setAttribute("aria-expanded", String(open));
+      menuBtn.setAttribute("aria-label", open ? closeLabel : openLabel);
+      menuItems.classList.toggle("hidden", !open);
+      menuItems.classList.toggle("grid", open);
+      menuAuth?.classList.toggle("hidden", !open);
+      menuIcon.classList.toggle("hidden", open);
+      closeIcon.classList.toggle("hidden", !open);
+    };
+
+    setMenuOpen(false);
+    if (boundMenuButtons.has(menuBtn)) return;
+    boundMenuButtons.add(menuBtn);
+
     menuBtn.addEventListener("click", () => {
-      const openMenu = menuBtn.getAttribute("aria-expanded") === "true";
-
-      menuBtn.setAttribute("aria-expanded", openMenu ? "false" : "true");
-      menuBtn.setAttribute("aria-label", openMenu ? openLabel : closeLabel);
-
-      menuItems.classList.toggle("hidden");
-      menuItems.classList.toggle("grid");
-      menuAuth?.classList.toggle("hidden", openMenu);
-      menuIcon.classList.toggle("hidden");
-      closeIcon.classList.toggle("hidden");
+      setMenuOpen(menuBtn.getAttribute("aria-expanded") !== "true");
     });
   }
 
@@ -262,8 +269,8 @@ const isActive = (path: string) => {
     });
   }
 
-  toggleNav();
-  document.addEventListener("astro:after-swap", toggleNav);
+  initNav();
+  document.addEventListener("astro:after-swap", initNav);
 
   handleSkipToContent();
   document.addEventListener("astro:after-swap", handleSkipToContent);

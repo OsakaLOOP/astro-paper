@@ -132,7 +132,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
     section.querySelector<HTMLAnchorElement>("[data-login-link]")!.href =
       `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href + "#comments")}`;
     const replyMarker =
-      '<span class="comment-reply-marker" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 14-5-5 5-5"></path><path d="M4 9h10a6 6 0 0 1 6 6v1"></path></svg></span>';
+      '<span class="comment-reply-marker" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20h-7a4 4 0 0 1-4-4V4"></path><path d="m14 9-5-5-5 5"></path></svg></span>';
 
     const renderMarkdown = (value: string) => {
       if (!emojiManifest) {
@@ -157,7 +157,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       const source = value.replace(tokenPattern, (_, id: string) => {
         const item = itemById.get(id);
         if (!item) return _;
-        const placeholder = `\\uE000EMOJI${placeholders.size}\\uE001`;
+        const placeholder = `\uE000EMOJI${placeholders.size}\uE001`;
         placeholders.set(placeholder, item);
         return placeholder;
       });
@@ -168,7 +168,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       if (!placeholders.size) return html;
       const container = document.createElement("div");
       container.innerHTML = html;
-      const placeholderPattern = /\\uE000EMOJI(\\d+)\\uE001/gu;
+      const placeholderPattern = /\uE000EMOJI(\d+)\uE001/gu;
       const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
       const textNodes: Text[] = [];
       while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
@@ -181,7 +181,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         let changed = false;
         const fragment = document.createDocumentFragment();
         while ((match = placeholderPattern.exec(text))) {
-          const item = placeholders.get(`\\uE000EMOJI${match[1]}\\uE001`);
+          const item = placeholders.get(`\uE000EMOJI${match[1]}\uE001`);
           if (!item) continue;
           changed = true;
           fragment.append(

@@ -22,6 +22,7 @@ export async function registerBff(app: FastifyInstance, options: BffOptions) {
   const jwks = metadata.jwks_uri ? createRemoteJWKSet(new URL(metadata.jwks_uri)) : undefined;
   const suffix = `; Path=/blog; HttpOnly; SameSite=Lax${options.origin.startsWith("https:") ? "; Secure" : ""}`;
   const clear = (name: string) => `${name}=; Max-Age=0${suffix}`;
+  const identityRefreshes = new Map<string, Promise<{ tokens: StoredTokens; info: Record<string, unknown> }>>();
   app.get("/auth/login", async (request, reply) => {
     const candidate = new URL(request.url, options.origin).searchParams.get("returnTo") ?? options.frontendOrigins[0];
     let returnTo: URL;
@@ -51,34 +52,41 @@ export async function registerBff(app: FastifyInstance, options: BffOptions) {
   async function getUser(request: FastifyRequest, fresh = false) {
     const value = cookie(request, "blog_session");
     if (!value) return null;
-    const connection = await options.pool.connect();
+    const session = (await options.pool.query(`SELECT * FROM ${table} WHERE token_digest=$1 AND expires_at>now() AND created_at>now()-interval '30 days'`, [digest(value)])).rows[0];
+    if (!session) return null;
+    const tokens = unseal<StoredTokens>(session.tokens, options.secret);
     try {
-      await connection.query("BEGIN");
-      await connection.query("SET LOCAL idle_in_transaction_session_timeout='15s'");
-      const session = (await connection.query(`SELECT * FROM ${table} WHERE token_digest=$1 AND expires_at>now() AND created_at>now()-interval '30 days' FOR UPDATE`, [digest(value)])).rows[0];
-      if (!session) { await connection.query("COMMIT"); return null; }
-      const tokens = unseal<StoredTokens>(session.tokens, options.secret);
       if (fresh || !session.checked_at || Date.now() - new Date(session.checked_at).getTime() > 30_000) {
         try {
-          if (tokens.expires_at <= Date.now() + 5000 && tokens.refresh_token) {
-            const refreshed = await oidc.refreshTokenGrant(client, tokens.refresh_token);
-            Object.assign(tokens, refreshed, { expires_at: Date.now() + Number(refreshed.expires_in ?? 300) * 1000 });
+          const key = digest(value);
+          let refresh = identityRefreshes.get(key);
+          if (!refresh) {
+            refresh = (async () => {
+              const nextTokens = { ...tokens };
+              if (nextTokens.expires_at <= Date.now() + 5000 && nextTokens.refresh_token) {
+                const refreshed = await oidc.refreshTokenGrant(client, nextTokens.refresh_token);
+                Object.assign(nextTokens, refreshed, { expires_at: Date.now() + Number(refreshed.expires_in ?? 300) * 1000 });
+              }
+              const info = await oidc.fetchUserInfo(client, nextTokens.access_token, session.user_id);
+              return { tokens: nextTokens, info: info as Record<string, unknown> };
+            })();
+            identityRefreshes.set(key, refresh);
+            void refresh.then(() => identityRefreshes.delete(key), () => identityRefreshes.delete(key));
           }
-          const info = await oidc.fetchUserInfo(client, tokens.access_token, session.user_id);
-          await connection.query(`UPDATE ${table} SET tokens=$2,profile=$3,checked_at=now() WHERE token_digest=$1`, [digest(value), seal(tokens, options.secret), JSON.stringify(info)]);
-          session.profile = info;
+          const updated = await refresh;
+          Object.assign(tokens, updated.tokens);
+          await options.pool.query(`UPDATE ${table} SET tokens=$2,profile=$3,checked_at=now() WHERE token_digest=$1`, [key, seal(tokens, options.secret), JSON.stringify(updated.info)]);
+          session.profile = updated.info;
         } catch (error) {
           const rejected = error instanceof oidc.WWWAuthenticateChallengeError || (error instanceof oidc.ResponseBodyError && ["invalid_grant", "invalid_token"].includes(error.error));
           if (!rejected) throw new HttpError(503, "IDENTITY_UNAVAILABLE");
-          await connection.query(`DELETE FROM ${table} WHERE token_digest=$1`, [digest(value)]);
-          await connection.query("COMMIT");
+          await options.pool.query(`DELETE FROM ${table} WHERE token_digest=$1`, [digest(value)]);
           return null;
         }
       }
-      await connection.query("COMMIT");
       const local = (await options.pool.query<{ display_name: string }>(`SELECT display_name FROM "${options.schema}".profiles WHERE user_id=$1`, [session.user_id])).rows[0];
       return { id: session.user_id as string, profile: { ...(session.profile as Record<string, unknown>), ...(local ? { name: local.display_name } : {}) } };
-    } catch (error) { await connection.query("ROLLBACK"); throw error; } finally { connection.release(); }
+    } catch (error) { throw error; }
   }
   app.get("/auth/me", async (request, reply) => { const user = await getUser(request); return user ? { id: user.id, name: String(user.profile.name ?? "读者") } : reply.code(401).send({ error: "AUTH_REQUIRED" }); });
   app.post("/auth/logout", async (request, reply) => {

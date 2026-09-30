@@ -62,7 +62,8 @@ export async function buildApp(options: AppOptions) {
       const admin = viewer ? isAdmin(viewer) : false;
       const limit = request.query.limit ?? 20;
       const visibility = admin ? "" : viewer ? " AND (deleted_at IS NULL OR user_id=$4)" : " AND deleted_at IS NULL";
-      const values = [request.query.post, request.query.after ?? null, limit + 1, viewer?.id ?? null];
+      const values: (string | number | null)[] = [request.query.post, request.query.after ?? null, limit + 1];
+      if (viewer && !admin) values.push(viewer.id);
       const rows = (await options.pool.query(`SELECT ${fields} FROM site_blog.comments WHERE post_slug=$1${visibility} AND ($2::uuid IS NULL OR (created_at,id) > (SELECT created_at,id FROM site_blog.comments WHERE id=$2 AND post_slug=$1)) ORDER BY created_at,id LIMIT $3`, values)).rows;
       const more = rows.length > limit;
       if (more) rows.pop();

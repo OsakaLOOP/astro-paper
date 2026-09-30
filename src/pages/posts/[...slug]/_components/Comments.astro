@@ -82,11 +82,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       DOMPurify.sanitize(marked.parse(value, { async: false }) as string, {
         USE_PROFILES: { html: true },
       });
-    let signedIn = false;
-    let identityLoaded = false;
     const showIdentity = (authenticated: boolean) => {
-      signedIn = authenticated;
-      identityLoaded = true;
       editor.hidden = !authenticated;
       login.hidden = authenticated;
     };
@@ -112,9 +108,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       const payload = await response.json();
       count.textContent = `${payload.total} comments`;
       subscribe.checked = payload.subscribed;
-      if (identityLoaded && Boolean(payload.viewer) !== signedIn) {
-        showIdentity(Boolean(payload.viewer));
-      }
+      showIdentity(Boolean(payload.viewer));
       const items = payload.items as any[];
       const ids = new Set(items.map(item => item.id));
       const byParent = new Map<string | null, any[]>();
@@ -135,16 +129,6 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       list.innerHTML =
         ordered.join("") ||
         `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
-    }
-    async function loadIdentity() {
-      try {
-        const response = await fetch(`${api}/blog/auth/me`, {
-          credentials: "include",
-        });
-        showIdentity(response.ok);
-      } catch {
-        showIdentity(false);
-      }
     }
     subscribe.addEventListener("change", async () => {
       await fetch(
@@ -203,7 +187,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
           input.placeholder = "Leave a comment…";
           await loadComments();
         } else if (response.status === 401) {
-          await loadIdentity();
+          showIdentity(false);
         }
       });
     list.addEventListener("click", async event => {
@@ -219,7 +203,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
           credentials: "include",
           headers: { Origin: location.origin },
         });
-        if (response.status === 401) await loadIdentity();
+        if (response.status === 401) showIdentity(false);
         await loadComments();
         return;
       }
@@ -239,7 +223,6 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
         input.focus();
       }
     });
-    loadIdentity();
     loadComments().catch(() => {
       list.innerHTML = `<p class="comments-empty">Comments are temporarily unavailable.</p>`;
       count.textContent = "";

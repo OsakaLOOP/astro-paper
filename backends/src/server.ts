@@ -5,7 +5,8 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import { createHmac } from "node:crypto";
 if (process.getBuiltinModule("fs").existsSync(".env")) process.loadEnvFile(".env");
 function required(key: string) { const value = process.env[key]; if (!value) throw new Error(`Missing ${key}`); return value; }
-const pool = new Pool({ connectionString: required("SITE_DATABASE_URL"), max: 3, connectionTimeoutMillis: 3000, statement_timeout: 5000 });
+// Keep enough connections for concurrent auth and comments requests on the first page load.
+const pool = new Pool({ connectionString: required("SITE_DATABASE_URL"), max: 10, connectionTimeoutMillis: 3000, statement_timeout: 5000 });
 const origins = required("FRONTEND_ORIGINS").split(",").map(s => new URL(s.trim()).origin);
 const mailUrl = process.env.SM_MAIL_URL;
 const mailSecret = process.env.SM_MAIL_SECRET;

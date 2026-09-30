@@ -33,7 +33,7 @@ The backend stores the original Markdown for editing and notification excerpts.
 ## Emoji system
 
 评论编辑器提供表情面板。表情资源位于 `public/emoji/<group>/`，每个一级目录
-对应一个表情分组，目录名作为面板中的分组名称。当前资源包含 7 个分组、309 个
+对应一个表情分组，目录名作为面板中的分组名称。当前资源包含 8 个分组、334 个
 文件，支持目录中已有的 `png`、`webp`、`gif` 及其他浏览器可显示的栅格格式。
 
 ### 资源命名

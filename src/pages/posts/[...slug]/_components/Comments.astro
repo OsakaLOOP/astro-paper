@@ -1,4 +1,6 @@
 ---
+import EmojiPicker from "@/components/EmojiPicker.astro";
+
 const { postSlug } = Astro.props;
 const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
 const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
@@ -28,11 +30,14 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       data-input
       maxlength="2000"
       rows="4"
-      placeholder="Leave a comment…"></textarea><div
-      class="comment-preview"
-      data-preview
-      hidden
+      placeholder="Leave a comment…"></textarea>
+    <div class="comment-preview" data-preview hidden></div>
+    <div
+      class="comments-editor-toolbar"
+      role="toolbar"
+      aria-label="Comment tools"
     >
+      <EmojiPicker />
     </div>
     <div class="comments-editor-footer">
       <label class="comment-subscribe"
@@ -55,8 +60,36 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
 <script>
   import { marked } from "marked";
   import DOMPurify from "dompurify";
+
+  type EmojiItem = {
+    id: string;
+    src: string;
+    alt: string;
+    type: string;
+  };
+  type EmojiGroup = { id: string; label: string; items: EmojiItem[] };
+  type EmojiManifest = { version: number; groups: EmojiGroup[] };
+
+  let emojiManifestPromise: Promise<EmojiManifest | null> | undefined;
+  const loadEmojiManifest = () => {
+    if (!emojiManifestPromise) {
+      emojiManifestPromise = fetch("/emoji/manifest.json", {
+        cache: "force-cache",
+      })
+        .then(async response => {
+          if (!response.ok) return null;
+          const manifest = (await response.json()) as EmojiManifest;
+          return Array.isArray(manifest.groups) ? manifest : null;
+        })
+        .catch(() => null);
+    }
+    return emojiManifestPromise;
+  };
+
+  const escapeRegExp = (value: string) =>
+    value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const sections = [...document.querySelectorAll<HTMLElement>(".comments")];
-  for (const section of sections) {
+  for (const [sectionIndex, section] of sections.entries()) {
     const api = section.dataset.commentsApi!,
       post = section.dataset.post!,
       list = section.querySelector<HTMLElement>("[data-list]")!,
@@ -65,12 +98,21 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       input = section.querySelector<HTMLTextAreaElement>("[data-input]")!,
       preview = section.querySelector<HTMLElement>("[data-preview]")!,
       count = section.querySelector<HTMLElement>("[data-count]")!,
-      subscribe = section.querySelector<HTMLInputElement>("[data-subscribe]")!;
+      subscribe = section.querySelector<HTMLInputElement>("[data-subscribe]")!,
+      picker = section.querySelector<HTMLElement>("[data-emoji-picker]")!,
+      emojiTrigger = picker.querySelector<HTMLButtonElement>(
+        "[data-emoji-trigger]"
+      )!,
+      emojiPanel = picker.querySelector<HTMLElement>("[data-emoji-panel]")!,
+      emojiGroups = picker.querySelector<HTMLElement>("[data-emoji-groups]")!,
+      emojiEmpty = picker.querySelector<HTMLElement>("[data-emoji-empty]")!;
     const debugEnabled = section.dataset.commentsDebug === "true";
     const startedAt = performance.now();
+    let emojiManifest: EmojiManifest | null = null;
+    let rerenderComments: (() => void) | undefined;
     const debugLog = (event: string, details: Record<string, unknown> = {}) => {
       if (!debugEnabled) return;
-      console.debug(
+      globalThis.console.debug(
         `[comments][${new Date().toISOString()}][+${(performance.now() - startedAt).toFixed(1)}ms] ${event}`,
         details
       );
@@ -90,10 +132,143 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       );
     section.querySelector<HTMLAnchorElement>("[data-login-link]")!.href =
       `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href + "#comments")}`;
+
+    const renderEmojiHtml = (html: string) => {
+      if (!emojiManifest) return html;
+      const items = new Map(
+        emojiManifest.groups
+          .flatMap(group => group.items)
+          .map(item => [item.id, item])
+      );
+      if (!items.size) return html;
+      const pattern = new RegExp(
+        `\\((${[...items.keys()]
+          .sort((left, right) => right.length - left.length)
+          .map(escapeRegExp)
+          .join("|")}))\\)`,
+        "gu"
+      );
+      const container = document.createElement("div");
+      container.innerHTML = html;
+      const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+      const textNodes: Text[] = [];
+      while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
+      for (const textNode of textNodes) {
+        if (textNode.parentElement?.closest("code, pre")) continue;
+        const value = textNode.nodeValue ?? "";
+        pattern.lastIndex = 0;
+        let match: RegExpExecArray | null;
+        let lastIndex = 0;
+        let changed = false;
+        const fragment = document.createDocumentFragment();
+        while ((match = pattern.exec(value))) {
+          changed = true;
+          fragment.append(
+            document.createTextNode(value.slice(lastIndex, match.index))
+          );
+          const item = items.get(match[1]);
+          if (!item) continue;
+          const image = document.createElement("img");
+          image.className = "comment-emoji";
+          image.src = item.src;
+          image.alt = item.alt;
+          image.title = item.alt;
+          image.draggable = false;
+          image.loading = "lazy";
+          fragment.append(image);
+          lastIndex = match.index + match[0].length;
+        }
+        if (changed) {
+          fragment.append(document.createTextNode(value.slice(lastIndex)));
+          textNode.parentNode?.replaceChild(fragment, textNode);
+        }
+      }
+      return container.innerHTML;
+    };
     const renderMarkdown = (value: string) =>
-      DOMPurify.sanitize(marked.parse(value, { async: false }) as string, {
-        USE_PROFILES: { html: true },
-      });
+      renderEmojiHtml(
+        DOMPurify.sanitize(marked.parse(value, { async: false }) as string, {
+          USE_PROFILES: { html: true },
+        })
+      );
+
+    const setEmojiPanelOpen = (open: boolean, restoreFocus = true) => {
+      emojiPanel.hidden = !open;
+      emojiTrigger.setAttribute("aria-expanded", String(open));
+      if (open) {
+        picker.querySelector<HTMLButtonElement>("[data-emoji-id]")?.focus();
+      } else if (restoreFocus) {
+        emojiTrigger.focus();
+      }
+    };
+    const renderEmojiPicker = (manifest: EmojiManifest | null) => {
+      emojiGroups.replaceChildren();
+      emojiEmpty.hidden = Boolean(manifest);
+      emojiTrigger.disabled = !manifest;
+      if (!manifest) return;
+      for (const group of manifest.groups) {
+        const groupElement = document.createElement("section");
+        groupElement.className = "emoji-group";
+        const heading = document.createElement("h3");
+        heading.textContent = group.label;
+        groupElement.append(heading);
+        const grid = document.createElement("div");
+        grid.className = "emoji-grid";
+        grid.setAttribute("role", "group");
+        grid.setAttribute("aria-label", group.label);
+        for (const item of group.items) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "emoji-item";
+          button.dataset.emojiId = item.id;
+          button.title = item.alt;
+          button.setAttribute("aria-label", item.alt);
+          const image = document.createElement("img");
+          image.src = item.src;
+          image.alt = item.alt;
+          image.loading = "lazy";
+          image.decoding = "async";
+          button.append(image);
+          grid.append(button);
+        }
+        groupElement.append(grid);
+        emojiGroups.append(groupElement);
+      }
+    };
+    const pickerId = `emoji-panel-${sectionIndex}`;
+    emojiPanel.id = pickerId;
+    emojiTrigger.setAttribute("aria-controls", pickerId);
+    emojiTrigger.addEventListener("click", () =>
+      setEmojiPanelOpen(Boolean(emojiPanel.hidden))
+    );
+    picker
+      .querySelector<HTMLButtonElement>("[data-emoji-close]")!
+      .addEventListener("click", () => setEmojiPanelOpen(false));
+    picker.addEventListener("click", event => {
+      const target = (event.target as HTMLElement).closest<HTMLButtonElement>(
+        "[data-emoji-id]"
+      );
+      if (!target) return;
+      const start = input.selectionStart ?? input.value.length;
+      const end = input.selectionEnd ?? start;
+      input.setRangeText(`(${target.dataset.emojiId})`, start, end, "end");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      setEmojiPanelOpen(false);
+      input.focus();
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !emojiPanel.hidden)
+        setEmojiPanelOpen(false);
+    });
+    document.addEventListener("focusin", event => {
+      if (!emojiPanel.hidden && !picker.contains(event.target as Node))
+        setEmojiPanelOpen(false, false);
+    });
+    document.addEventListener("pointerdown", event => {
+      if (!emojiPanel.hidden && !picker.contains(event.target as Node))
+        setEmojiPanelOpen(false, false);
+    });
+
     const showIdentity = (authenticated: boolean) => {
       editor.hidden = !authenticated;
       login.hidden = authenticated;
@@ -141,25 +316,29 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           item.parent_id && ids.has(item.parent_id) ? item.parent_id : null;
         byParent.set(key, [...(byParent.get(key) ?? []), item]);
       }
-      const render = (item: any, depth: number): string => {
-        const createdAt = new Date(item.created_at);
-        const formattedTime = createdAt.toLocaleString(undefined, {
-          dateStyle: "medium",
-          timeStyle: "short",
-        });
-        return `<article class="comment${item.parent_id ? " comment--reply" : ""}" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}">${item.parent_id ? '<span class="comment-reply-marker" aria-hidden="true"></span>' : ""}<div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time datetime="${createdAt.toISOString()}">${formattedTime}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by a moderator.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
+      const renderCommentList = () => {
+        const render = (item: any, depth: number): string => {
+          const createdAt = new Date(item.created_at);
+          const formattedTime = createdAt.toLocaleString(undefined, {
+            dateStyle: "medium",
+            timeStyle: "short",
+          });
+          return `<article class="comment${item.parent_id ? " comment--reply" : ""}" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}" data-comment-body="${safe(item.body)}">${item.parent_id ? '<span class="comment-reply-marker" aria-hidden="true"></span>' : ""}<div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time datetime="${createdAt.toISOString()}">${formattedTime}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by a moderator.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
+        };
+        const ordered: string[] = [];
+        const flatten = (item: any, depth: number) => {
+          ordered.push(render(item, depth));
+          for (const child of byParent.get(item.id) ?? [])
+            flatten(child, depth + 1);
+        };
+        for (const item of byParent.get(null) ?? []) flatten(item, 0);
+        list.innerHTML =
+          ordered.join("") ||
+          `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
+        debugLog("comments-rendered", { items: ordered.length });
       };
-      const ordered: string[] = [];
-      const flatten = (item: any, depth: number) => {
-        ordered.push(render(item, depth));
-        for (const child of byParent.get(item.id) ?? [])
-          flatten(child, depth + 1);
-      };
-      for (const item of byParent.get(null) ?? []) flatten(item, 0);
-      list.innerHTML =
-        ordered.join("") ||
-        `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
-      debugLog("comments-rendered", { items: ordered.length });
+      rerenderComments = renderCommentList;
+      renderCommentList();
     }
     subscribe.addEventListener("change", async () => {
       await fetch(
@@ -246,13 +425,18 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       }
       if (target.dataset.edit) {
         const article = target.closest<HTMLElement>(".comment")!;
-        const content = article.querySelector<HTMLElement>(".comment-content")!;
         section.dataset.editId = target.dataset.edit;
         section.dataset.editVersion = target.dataset.version;
-        input.value = content.innerText;
+        input.value = article.dataset.commentBody ?? "";
         input.placeholder = "Edit your comment…";
         input.focus();
       }
+    });
+    loadEmojiManifest().then(manifest => {
+      emojiManifest = manifest;
+      renderEmojiPicker(manifest);
+      if (!preview.hidden) preview.innerHTML = renderMarkdown(input.value);
+      rerenderComments?.();
     });
     loadComments().catch(() => {
       list.innerHTML = `<p class="comments-empty">Comments are temporarily unavailable.</p>`;

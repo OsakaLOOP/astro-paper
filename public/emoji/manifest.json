@@ -1,0 +1,2057 @@
+{
+  "version": 1,
+  "groups": [
+    {
+      "id": "2233",
+      "label": "2233",
+      "items": [
+        {
+          "id": "2233_卖萌",
+          "src": "/emoji/2233/2233_%E5%8D%96%E8%90%8C.png",
+          "alt": "2233 卖萌",
+          "type": "png"
+        },
+        {
+          "id": "2233_吃惊",
+          "src": "/emoji/2233/2233_%E5%90%83%E6%83%8A.png",
+          "alt": "2233 吃惊",
+          "type": "png"
+        },
+        {
+          "id": "2233_吐魂",
+          "src": "/emoji/2233/2233_%E5%90%90%E9%AD%82.png",
+          "alt": "2233 吐魂",
+          "type": "png"
+        },
+        {
+          "id": "2233_喝水",
+          "src": "/emoji/2233/2233_%E5%96%9D%E6%B0%B4.png",
+          "alt": "2233 喝水",
+          "type": "png"
+        },
+        {
+          "id": "2233_困惑",
+          "src": "/emoji/2233/2233_%E5%9B%B0%E6%83%91.png",
+          "alt": "2233 困惑",
+          "type": "png"
+        },
+        {
+          "id": "2233_大哭",
+          "src": "/emoji/2233/2233_%E5%A4%A7%E5%93%AD.png",
+          "alt": "2233 大哭",
+          "type": "png"
+        },
+        {
+          "id": "2233_大笑",
+          "src": "/emoji/2233/2233_%E5%A4%A7%E7%AC%91.png",
+          "alt": "2233 大笑",
+          "type": "png"
+        },
+        {
+          "id": "2233_委屈",
+          "src": "/emoji/2233/2233_%E5%A7%94%E5%B1%88.png",
+          "alt": "2233 委屈",
+          "type": "png"
+        },
+        {
+          "id": "2233_怒",
+          "src": "/emoji/2233/2233_%E6%80%92.png",
+          "alt": "2233 怒",
+          "type": "png"
+        },
+        {
+          "id": "2233_无言",
+          "src": "/emoji/2233/2233_%E6%97%A0%E8%A8%80.png",
+          "alt": "2233 无言",
+          "type": "png"
+        },
+        {
+          "id": "2233_汗",
+          "src": "/emoji/2233/2233_%E6%B1%97.png",
+          "alt": "2233 汗",
+          "type": "png"
+        },
+        {
+          "id": "2233_疑问",
+          "src": "/emoji/2233/2233_%E7%96%91%E9%97%AE.png",
+          "alt": "2233 疑问",
+          "type": "png"
+        },
+        {
+          "id": "2233_第一",
+          "src": "/emoji/2233/2233_%E7%AC%AC%E4%B8%80.png",
+          "alt": "2233 第一",
+          "type": "png"
+        },
+        {
+          "id": "2233_耶",
+          "src": "/emoji/2233/2233_%E8%80%B6.png",
+          "alt": "2233 耶",
+          "type": "png"
+        },
+        {
+          "id": "2233_郁闷",
+          "src": "/emoji/2233/2233_%E9%83%81%E9%97%B7.png",
+          "alt": "2233 郁闷",
+          "type": "png"
+        }
+      ]
+    },
+    {
+      "id": "choten",
+      "label": "超てんじゃん",
+      "items": [
+        {
+          "id": "choten_233",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_233.png",
+          "alt": "超てんじゃん 233",
+          "type": "png"
+        },
+        {
+          "id": "choten_V我50",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_V%E6%88%9150.png",
+          "alt": "超てんじゃん V我50",
+          "type": "png"
+        },
+        {
+          "id": "choten_hso",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_hso.png",
+          "alt": "超てんじゃん hso",
+          "type": "png"
+        },
+        {
+          "id": "choten_不可以",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E4%B8%8D%E5%8F%AF%E4%BB%A5.png",
+          "alt": "超てんじゃん 不可以",
+          "type": "png"
+        },
+        {
+          "id": "choten_喷",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E5%96%B7.png",
+          "alt": "超てんじゃん 喷",
+          "type": "png"
+        },
+        {
+          "id": "choten_嘤嘤",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E5%98%A4%E5%98%A4.png",
+          "alt": "超てんじゃん 嘤嘤",
+          "type": "png"
+        },
+        {
+          "id": "choten_垃圾桶",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E5%9E%83%E5%9C%BE%E6%A1%B6.png",
+          "alt": "超てんじゃん 垃圾桶",
+          "type": "png"
+        },
+        {
+          "id": "choten_太强了",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E5%A4%AA%E5%BC%BA%E4%BA%86.png",
+          "alt": "超てんじゃん 太强了",
+          "type": "png"
+        },
+        {
+          "id": "choten_干杯",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E5%B9%B2%E6%9D%AF.png",
+          "alt": "超てんじゃん 干杯",
+          "type": "png"
+        },
+        {
+          "id": "choten_急了",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E6%80%A5%E4%BA%86.png",
+          "alt": "超てんじゃん 急了",
+          "type": "png"
+        },
+        {
+          "id": "choten_我不到阿",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E6%88%91%E4%B8%8D%E5%88%B0%E9%98%BF.png",
+          "alt": "超てんじゃん 我不到阿",
+          "type": "png"
+        },
+        {
+          "id": "choten_拳头硬了",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E6%8B%B3%E5%A4%B4%E7%A1%AC%E4%BA%86.png",
+          "alt": "超てんじゃん 拳头硬了",
+          "type": "png"
+        },
+        {
+          "id": "choten_昇天",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E6%98%87%E5%A4%A9.png",
+          "alt": "超てんじゃん 昇天",
+          "type": "png"
+        },
+        {
+          "id": "choten_朝天椒",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E6%9C%9D%E5%A4%A9%E6%A4%92.png",
+          "alt": "超てんじゃん 朝天椒",
+          "type": "png"
+        },
+        {
+          "id": "choten_期待",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E6%9C%9F%E5%BE%85.png",
+          "alt": "超てんじゃん 期待",
+          "type": "png"
+        },
+        {
+          "id": "choten_永远",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E6%B0%B8%E8%BF%9C.png",
+          "alt": "超てんじゃん 永远",
+          "type": "png"
+        },
+        {
+          "id": "choten_永远爱你",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E6%B0%B8%E8%BF%9C%E7%88%B1%E4%BD%A0.png",
+          "alt": "超てんじゃん 永远爱你",
+          "type": "png"
+        },
+        {
+          "id": "choten_点点关注",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E7%82%B9%E7%82%B9%E5%85%B3%E6%B3%A8.png",
+          "alt": "超てんじゃん 点点关注",
+          "type": "png"
+        },
+        {
+          "id": "choten_点赞",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E7%82%B9%E8%B5%9E.png",
+          "alt": "超てんじゃん 点赞",
+          "type": "png"
+        },
+        {
+          "id": "choten_爱你",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E7%88%B1%E4%BD%A0.png",
+          "alt": "超てんじゃん 爱你",
+          "type": "png"
+        },
+        {
+          "id": "choten_痴呆",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E7%97%B4%E5%91%86.png",
+          "alt": "超てんじゃん 痴呆",
+          "type": "png"
+        },
+        {
+          "id": "choten_盒打击",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E7%9B%92%E6%89%93%E5%87%BB.png",
+          "alt": "超てんじゃん 盒打击",
+          "type": "png"
+        },
+        {
+          "id": "choten_谁懂啊",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E8%B0%81%E6%87%82%E5%95%8A.png",
+          "alt": "超てんじゃん 谁懂啊",
+          "type": "png"
+        },
+        {
+          "id": "choten_谁问你了",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E8%B0%81%E9%97%AE%E4%BD%A0%E4%BA%86.png",
+          "alt": "超てんじゃん 谁问你了",
+          "type": "png"
+        },
+        {
+          "id": "choten_难绷",
+          "src": "/emoji/%E8%B6%85%E3%81%A6%E3%82%93%E3%81%98%E3%82%83%E3%82%93/choten_%E9%9A%BE%E7%BB%B7.png",
+          "alt": "超てんじゃん 难绷",
+          "type": "png"
+        }
+      ]
+    },
+    {
+      "id": "AC",
+      "label": "AC 娘 Selected",
+      "items": [
+        {
+          "id": "AC_01",
+          "src": "/emoji/AC%20%E5%A8%98%20Selected/AC_01.webp",
+          "alt": "AC 娘 Selected 01",
+          "type": "webp"
+        },
+        {
+          "id": "AC_02",
+          "src": "/emoji/AC%20%E5%A8%98%20Selected/AC_02.webp",
+          "alt": "AC 娘 Selected 02",
+          "type": "webp"
+        },
+        {
+          "id": "AC_03",
+          "src": "/emoji/AC%20%E5%A8%98%20Selected/AC_03.webp",
+          "alt": "AC 娘 Selected 03",
+          "type": "webp"
+        },
+        {
+          "id": "AC_04",
+          "src": "/emoji/AC%20%E5%A8%98%20Selected/AC_04.webp",
+          "alt": "AC 娘 Selected 04",
+          "type": "webp"
+        },
+        {
+          "id": "AC_05",
+          "src": "/emoji/AC%20%E5%A8%98%20Selected/AC_05.webp",
+          "alt": "AC 娘 Selected 05",
+          "type": "webp"
+        },
+        {
+          "id": "AC_06",
+          "src": "/emoji/AC%20%E5%A8%98%20Selected/AC_06.webp",
+          "alt": "AC 娘 Selected 06",
+          "type": "webp"
+        }
+      ]
+    },
+    {
+      "id": "bgmmusume",
+      "label": "Bangumi 娘 by 猫魚",
+      "items": [
+        {
+          "id": "bgmmusume_01",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_01.gif",
+          "alt": "Bangumi 娘 by 猫魚 01",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_02",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_02.gif",
+          "alt": "Bangumi 娘 by 猫魚 02",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_03",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_03.gif",
+          "alt": "Bangumi 娘 by 猫魚 03",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_04",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_04.gif",
+          "alt": "Bangumi 娘 by 猫魚 04",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_05",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_05.gif",
+          "alt": "Bangumi 娘 by 猫魚 05",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_06",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_06.gif",
+          "alt": "Bangumi 娘 by 猫魚 06",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_07",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_07.gif",
+          "alt": "Bangumi 娘 by 猫魚 07",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_08",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_08.gif",
+          "alt": "Bangumi 娘 by 猫魚 08",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_09",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_09.gif",
+          "alt": "Bangumi 娘 by 猫魚 09",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_10",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_10.gif",
+          "alt": "Bangumi 娘 by 猫魚 10",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_100",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_100.gif",
+          "alt": "Bangumi 娘 by 猫魚 100",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_101",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_101.gif",
+          "alt": "Bangumi 娘 by 猫魚 101",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_102",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_102.gif",
+          "alt": "Bangumi 娘 by 猫魚 102",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_103",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_103.gif",
+          "alt": "Bangumi 娘 by 猫魚 103",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_104",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_104.gif",
+          "alt": "Bangumi 娘 by 猫魚 104",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_105",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_105.gif",
+          "alt": "Bangumi 娘 by 猫魚 105",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_106",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_106.gif",
+          "alt": "Bangumi 娘 by 猫魚 106",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_107",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_107.gif",
+          "alt": "Bangumi 娘 by 猫魚 107",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_108",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_108.gif",
+          "alt": "Bangumi 娘 by 猫魚 108",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_109",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_109.gif",
+          "alt": "Bangumi 娘 by 猫魚 109",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_11",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_11.gif",
+          "alt": "Bangumi 娘 by 猫魚 11",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_110",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_110.gif",
+          "alt": "Bangumi 娘 by 猫魚 110",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_111",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_111.gif",
+          "alt": "Bangumi 娘 by 猫魚 111",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_112",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_112.gif",
+          "alt": "Bangumi 娘 by 猫魚 112",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_113",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_113.gif",
+          "alt": "Bangumi 娘 by 猫魚 113",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_114",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_114.gif",
+          "alt": "Bangumi 娘 by 猫魚 114",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_115",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_115.gif",
+          "alt": "Bangumi 娘 by 猫魚 115",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_116",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_116.gif",
+          "alt": "Bangumi 娘 by 猫魚 116",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_12",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_12.gif",
+          "alt": "Bangumi 娘 by 猫魚 12",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_13",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_13.gif",
+          "alt": "Bangumi 娘 by 猫魚 13",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_14",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_14.gif",
+          "alt": "Bangumi 娘 by 猫魚 14",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_15",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_15.gif",
+          "alt": "Bangumi 娘 by 猫魚 15",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_16",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_16.gif",
+          "alt": "Bangumi 娘 by 猫魚 16",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_17",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_17.gif",
+          "alt": "Bangumi 娘 by 猫魚 17",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_18",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_18.gif",
+          "alt": "Bangumi 娘 by 猫魚 18",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_19",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_19.gif",
+          "alt": "Bangumi 娘 by 猫魚 19",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_20",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_20.gif",
+          "alt": "Bangumi 娘 by 猫魚 20",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_21",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_21.gif",
+          "alt": "Bangumi 娘 by 猫魚 21",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_22",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_22.gif",
+          "alt": "Bangumi 娘 by 猫魚 22",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_23",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_23.gif",
+          "alt": "Bangumi 娘 by 猫魚 23",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_24",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_24.gif",
+          "alt": "Bangumi 娘 by 猫魚 24",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_25",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_25.gif",
+          "alt": "Bangumi 娘 by 猫魚 25",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_26",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_26.gif",
+          "alt": "Bangumi 娘 by 猫魚 26",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_27",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_27.gif",
+          "alt": "Bangumi 娘 by 猫魚 27",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_28",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_28.gif",
+          "alt": "Bangumi 娘 by 猫魚 28",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_29",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_29.gif",
+          "alt": "Bangumi 娘 by 猫魚 29",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_30",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_30.gif",
+          "alt": "Bangumi 娘 by 猫魚 30",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_31",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_31.gif",
+          "alt": "Bangumi 娘 by 猫魚 31",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_32",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_32.gif",
+          "alt": "Bangumi 娘 by 猫魚 32",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_33",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_33.gif",
+          "alt": "Bangumi 娘 by 猫魚 33",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_34",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_34.gif",
+          "alt": "Bangumi 娘 by 猫魚 34",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_35",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_35.gif",
+          "alt": "Bangumi 娘 by 猫魚 35",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_36",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_36.gif",
+          "alt": "Bangumi 娘 by 猫魚 36",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_37",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_37.gif",
+          "alt": "Bangumi 娘 by 猫魚 37",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_38",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_38.gif",
+          "alt": "Bangumi 娘 by 猫魚 38",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_39",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_39.gif",
+          "alt": "Bangumi 娘 by 猫魚 39",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_40",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_40.gif",
+          "alt": "Bangumi 娘 by 猫魚 40",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_41",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_41.gif",
+          "alt": "Bangumi 娘 by 猫魚 41",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_42",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_42.gif",
+          "alt": "Bangumi 娘 by 猫魚 42",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_43",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_43.gif",
+          "alt": "Bangumi 娘 by 猫魚 43",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_44",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_44.gif",
+          "alt": "Bangumi 娘 by 猫魚 44",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_45",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_45.gif",
+          "alt": "Bangumi 娘 by 猫魚 45",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_46",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_46.gif",
+          "alt": "Bangumi 娘 by 猫魚 46",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_47",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_47.gif",
+          "alt": "Bangumi 娘 by 猫魚 47",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_48",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_48.gif",
+          "alt": "Bangumi 娘 by 猫魚 48",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_49",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_49.gif",
+          "alt": "Bangumi 娘 by 猫魚 49",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_50",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_50.gif",
+          "alt": "Bangumi 娘 by 猫魚 50",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_51",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_51.gif",
+          "alt": "Bangumi 娘 by 猫魚 51",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_52",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_52.gif",
+          "alt": "Bangumi 娘 by 猫魚 52",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_53",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_53.gif",
+          "alt": "Bangumi 娘 by 猫魚 53",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_54",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_54.gif",
+          "alt": "Bangumi 娘 by 猫魚 54",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_55",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_55.gif",
+          "alt": "Bangumi 娘 by 猫魚 55",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_56",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_56.gif",
+          "alt": "Bangumi 娘 by 猫魚 56",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_57",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_57.gif",
+          "alt": "Bangumi 娘 by 猫魚 57",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_58",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_58.gif",
+          "alt": "Bangumi 娘 by 猫魚 58",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_59",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_59.gif",
+          "alt": "Bangumi 娘 by 猫魚 59",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_60",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_60.gif",
+          "alt": "Bangumi 娘 by 猫魚 60",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_61",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_61.gif",
+          "alt": "Bangumi 娘 by 猫魚 61",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_62",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_62.gif",
+          "alt": "Bangumi 娘 by 猫魚 62",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_63",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_63.gif",
+          "alt": "Bangumi 娘 by 猫魚 63",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_64",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_64.gif",
+          "alt": "Bangumi 娘 by 猫魚 64",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_65",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_65.gif",
+          "alt": "Bangumi 娘 by 猫魚 65",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_66",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_66.gif",
+          "alt": "Bangumi 娘 by 猫魚 66",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_67",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_67.gif",
+          "alt": "Bangumi 娘 by 猫魚 67",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_68",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_68.gif",
+          "alt": "Bangumi 娘 by 猫魚 68",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_69",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_69.gif",
+          "alt": "Bangumi 娘 by 猫魚 69",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_70",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_70.gif",
+          "alt": "Bangumi 娘 by 猫魚 70",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_71",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_71.gif",
+          "alt": "Bangumi 娘 by 猫魚 71",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_72",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_72.gif",
+          "alt": "Bangumi 娘 by 猫魚 72",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_73",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_73.gif",
+          "alt": "Bangumi 娘 by 猫魚 73",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_74",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_74.gif",
+          "alt": "Bangumi 娘 by 猫魚 74",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_75",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_75.gif",
+          "alt": "Bangumi 娘 by 猫魚 75",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_76",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_76.gif",
+          "alt": "Bangumi 娘 by 猫魚 76",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_77",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_77.gif",
+          "alt": "Bangumi 娘 by 猫魚 77",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_78",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_78.gif",
+          "alt": "Bangumi 娘 by 猫魚 78",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_79",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_79.gif",
+          "alt": "Bangumi 娘 by 猫魚 79",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_80",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_80.gif",
+          "alt": "Bangumi 娘 by 猫魚 80",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_81",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_81.gif",
+          "alt": "Bangumi 娘 by 猫魚 81",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_82",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_82.gif",
+          "alt": "Bangumi 娘 by 猫魚 82",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_83",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_83.gif",
+          "alt": "Bangumi 娘 by 猫魚 83",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_84",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_84.gif",
+          "alt": "Bangumi 娘 by 猫魚 84",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_85",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_85.gif",
+          "alt": "Bangumi 娘 by 猫魚 85",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_86",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_86.gif",
+          "alt": "Bangumi 娘 by 猫魚 86",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_87",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_87.gif",
+          "alt": "Bangumi 娘 by 猫魚 87",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_88",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_88.gif",
+          "alt": "Bangumi 娘 by 猫魚 88",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_89",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_89.gif",
+          "alt": "Bangumi 娘 by 猫魚 89",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_90",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_90.gif",
+          "alt": "Bangumi 娘 by 猫魚 90",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_91",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_91.gif",
+          "alt": "Bangumi 娘 by 猫魚 91",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_92",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_92.gif",
+          "alt": "Bangumi 娘 by 猫魚 92",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_93",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_93.gif",
+          "alt": "Bangumi 娘 by 猫魚 93",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_94",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_94.gif",
+          "alt": "Bangumi 娘 by 猫魚 94",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_95",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_95.gif",
+          "alt": "Bangumi 娘 by 猫魚 95",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_96",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_96.gif",
+          "alt": "Bangumi 娘 by 猫魚 96",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_97",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_97.gif",
+          "alt": "Bangumi 娘 by 猫魚 97",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_98",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_98.gif",
+          "alt": "Bangumi 娘 by 猫魚 98",
+          "type": "gif"
+        },
+        {
+          "id": "bgmmusume_99",
+          "src": "/emoji/Bangumi%20%E5%A8%98%20by%20%E7%8C%AB%E9%AD%9A/bgmmusume_99.gif",
+          "alt": "Bangumi 娘 by 猫魚 99",
+          "type": "gif"
+        }
+      ]
+    },
+    {
+      "id": "bgmtv",
+      "label": "Bangumi TV Classic",
+      "items": [
+        {
+          "id": "bgmtv_01",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_01.gif",
+          "alt": "Bangumi TV Classic 01",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_02",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_02.gif",
+          "alt": "Bangumi TV Classic 02",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_03",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_03.gif",
+          "alt": "Bangumi TV Classic 03",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_04",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_04.gif",
+          "alt": "Bangumi TV Classic 04",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_05",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_05.gif",
+          "alt": "Bangumi TV Classic 05",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_06",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_06.gif",
+          "alt": "Bangumi TV Classic 06",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_07",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_07.gif",
+          "alt": "Bangumi TV Classic 07",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_08",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_08.gif",
+          "alt": "Bangumi TV Classic 08",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_09",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_09.gif",
+          "alt": "Bangumi TV Classic 09",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_10",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_10.gif",
+          "alt": "Bangumi TV Classic 10",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_100",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_100.gif",
+          "alt": "Bangumi TV Classic 100",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_101",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_101.gif",
+          "alt": "Bangumi TV Classic 101",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_102",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_102.gif",
+          "alt": "Bangumi TV Classic 102",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_11",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_11.gif",
+          "alt": "Bangumi TV Classic 11",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_12",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_12.gif",
+          "alt": "Bangumi TV Classic 12",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_13",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_13.gif",
+          "alt": "Bangumi TV Classic 13",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_14",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_14.gif",
+          "alt": "Bangumi TV Classic 14",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_15",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_15.gif",
+          "alt": "Bangumi TV Classic 15",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_16",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_16.gif",
+          "alt": "Bangumi TV Classic 16",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_17",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_17.gif",
+          "alt": "Bangumi TV Classic 17",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_18",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_18.gif",
+          "alt": "Bangumi TV Classic 18",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_19",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_19.gif",
+          "alt": "Bangumi TV Classic 19",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_20",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_20.gif",
+          "alt": "Bangumi TV Classic 20",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_21",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_21.gif",
+          "alt": "Bangumi TV Classic 21",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_22",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_22.gif",
+          "alt": "Bangumi TV Classic 22",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_23",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_23.gif",
+          "alt": "Bangumi TV Classic 23",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_24",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_24.gif",
+          "alt": "Bangumi TV Classic 24",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_25",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_25.gif",
+          "alt": "Bangumi TV Classic 25",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_26",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_26.gif",
+          "alt": "Bangumi TV Classic 26",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_27",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_27.gif",
+          "alt": "Bangumi TV Classic 27",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_28",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_28.gif",
+          "alt": "Bangumi TV Classic 28",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_29",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_29.gif",
+          "alt": "Bangumi TV Classic 29",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_30",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_30.gif",
+          "alt": "Bangumi TV Classic 30",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_31",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_31.gif",
+          "alt": "Bangumi TV Classic 31",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_32",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_32.gif",
+          "alt": "Bangumi TV Classic 32",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_33",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_33.gif",
+          "alt": "Bangumi TV Classic 33",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_34",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_34.gif",
+          "alt": "Bangumi TV Classic 34",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_35",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_35.gif",
+          "alt": "Bangumi TV Classic 35",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_36",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_36.gif",
+          "alt": "Bangumi TV Classic 36",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_37",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_37.gif",
+          "alt": "Bangumi TV Classic 37",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_38",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_38.gif",
+          "alt": "Bangumi TV Classic 38",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_39",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_39.gif",
+          "alt": "Bangumi TV Classic 39",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_40",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_40.gif",
+          "alt": "Bangumi TV Classic 40",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_41",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_41.gif",
+          "alt": "Bangumi TV Classic 41",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_42",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_42.gif",
+          "alt": "Bangumi TV Classic 42",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_43",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_43.gif",
+          "alt": "Bangumi TV Classic 43",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_44",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_44.gif",
+          "alt": "Bangumi TV Classic 44",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_45",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_45.gif",
+          "alt": "Bangumi TV Classic 45",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_46",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_46.gif",
+          "alt": "Bangumi TV Classic 46",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_47",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_47.gif",
+          "alt": "Bangumi TV Classic 47",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_48",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_48.gif",
+          "alt": "Bangumi TV Classic 48",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_49",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_49.gif",
+          "alt": "Bangumi TV Classic 49",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_50",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_50.gif",
+          "alt": "Bangumi TV Classic 50",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_51",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_51.gif",
+          "alt": "Bangumi TV Classic 51",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_52",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_52.gif",
+          "alt": "Bangumi TV Classic 52",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_53",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_53.gif",
+          "alt": "Bangumi TV Classic 53",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_54",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_54.gif",
+          "alt": "Bangumi TV Classic 54",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_55",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_55.gif",
+          "alt": "Bangumi TV Classic 55",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_56",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_56.gif",
+          "alt": "Bangumi TV Classic 56",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_57",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_57.gif",
+          "alt": "Bangumi TV Classic 57",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_58",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_58.gif",
+          "alt": "Bangumi TV Classic 58",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_59",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_59.gif",
+          "alt": "Bangumi TV Classic 59",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_60",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_60.gif",
+          "alt": "Bangumi TV Classic 60",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_61",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_61.gif",
+          "alt": "Bangumi TV Classic 61",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_62",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_62.gif",
+          "alt": "Bangumi TV Classic 62",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_63",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_63.gif",
+          "alt": "Bangumi TV Classic 63",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_64",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_64.gif",
+          "alt": "Bangumi TV Classic 64",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_65",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_65.gif",
+          "alt": "Bangumi TV Classic 65",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_66",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_66.gif",
+          "alt": "Bangumi TV Classic 66",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_67",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_67.gif",
+          "alt": "Bangumi TV Classic 67",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_68",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_68.gif",
+          "alt": "Bangumi TV Classic 68",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_69",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_69.gif",
+          "alt": "Bangumi TV Classic 69",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_70",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_70.gif",
+          "alt": "Bangumi TV Classic 70",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_71",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_71.gif",
+          "alt": "Bangumi TV Classic 71",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_72",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_72.gif",
+          "alt": "Bangumi TV Classic 72",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_73",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_73.gif",
+          "alt": "Bangumi TV Classic 73",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_74",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_74.gif",
+          "alt": "Bangumi TV Classic 74",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_75",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_75.gif",
+          "alt": "Bangumi TV Classic 75",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_76",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_76.gif",
+          "alt": "Bangumi TV Classic 76",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_77",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_77.gif",
+          "alt": "Bangumi TV Classic 77",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_78",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_78.gif",
+          "alt": "Bangumi TV Classic 78",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_79",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_79.gif",
+          "alt": "Bangumi TV Classic 79",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_80",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_80.gif",
+          "alt": "Bangumi TV Classic 80",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_81",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_81.gif",
+          "alt": "Bangumi TV Classic 81",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_82",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_82.gif",
+          "alt": "Bangumi TV Classic 82",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_83",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_83.gif",
+          "alt": "Bangumi TV Classic 83",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_84",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_84.gif",
+          "alt": "Bangumi TV Classic 84",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_85",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_85.gif",
+          "alt": "Bangumi TV Classic 85",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_86",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_86.gif",
+          "alt": "Bangumi TV Classic 86",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_87",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_87.gif",
+          "alt": "Bangumi TV Classic 87",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_88",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_88.gif",
+          "alt": "Bangumi TV Classic 88",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_89",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_89.gif",
+          "alt": "Bangumi TV Classic 89",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_90",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_90.gif",
+          "alt": "Bangumi TV Classic 90",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_91",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_91.gif",
+          "alt": "Bangumi TV Classic 91",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_92",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_92.gif",
+          "alt": "Bangumi TV Classic 92",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_93",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_93.gif",
+          "alt": "Bangumi TV Classic 93",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_94",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_94.gif",
+          "alt": "Bangumi TV Classic 94",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_95",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_95.gif",
+          "alt": "Bangumi TV Classic 95",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_96",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_96.gif",
+          "alt": "Bangumi TV Classic 96",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_97",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_97.gif",
+          "alt": "Bangumi TV Classic 97",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_98",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_98.gif",
+          "alt": "Bangumi TV Classic 98",
+          "type": "gif"
+        },
+        {
+          "id": "bgmtv_99",
+          "src": "/emoji/Bangumi%20TV%20Classic/bgmtv_99.gif",
+          "alt": "Bangumi TV Classic 99",
+          "type": "gif"
+        }
+      ]
+    },
+    {
+      "id": "hmg",
+      "label": "はるまきごはん",
+      "items": [
+        {
+          "id": "hmg_tama",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_tama.png",
+          "alt": "はるまきごはん tama",
+          "type": "png"
+        },
+        {
+          "id": "hmg_了解",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E4%BA%86%E8%A7%A3.png",
+          "alt": "はるまきごはん 了解",
+          "type": "png"
+        },
+        {
+          "id": "hmg_偷看",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E5%81%B7%E7%9C%8B.png",
+          "alt": "はるまきごはん 偷看",
+          "type": "png"
+        },
+        {
+          "id": "hmg_再见吧",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E5%86%8D%E8%A7%81%E5%90%A7.png",
+          "alt": "はるまきごはん 再见吧",
+          "type": "png"
+        },
+        {
+          "id": "hmg_吓到了",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E5%90%93%E5%88%B0%E4%BA%86.png",
+          "alt": "はるまきごはん 吓到了",
+          "type": "png"
+        },
+        {
+          "id": "hmg_哦",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E5%93%A6.png",
+          "alt": "はるまきごはん 哦",
+          "type": "png"
+        },
+        {
+          "id": "hmg_奔跑",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E5%A5%94%E8%B7%91.png",
+          "alt": "はるまきごはん 奔跑",
+          "type": "png"
+        },
+        {
+          "id": "hmg_定",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E5%AE%9A.png",
+          "alt": "はるまきごはん 定",
+          "type": "png"
+        },
+        {
+          "id": "hmg_对不起",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E5%AF%B9%E4%B8%8D%E8%B5%B7.png",
+          "alt": "はるまきごはん 对不起",
+          "type": "png"
+        },
+        {
+          "id": "hmg_拜托了",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E6%8B%9C%E6%89%98%E4%BA%86.png",
+          "alt": "はるまきごはん 拜托了",
+          "type": "png"
+        },
+        {
+          "id": "hmg_早上好",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E6%97%A9%E4%B8%8A%E5%A5%BD.png",
+          "alt": "はるまきごはん 早上好",
+          "type": "png"
+        },
+        {
+          "id": "hmg_晚安",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E6%99%9A%E5%AE%89.png",
+          "alt": "はるまきごはん 晚安",
+          "type": "png"
+        },
+        {
+          "id": "hmg_生日快乐",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E7%94%9F%E6%97%A5%E5%BF%AB%E4%B9%90.png",
+          "alt": "はるまきごはん 生日快乐",
+          "type": "png"
+        },
+        {
+          "id": "hmg_确实",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E7%A1%AE%E5%AE%9E.png",
+          "alt": "はるまきごはん 确实",
+          "type": "png"
+        },
+        {
+          "id": "hmg_秘密",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E7%A7%98%E5%AF%86.png",
+          "alt": "はるまきごはん 秘密",
+          "type": "png"
+        },
+        {
+          "id": "hmg_约",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E7%BA%A6.png",
+          "alt": "はるまきごはん 约",
+          "type": "png"
+        },
+        {
+          "id": "hmg_能变成它吗",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E8%83%BD%E5%8F%98%E6%88%90%E5%AE%83%E5%90%97.png",
+          "alt": "はるまきごはん 能变成它吗",
+          "type": "png"
+        },
+        {
+          "id": "hmg_请相信我",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E8%AF%B7%E7%9B%B8%E4%BF%A1%E6%88%91.png",
+          "alt": "はるまきごはん 请相信我",
+          "type": "png"
+        },
+        {
+          "id": "hmg_谢谢",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E8%B0%A2%E8%B0%A2.png",
+          "alt": "はるまきごはん 谢谢",
+          "type": "png"
+        },
+        {
+          "id": "hmg_马卡龙塔",
+          "src": "/emoji/%E3%81%AF%E3%82%8B%E3%81%BE%E3%81%8D%E3%81%94%E3%81%AF%E3%82%93/hmg_%E9%A9%AC%E5%8D%A1%E9%BE%99%E5%A1%94.png",
+          "alt": "はるまきごはん 马卡龙塔",
+          "type": "png"
+        }
+      ]
+    },
+    {
+      "id": "BA",
+      "label": "ブルアカ",
+      "items": [
+        {
+          "id": "BA_不是我",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E4%B8%8D%E6%98%AF%E6%88%91.png",
+          "alt": "ブルアカ 不是我",
+          "type": "png"
+        },
+        {
+          "id": "BA_不行",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E4%B8%8D%E8%A1%8C.png",
+          "alt": "ブルアカ 不行",
+          "type": "png"
+        },
+        {
+          "id": "BA_做错了",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E5%81%9A%E9%94%99%E4%BA%86.png",
+          "alt": "ブルアカ 做错了",
+          "type": "png"
+        },
+        {
+          "id": "BA_兴奋",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E5%85%B4%E5%A5%8B.png",
+          "alt": "ブルアカ 兴奋",
+          "type": "png"
+        },
+        {
+          "id": "BA_加油",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E5%8A%A0%E6%B2%B9.png",
+          "alt": "ブルアカ 加油",
+          "type": "png"
+        },
+        {
+          "id": "BA_呜哇",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E5%91%9C%E5%93%87.png",
+          "alt": "ブルアカ 呜哇",
+          "type": "png"
+        },
+        {
+          "id": "BA_宣布",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E5%AE%A3%E5%B8%83.png",
+          "alt": "ブルアカ 宣布",
+          "type": "png"
+        },
+        {
+          "id": "BA_应付",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E5%BA%94%E4%BB%98.png",
+          "alt": "ブルアカ 应付",
+          "type": "png"
+        },
+        {
+          "id": "BA_开始吧",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E5%BC%80%E5%A7%8B%E5%90%A7.png",
+          "alt": "ブルアカ 开始吧",
+          "type": "png"
+        },
+        {
+          "id": "BA_得意",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E5%BE%97%E6%84%8F.png",
+          "alt": "ブルアカ 得意",
+          "type": "png"
+        },
+        {
+          "id": "BA_想要",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E6%83%B3%E8%A6%81.png",
+          "alt": "ブルアカ 想要",
+          "type": "png"
+        },
+        {
+          "id": "BA_慌张",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E6%85%8C%E5%BC%A0.png",
+          "alt": "ブルアカ 慌张",
+          "type": "png"
+        },
+        {
+          "id": "BA_抱抱",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E6%8A%B1%E6%8A%B1.png",
+          "alt": "ブルアカ 抱抱",
+          "type": "png"
+        },
+        {
+          "id": "BA_抽到了",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E6%8A%BD%E5%88%B0%E4%BA%86.png",
+          "alt": "ブルアカ 抽到了",
+          "type": "png"
+        },
+        {
+          "id": "BA_收到",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E6%94%B6%E5%88%B0.png",
+          "alt": "ブルアカ 收到",
+          "type": "png"
+        },
+        {
+          "id": "BA_斯哈",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E6%96%AF%E5%93%88.png",
+          "alt": "ブルアカ 斯哈",
+          "type": "png"
+        },
+        {
+          "id": "BA_疑问",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E7%96%91%E9%97%AE.png",
+          "alt": "ブルアカ 疑问",
+          "type": "png"
+        },
+        {
+          "id": "BA_白眼",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E7%99%BD%E7%9C%BC.png",
+          "alt": "ブルアカ 白眼",
+          "type": "png"
+        },
+        {
+          "id": "BA_祈祷",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E7%A5%88%E7%A5%B7.png",
+          "alt": "ブルアカ 祈祷",
+          "type": "png"
+        },
+        {
+          "id": "BA_神作",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E7%A5%9E%E4%BD%9C.png",
+          "alt": "ブルアカ 神作",
+          "type": "png"
+        },
+        {
+          "id": "BA_给你",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E7%BB%99%E4%BD%A0.png",
+          "alt": "ブルアカ 给你",
+          "type": "png"
+        },
+        {
+          "id": "BA_藏起来",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E8%97%8F%E8%B5%B7%E6%9D%A5.png",
+          "alt": "ブルアカ 藏起来",
+          "type": "png"
+        },
+        {
+          "id": "BA_蝴蝶",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E8%9D%B4%E8%9D%B6.png",
+          "alt": "ブルアカ 蝴蝶",
+          "type": "png"
+        },
+        {
+          "id": "BA_观察",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E8%A7%82%E5%AF%9F.png",
+          "alt": "ブルアカ 观察",
+          "type": "png"
+        },
+        {
+          "id": "BA_高手",
+          "src": "/emoji/%E3%83%96%E3%83%AB%E3%82%A2%E3%82%AB/BA_%E9%AB%98%E6%89%8B.png",
+          "alt": "ブルアカ 高手",
+          "type": "png"
+        }
+      ]
+    },
+    {
+      "id": "PJSK",
+      "label": "プロセカ",
+      "items": [
+        {
+          "id": "PJSK_01",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_01.png",
+          "alt": "プロセカ 01",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_FULLCOMBO",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_FULLCOMBO.png",
+          "alt": "プロセカ FULLCOMBO",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_一起加油吧",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E4%B8%80%E8%B5%B7%E5%8A%A0%E6%B2%B9%E5%90%A7.png",
+          "alt": "プロセカ 一起加油吧",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_你好",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E4%BD%A0%E5%A5%BD.png",
+          "alt": "プロセカ 你好",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_再来一次",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%86%8D%E6%9D%A5%E4%B8%80%E6%AC%A1.png",
+          "alt": "プロセカ 再来一次",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_再见",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%86%8D%E8%A7%81.png",
+          "alt": "プロセカ 再见",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_加油",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%8A%A0%E6%B2%B9.png",
+          "alt": "プロセカ 加油",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_呜",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%91%9C.png",
+          "alt": "プロセカ 呜",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_呜呜",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%91%9C%E5%91%9C.png",
+          "alt": "プロセカ 呜呜",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_呵呵呵",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%91%B5%E5%91%B5%E5%91%B5.png",
+          "alt": "プロセカ 呵呵呵",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_咦",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%92%A6.png",
+          "alt": "プロセカ 咦",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_哇",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%93%87.png",
+          "alt": "プロセカ 哇",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_哈哈哈",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%93%88%E5%93%88%E5%93%88.png",
+          "alt": "プロセカ 哈哈哈",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_喂",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%96%82.png",
+          "alt": "プロセカ 喂",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_嘿嘿",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%98%BF%E5%98%BF.png",
+          "alt": "プロセカ 嘿嘿",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_大家好厉害",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%A4%A7%E5%AE%B6%E5%A5%BD%E5%8E%89%E5%AE%B3.png",
+          "alt": "プロセカ 大家好厉害",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_对不起",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E5%AF%B9%E4%B8%8D%E8%B5%B7.png",
+          "alt": "プロセカ 对不起",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_我会更努力",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E6%88%91%E4%BC%9A%E6%9B%B4%E5%8A%AA%E5%8A%9B.png",
+          "alt": "プロセカ 我会更努力",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_我来啦",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E6%88%91%E6%9D%A5%E5%95%A6.png",
+          "alt": "プロセカ 我来啦",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_扑通扑通",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E6%89%91%E9%80%9A%E6%89%91%E9%80%9A.png",
+          "alt": "プロセカ 扑通扑通",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_精彩的表演",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E7%B2%BE%E5%BD%A9%E7%9A%84%E8%A1%A8%E6%BC%94.png",
+          "alt": "プロセカ 精彩的表演",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_请多关照",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E8%AF%B7%E5%A4%9A%E5%85%B3%E7%85%A7.png",
+          "alt": "プロセカ 请多关照",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_谢谢",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E8%B0%A2%E8%B0%A2.png",
+          "alt": "プロセカ 谢谢",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_赞",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E8%B5%9E.png",
+          "alt": "プロセカ 赞",
+          "type": "png"
+        },
+        {
+          "id": "PJSK_这样啊",
+          "src": "/emoji/%E3%83%97%E3%83%AD%E3%82%BB%E3%82%AB/PJSK_%E8%BF%99%E6%A0%B7%E5%95%8A.png",
+          "alt": "プロセカ 这样啊",
+          "type": "png"
+        }
+      ]
+    }
+  ]
+}

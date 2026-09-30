@@ -580,7 +580,9 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
             id,
           });
           count.textContent = `${payload.total} comments`;
-          subscribe.checked = payload.subscribed;
+          subscribe.checked =
+            payload.subscribed ||
+            (!payload.subscription_configured && payload.auto_subscribe_comments);
           showIdentity(Boolean(payload.viewer));
           const items = payload.items as any[];
           const ids = new Set(items.map(item => item.id));

@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS site_blog.notification_settings (
   user_id text PRIMARY KEY,
   email text NOT NULL,
   enabled boolean NOT NULL DEFAULT true,
+  auto_subscribe_comments boolean NOT NULL DEFAULT false,
+  content_notifications_enabled boolean NOT NULL DEFAULT false,
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 

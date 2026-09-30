@@ -1,0 +1,8 @@
+#!/bin/sh
+if [ -f "$(git rev-parse --show-toplevel)/backends/.env" ]; then
+  set -a
+  . "$(git rev-parse --show-toplevel)/backends/.env"
+  set +a
+fi
+export BLOG_API_URL="${BLOG_API_URL:-${SITE_API_URL:-}}"
+exec node "$(git rev-parse --show-toplevel)/scripts/git-content-notify.mjs" commit

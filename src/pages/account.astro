@@ -19,7 +19,7 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
 
 <Layout
   title="Account | Loopo:443"
-  description="Manage your profile and comment notifications."
+  description="Manage your profile and notification preferences."
 >
   <Header />
   <main
@@ -50,12 +50,28 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
       >
     </section>
     <section class="account-section" data-notifications hidden>
-      <h2>Comment notifications</h2><div class="account-row">
+      <h2>Notifications</h2><div class="account-row">
         <label class="comment-subscribe"
           ><input type="checkbox" data-global /><span
             class="comment-check"
             aria-hidden="true"></span><span
             >Email me about comments I follow</span
+          ></label
+        >
+      </div><div class="account-row">
+        <label class="comment-subscribe"
+          ><input type="checkbox" data-auto-comments /><span
+            class="comment-check"
+            aria-hidden="true"></span><span
+            >Automatically follow an article when I leave my first comment</span
+          ></label
+        >
+      </div><div class="account-row">
+        <label class="comment-subscribe"
+          ><input type="checkbox" data-content-notifications /><span
+            class="comment-check"
+            aria-hidden="true"></span><span
+            >Email me about new articles and content updates</span
           ></label
         >
       </div><div class="account-row" data-site-switch hidden>
@@ -101,6 +117,12 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
       website = page.querySelector<HTMLInputElement>("[data-website]")!,
       email = page.querySelector<HTMLElement>("[data-email]")!,
       global = page.querySelector<HTMLInputElement>("[data-global]")!,
+      autoComments = page.querySelector<HTMLInputElement>(
+        "[data-auto-comments]"
+      )!,
+      contentNotifications = page.querySelector<HTMLInputElement>(
+        "[data-content-notifications]"
+      )!,
       siteGlobal = page.querySelector<HTMLInputElement>("[data-site-global]")!,
       siteSwitch = page.querySelector<HTMLElement>("[data-site-switch]")!,
       subscriptions = page.querySelector<HTMLElement>("[data-subscriptions]")!;
@@ -133,6 +155,8 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
       website.value = data.user.website_url ?? "";
       email.textContent = data.user.email;
       global.checked = data.notifications_enabled;
+      autoComments.checked = data.auto_subscribe_comments;
+      contentNotifications.checked = data.content_notifications_enabled;
       siteSwitch.hidden = !data.is_admin;
       siteGlobal.checked = data.site_notifications_enabled;
       subscriptions.innerHTML = data.subscriptions.length
@@ -171,6 +195,17 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
     global.addEventListener(
       "change",
       () => void update({ notifications_enabled: global.checked })
+    );
+    autoComments.addEventListener(
+      "change",
+      () => void update({ auto_subscribe_comments: autoComments.checked })
+    );
+    contentNotifications.addEventListener(
+      "change",
+      () =>
+        void update({
+          content_notifications_enabled: contentNotifications.checked,
+        })
     );
     siteGlobal.addEventListener(
       "change",

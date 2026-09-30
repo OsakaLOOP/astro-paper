@@ -147,9 +147,20 @@ section without duplicating mounts or allowing an old response to update it.
 
 ## Notification rules
 
-The article comment control is `Email me about new comments on this article`.
-Submitting a comment enables the article subscription only when the user opts in;
-the user can change it in the article section or in `/account`.
+`/account` keeps three user notification controls under `Notifications`:
+
+- `Email me about comments I follow` is the existing master switch for comment
+  mail.
+- `Automatically follow an article when I leave my first comment` controls the
+  initial state of the article checkbox. It defaults to off, preserving the old
+  behavior. An explicit article choice is stored and wins over the default.
+- `Email me about new articles and content updates` opts the user into mail sent
+  by the signed Git hook endpoint.
+
+The article comment control remains `Email me about new comments on this article`.
+Submitting a comment stores the article choice; when no choice exists, the
+account default is used. The user can change the article subscription in the
+article section or in `/account`.
 
 When notifications are globally enabled, a new comment is sent once to:
 
@@ -158,6 +169,10 @@ When notifications are globally enabled, a new comment is sent once to:
 - users whose parent comment is directly replied to, even if they have not enabled
   the article subscription.
 
+The author of the event is always excluded by both account ID and normalized
+email address. This applies to top-level comments, replies to one's own comment,
+and cases where the same person is also the site author or an article subscriber.
+
 When an admin deletes another user's comment, the affected commenter receives a
 separate deletion notice. Deletion notices are never sent for self-deletion and do
 not expose the deleted body. A notification is queued once per recipient and event
@@ -165,7 +180,8 @@ through SM's existing mail worker. Failed delivery is retried by SM.
 
 The global switch is admin-only and stored by the blog service. It defaults to on,
 is available in the account admin view, and is enforced server-side for every
-notification event.
+comment notification event. Article/content mail is independently controlled by
+each user's third setting.
 
 ## SM mail integration
 
@@ -174,6 +190,14 @@ validates the service secret, calls the existing `Jobs.mail` queue, and never gi
 the blog service SMTP credentials. The request contains recipient, subject, text,
 HTML, event id, and a five-minute timestamp window. The blog service retries only
 transport failures; SM owns delivery retries and Message-ID generation.
+
+The content endpoint is `POST /blog/hooks/content`. It accepts `new_article` and
+`content_update` payloads and requires `X-Site-Command-Timestamp` plus an
+`X-Site-Command-Signature` HMAC using `SITE_COMMAND_SECRET`. The tracked
+`.githooks/post-commit` and `.githooks/post-merge` hooks inspect changed files
+under `src/content/posts`; install them with `npm run hooks:install`. Hooks are
+non-blocking: a mail outage is reported to stderr but does not prevent a commit
+or merge.
 
 ## Acceptance checklist
 
@@ -191,5 +215,6 @@ transport failures; SM owns delivery retries and Message-ID generation.
 - Author self-delete and admin delete-anywhere are enforced server-side.
 - New comment, direct reply, and admin deletion events follow the recipient rules.
 - Global notification off prevents all new event mail.
+- Content notification hooks send only to users who opt in.
 - SM mail queue receives signed requests and handles retries.
 - Root Astro build and backend typecheck pass.

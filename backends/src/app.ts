@@ -2,7 +2,11 @@ import Fastify, { type FastifyRequest } from "fastify";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
 import type { Pool } from "pg";
-import { randomUUID } from "node:crypto";
+import {
+  createHmac,
+  randomUUID,
+  timingSafeEqual,
+} from "node:crypto";
 import { HttpError } from "./errors.js";
 
 export type Identity = { id: string; profile: Record<string, unknown> };
@@ -24,6 +28,9 @@ export interface AppOptions {
   authorEmail?: string;
   authorUserId?: string;
   notificationsEnabled?: boolean;
+  autoSubscribeCommentsDefault?: boolean;
+  contentNotificationsDefault?: boolean;
+  commandSecret?: string;
   sendMail?: (message: MailMessage) => Promise<void>;
   logger?: boolean;
   commentsDebug?: boolean;
@@ -65,8 +72,41 @@ function mailTemplate(
 ) {
   const subject = `${action} · ${article}`;
   const text = `${action}\n\n${author}: ${content}\n\nOpen the discussion: ${url}\n\nManage comment notifications in your account.`;
-  const html = `<div style="max-width:560px;margin:0 auto;font:16px/1.7 system-ui,sans-serif;color:#282728"><p style="color:#006cac;font:700 12px monospace;letter-spacing:.12em">LOOPO BLOG</p><h2>${esc(action)}</h2><p><strong>${esc(author)}</strong></p><p style="white-space:pre-wrap">${esc(content)}</p><p><a href="${esc(url)}" style="color:#006cac">Open the discussion</a></p><hr style="border:0;border-top:1px solid #ece9e9;margin:24px 0"><p style="color:#6b7280;font-size:13px">Manage comment notifications in your account.</p></div>`;
+  const html = `<div style="max-width:560px;margin:0 auto;font:16px/1.7 system-ui,sans-serif;color:#282728"><div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(action)} · ${esc(article)}</div><p style="color:#006cac;font:700 12px monospace;letter-spacing:.12em">LOOPO BLOG</p><h2 style="margin-bottom:8px">${esc(action)}</h2><p style="margin-top:0;color:#6b7280;font-size:14px">${esc(article)}</p><p><strong>${esc(author)}</strong></p><p style="white-space:pre-wrap">${esc(content)}</p><p><a href="${esc(url)}" style="color:#006cac">Open the discussion</a></p><hr style="border:0;border-top:1px solid #ece9e9;margin:24px 0"><p style="color:#6b7280;font-size:13px">Manage comment notifications in your account.</p></div>`;
   return { subject, text, html };
+}
+function contentMailTemplate(
+  title: string,
+  url: string,
+  summary: string,
+  action: "New article" | "Article updated"
+) {
+  const subject = `${action} · ${title}`;
+  const text = `${action}\n\n${title}\n\n${summary}\n\nOpen the article: ${url}\n\nManage article and comment notifications in your account.`;
+  const html = `<div style="max-width:560px;margin:0 auto;font:16px/1.7 system-ui,sans-serif;color:#282728"><div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(action)} · ${esc(title)}</div><p style="color:#006cac;font:700 12px monospace;letter-spacing:.12em">LOOPO BLOG</p><h2 style="margin-bottom:8px">${esc(action)}</h2><h3>${esc(title)}</h3><p style="white-space:pre-wrap">${esc(summary)}</p><p><a href="${esc(url)}" style="color:#006cac">Open the article</a></p><hr style="border:0;border-top:1px solid #ece9e9;margin:24px 0"><p style="color:#6b7280;font-size:13px">Manage article and content notifications in your account.</p></div>`;
+  return { subject, text, html };
+}
+function validCommandSignature(
+  body: string,
+  eventId: string,
+  timestamp: string | string[] | undefined,
+  signature: string | string[] | undefined,
+  secret: string | undefined
+) {
+  if (Array.isArray(timestamp) || Array.isArray(signature)) return false;
+  if (!secret || !timestamp || !signature || !/^\d+$/.test(timestamp))
+    return false;
+  const timestampNumber = Number(timestamp);
+  if (
+    !Number.isSafeInteger(timestampNumber) ||
+    Math.abs(Date.now() / 1000 - timestampNumber) > 300 ||
+    !/^[a-f0-9]{64}$/.test(signature)
+  )
+    return false;
+  const expected = createHmac("sha256", secret)
+    .update(`${eventId}.${timestamp}.${body}`)
+    .digest("hex");
+  return timingSafeEqual(Buffer.from(expected, "hex"), Buffer.from(signature, "hex"));
 }
 export async function buildApp(options: AppOptions) {
   const app = Fastify({
@@ -132,7 +172,7 @@ export async function buildApp(options: AppOptions) {
   );
   app.get("/health/ready", async () => {
     await options.pool.query("SELECT user_id FROM site_blog.profiles LIMIT 0");
-    return { status: "ready" };
+    return { status: "ready", mail_configured: Boolean(options.sendMail) };
   });
   const current = async (request: FastifyRequest) => {
     const user = await options.getUser(request, true);
@@ -153,8 +193,13 @@ export async function buildApp(options: AppOptions) {
       [user.id, name, email]
     );
     await options.pool.query(
-      "INSERT INTO site_blog.notification_settings(user_id,email) VALUES($1,$2) ON CONFLICT(user_id) DO UPDATE SET email=excluded.email",
-      [user.id, email]
+      "INSERT INTO site_blog.notification_settings(user_id,email,auto_subscribe_comments,content_notifications_enabled) VALUES($1,$2,$3,$4) ON CONFLICT(user_id) DO UPDATE SET email=excluded.email",
+      [
+        user.id,
+        email,
+        options.autoSubscribeCommentsDefault ?? false,
+        options.contentNotificationsDefault ?? false,
+      ]
     );
     const profile = (
       await options.pool.query<{ website_url: string | null }>(
@@ -183,6 +228,8 @@ export async function buildApp(options: AppOptions) {
   };
   const postUrl = (slug: string) =>
     `${process.env.PUBLIC_BLOG_ORIGIN ?? "https://www.loopo.cc"}/posts/${encodeURIComponent(slug)}/#comments`;
+  const contentUrl = (slug: string) =>
+    `${process.env.PUBLIC_BLOG_ORIGIN ?? "https://www.loopo.cc"}/posts/${encodeURIComponent(slug)}/`;
   async function notifyComment(
     postSlug: string,
     comment: {
@@ -196,7 +243,12 @@ export async function buildApp(options: AppOptions) {
   ) {
     if (!(await siteNotificationsEnabled()) || !options.sendMail) return;
     const recipients = new Map<string, string>();
-    if (options.authorEmail)
+    const senderEmail = comment.author_email.trim().toLowerCase();
+    if (
+      options.authorEmail &&
+      options.authorEmail.trim().toLowerCase() !== senderEmail &&
+      options.authorUserId !== comment.user_id
+    )
       recipients.set(options.authorEmail.toLowerCase(), options.authorEmail);
     const subscriptions = await options.pool.query<{
       user_id: string;
@@ -206,19 +258,20 @@ export async function buildApp(options: AppOptions) {
       [postSlug]
     );
     for (const item of subscriptions.rows)
-      if (item.user_id !== comment.user_id)
+      if (item.user_id !== comment.user_id && item.email.toLowerCase() !== senderEmail)
         recipients.set(item.email.toLowerCase(), item.email);
     if (comment.parent_id) {
       const parent = (
-        await options.pool.query<{ author_email: string }>(
-          "SELECT author_email FROM site_blog.comments WHERE id=$1",
+        await options.pool.query<{ user_id: string; author_email: string }>(
+          "SELECT user_id,author_email FROM site_blog.comments WHERE id=$1",
           [comment.parent_id]
         )
       ).rows[0];
       if (
         parent?.author_email &&
+        parent.user_id !== comment.user_id &&
         parent.author_email.toLowerCase() !==
-          comment.author_email.toLowerCase() &&
+          senderEmail &&
         (
           await options.pool.query(
             "SELECT 1 FROM site_blog.notification_settings WHERE email=$1 AND enabled",
@@ -228,6 +281,7 @@ export async function buildApp(options: AppOptions) {
       )
         recipients.set(parent.author_email.toLowerCase(), parent.author_email);
     }
+    recipients.delete(senderEmail);
     const excerpt = comment.body
       .replace(/[`*_>#\[\]()]/g, "")
       .replace(/\s+/g, " ")
@@ -238,7 +292,7 @@ export async function buildApp(options: AppOptions) {
       postUrl(postSlug),
       comment.author_name,
       excerpt,
-      "New comment"
+      comment.parent_id ? "New reply" : "New comment"
     );
     for (const to of recipients.values())
       await send(to, template.subject, template.text, template.html);
@@ -307,16 +361,24 @@ export async function buildApp(options: AppOptions) {
           )
         ).rows[0].total;
         debugComments(request, "count-queried", startedAt, { total: count });
-        const subscribed = viewer
-          ? Boolean(
-              (
-                await options.pool.query(
-                  "SELECT 1 FROM site_blog.comment_subscriptions WHERE user_id=$1 AND post_slug=$2 AND enabled",
-                  [viewer.id, request.query.post]
-                )
-              ).rowCount
-            )
-          : false;
+        const subscriptionRow = viewer
+          ? (
+              await options.pool.query<{ enabled: boolean }>(
+                "SELECT enabled FROM site_blog.comment_subscriptions WHERE user_id=$1 AND post_slug=$2",
+                [viewer.id, request.query.post]
+              )
+            ).rows[0]
+          : undefined;
+        const setting = viewer
+          ? (
+              await options.pool.query<{
+                auto_subscribe_comments: boolean;
+              }>(
+                "SELECT auto_subscribe_comments FROM site_blog.notification_settings WHERE user_id=$1",
+                [viewer.id]
+              )
+            ).rows[0]
+          : undefined;
         const items = rows.map(({ user_id, author_email, ...item }) => ({
           ...item,
           can_edit: !item.deleted_at && viewer?.id === user_id,
@@ -328,7 +390,9 @@ export async function buildApp(options: AppOptions) {
         const result = {
           items,
           total: count,
-          subscribed,
+          subscribed: subscriptionRow?.enabled ?? false,
+          subscription_configured: Boolean(subscriptionRow),
+          auto_subscribe_comments: setting?.auto_subscribe_comments ?? false,
           viewer: viewer ? { id: viewer.id, is_admin: admin } : null,
           next_cursor: more ? rows.at(-1)?.id : null,
         };
@@ -397,6 +461,18 @@ export async function buildApp(options: AppOptions) {
           await options.pool.query(
             "INSERT INTO site_blog.comment_subscriptions(user_id,post_slug,email,enabled) VALUES($1,$2,$3,$4) ON CONFLICT(user_id,post_slug) DO UPDATE SET email=excluded.email,enabled=excluded.enabled,updated_at=now()",
             [user.id, input.post, p.email, input.subscribe]
+          );
+        else if (
+          (
+            await options.pool.query<{ auto_subscribe_comments: boolean }>(
+              "SELECT auto_subscribe_comments FROM site_blog.notification_settings WHERE user_id=$1",
+              [user.id]
+            )
+          ).rows[0]?.auto_subscribe_comments
+        )
+          await options.pool.query(
+            "INSERT INTO site_blog.comment_subscriptions(user_id,post_slug,email,enabled) VALUES($1,$2,$3,true) ON CONFLICT(user_id,post_slug) DO UPDATE SET email=excluded.email,enabled=true,updated_at=now()",
+            [user.id, input.post, p.email]
           );
         void notifyComment(input.post, {
           user_id: user.id,
@@ -486,7 +562,7 @@ export async function buildApp(options: AppOptions) {
       const admin = isAdmin(user);
       const setting = (
         await options.pool.query(
-          "SELECT enabled FROM site_blog.notification_settings WHERE user_id=$1",
+          "SELECT enabled,auto_subscribe_comments,content_notifications_enabled FROM site_blog.notification_settings WHERE user_id=$1",
           [user.id]
         )
       ).rows[0];
@@ -505,6 +581,9 @@ export async function buildApp(options: AppOptions) {
         user: { id: user.id, ...p },
         is_admin: admin,
         notifications_enabled: setting?.enabled ?? true,
+        auto_subscribe_comments: setting?.auto_subscribe_comments ?? false,
+        content_notifications_enabled:
+          setting?.content_notifications_enabled ?? false,
         site_notifications_enabled: global?.enabled ?? true,
         subscriptions,
       };
@@ -514,6 +593,8 @@ export async function buildApp(options: AppOptions) {
         name?: string;
         website_url?: string;
         notifications_enabled?: boolean;
+        auto_subscribe_comments?: boolean;
+        content_notifications_enabled?: boolean;
         site_notifications_enabled?: boolean;
       };
     }>(
@@ -527,6 +608,8 @@ export async function buildApp(options: AppOptions) {
               name: { type: "string", minLength: 1, maxLength: 120 },
               website_url: websiteUrl,
               notifications_enabled: { type: "boolean" },
+              auto_subscribe_comments: { type: "boolean" },
+              content_notifications_enabled: { type: "boolean" },
               site_notifications_enabled: { type: "boolean" },
             },
           },
@@ -551,6 +634,18 @@ export async function buildApp(options: AppOptions) {
             "UPDATE site_blog.notification_settings SET enabled=$2,updated_at=now() WHERE user_id=$1",
             [user.id, request.body.notifications_enabled]
           );
+        if (
+          request.body.auto_subscribe_comments !== undefined ||
+          request.body.content_notifications_enabled !== undefined
+        )
+          await options.pool.query(
+            "UPDATE site_blog.notification_settings SET auto_subscribe_comments=COALESCE($2,auto_subscribe_comments),content_notifications_enabled=COALESCE($3,content_notifications_enabled),updated_at=now() WHERE user_id=$1",
+            [
+              user.id,
+              request.body.auto_subscribe_comments ?? null,
+              request.body.content_notifications_enabled ?? null,
+            ]
+          );
         if (request.body.site_notifications_enabled !== undefined) {
           if (!admin) throw new HttpError(403, "ADMIN_REQUIRED");
           await options.pool.query(
@@ -566,6 +661,9 @@ export async function buildApp(options: AppOptions) {
               ? request.body.website_url.trim()
               : p.website_url,
           notifications_enabled: request.body.notifications_enabled,
+          auto_subscribe_comments: request.body.auto_subscribe_comments,
+          content_notifications_enabled:
+            request.body.content_notifications_enabled,
           site_notifications_enabled: request.body.site_notifications_enabled,
         };
       }
@@ -594,5 +692,73 @@ export async function buildApp(options: AppOptions) {
       }
     );
   });
+  app.post<{
+    Body: {
+      event_id: string;
+      kind: "new_article" | "content_update";
+      slug: string;
+      title: string;
+      summary?: string;
+    };
+  }>(
+    "/blog/hooks/content",
+    {
+      schema: {
+        body: {
+          type: "object",
+          additionalProperties: false,
+          required: ["event_id", "kind", "slug", "title"],
+          properties: {
+            event_id: { type: "string", minLength: 1, maxLength: 200 },
+            kind: { type: "string", enum: ["new_article", "content_update"] },
+            slug: post,
+            title: { type: "string", minLength: 1, maxLength: 240 },
+            summary: { type: "string", maxLength: 2000 },
+          },
+        },
+      },
+    },
+    async request => {
+      const body = JSON.stringify(request.body);
+      if (
+        !validCommandSignature(
+          body,
+          request.body.event_id,
+          request.headers["x-site-command-timestamp"],
+          request.headers["x-site-command-signature"],
+          options.commandSecret
+        )
+      )
+        throw new HttpError(401, "COMMAND_UNAUTHORIZED");
+      if (!options.sendMail)
+        throw new HttpError(503, "MAIL_NOT_CONFIGURED");
+      const recipients = (
+        await options.pool.query<{ email: string }>(
+          "SELECT email FROM site_blog.notification_settings WHERE content_notifications_enabled AND email <> ''"
+        )
+      ).rows;
+      const template = contentMailTemplate(
+        request.body.title,
+        contentUrl(request.body.slug),
+        request.body.summary?.trim() || "A new update is available on the blog.",
+        request.body.kind === "new_article" ? "New article" : "Article updated"
+      );
+      const results = await Promise.allSettled(
+        [...new Map(recipients.map(item => [item.email.toLowerCase(), item.email])).values()].map(
+          to =>
+            options.sendMail!({
+              eventId: `${request.body.event_id}:${to.toLowerCase()}`,
+              to,
+              subject: template.subject,
+              text: template.text,
+              html: template.html,
+            })
+        )
+      );
+      const failed = results.filter(result => result.status === "rejected");
+      if (failed.length) throw new HttpError(502, "MAIL_DELIVERY_FAILED");
+      return { ok: true, sent: results.length };
+    }
+  );
   return app;
 }

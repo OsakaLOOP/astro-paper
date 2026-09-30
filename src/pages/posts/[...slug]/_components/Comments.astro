@@ -19,12 +19,15 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
     >
   </div>
   <div class="comments-editor" data-editor hidden>
-    <div class="comments-tabs">
-      <button class="comments-tab" data-tab="write" aria-selected="true"
-        >Write</button
-      ><button class="comments-tab" data-tab="preview" aria-selected="false"
-        >Preview(Markdown)</button
-      >
+    <div class="comments-editor-header">
+      <div class="comments-tabs">
+        <button class="comments-tab" data-tab="write" aria-selected="true"
+          >Write</button
+        ><button class="comments-tab" data-tab="preview" aria-selected="false"
+          >Preview(Markdown)</button
+        >
+      </div>
+      <EmojiPicker />
     </div>
     <textarea
       data-input
@@ -32,13 +35,6 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       rows="4"
       placeholder="Leave a comment…"></textarea>
     <div class="comment-preview" data-preview hidden></div>
-    <div
-      class="comments-editor-toolbar"
-      role="toolbar"
-      aria-label="Comment tools"
-    >
-      <EmojiPicker />
-    </div>
     <div class="comments-editor-footer">
       <label class="comment-subscribe"
         ><input type="checkbox" data-subscribe /><span
@@ -104,7 +100,10 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         "[data-emoji-trigger]"
       )!,
       emojiPanel = picker.querySelector<HTMLElement>("[data-emoji-panel]")!,
-      emojiGroups = picker.querySelector<HTMLElement>("[data-emoji-groups]")!,
+      emojiTabs = picker.querySelector<HTMLElement>("[data-emoji-tabs]")!,
+      emojiContents = picker.querySelector<HTMLElement>(
+        "[data-emoji-contents]"
+      )!,
       emojiEmpty = picker.querySelector<HTMLElement>("[data-emoji-empty]")!;
     const debugEnabled = section.dataset.commentsDebug === "true";
     const startedAt = performance.now();
@@ -132,42 +131,62 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       );
     section.querySelector<HTMLAnchorElement>("[data-login-link]")!.href =
       `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href + "#comments")}`;
+    const replyMarker =
+      '<span class="comment-reply-marker" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 14-5-5 5-5"></path><path d="M4 9h10a6 6 0 0 1 6 6v1"></path></svg></span>';
 
-    const renderEmojiHtml = (html: string) => {
-      if (!emojiManifest) return html;
-      const items = new Map(
-        emojiManifest.groups
-          .flatMap(group => group.items)
-          .map(item => [item.id, item])
-      );
-      if (!items.size) return html;
-      const pattern = new RegExp(
-        `\\((${[...items.keys()]
+    const renderMarkdown = (value: string) => {
+      if (!emojiManifest) {
+        return DOMPurify.sanitize(
+          marked.parse(value, { async: false }) as string,
+          {
+            USE_PROFILES: { html: true },
+          }
+        );
+      }
+      const items = emojiManifest.groups.flatMap(group => group.items);
+      const itemById = new Map(items.map(item => [item.id, item]));
+      const placeholders = new Map<string, EmojiItem>();
+      const tokenPattern = new RegExp(
+        `\\((${items
+          .map(item => item.id)
           .sort((left, right) => right.length - left.length)
           .map(escapeRegExp)
           .join("|")}))\\)`,
         "gu"
       );
+      const source = value.replace(tokenPattern, (_, id: string) => {
+        const item = itemById.get(id);
+        if (!item) return _;
+        const placeholder = `\\uE000EMOJI${placeholders.size}\\uE001`;
+        placeholders.set(placeholder, item);
+        return placeholder;
+      });
+      const html = DOMPurify.sanitize(
+        marked.parse(source, { async: false }) as string,
+        { USE_PROFILES: { html: true } }
+      );
+      if (!placeholders.size) return html;
       const container = document.createElement("div");
       container.innerHTML = html;
+      const placeholderPattern = /\\uE000EMOJI(\\d+)\\uE001/gu;
       const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
       const textNodes: Text[] = [];
       while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
       for (const textNode of textNodes) {
         if (textNode.parentElement?.closest("code, pre")) continue;
-        const value = textNode.nodeValue ?? "";
-        pattern.lastIndex = 0;
+        const text = textNode.nodeValue ?? "";
+        placeholderPattern.lastIndex = 0;
         let match: RegExpExecArray | null;
         let lastIndex = 0;
         let changed = false;
         const fragment = document.createDocumentFragment();
-        while ((match = pattern.exec(value))) {
+        while ((match = placeholderPattern.exec(text))) {
+          const item = placeholders.get(`\\uE000EMOJI${match[1]}\\uE001`);
+          if (!item) continue;
           changed = true;
           fragment.append(
-            document.createTextNode(value.slice(lastIndex, match.index))
+            document.createTextNode(text.slice(lastIndex, match.index))
           );
-          const item = items.get(match[1]);
-          if (!item) continue;
           const image = document.createElement("img");
           image.className = "comment-emoji";
           image.src = item.src;
@@ -179,43 +198,76 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           lastIndex = match.index + match[0].length;
         }
         if (changed) {
-          fragment.append(document.createTextNode(value.slice(lastIndex)));
+          fragment.append(document.createTextNode(text.slice(lastIndex)));
           textNode.parentNode?.replaceChild(fragment, textNode);
         }
       }
       return container.innerHTML;
     };
-    const renderMarkdown = (value: string) =>
-      renderEmojiHtml(
-        DOMPurify.sanitize(marked.parse(value, { async: false }) as string, {
-          USE_PROFILES: { html: true },
-        })
-      );
-
-    const setEmojiPanelOpen = (open: boolean, restoreFocus = true) => {
+    const setEmojiPanelOpen = (open: boolean, restoreFocus = false) => {
       emojiPanel.hidden = !open;
       emojiTrigger.setAttribute("aria-expanded", String(open));
       if (open) {
-        picker.querySelector<HTMLButtonElement>("[data-emoji-id]")?.focus();
+        picker
+          .querySelector<HTMLButtonElement>("[data-emoji-id]")
+          ?.focus({ preventScroll: true });
       } else if (restoreFocus) {
-        emojiTrigger.focus();
+        emojiTrigger.focus({ preventScroll: true });
       }
     };
+    let closeTimer: number | undefined;
+    const cancelEmojiClose = () => {
+      if (closeTimer !== undefined) window.clearTimeout(closeTimer);
+      closeTimer = undefined;
+    };
+    const scheduleEmojiClose = () => {
+      cancelEmojiClose();
+      closeTimer = window.setTimeout(() => setEmojiPanelOpen(false), 120);
+    };
+    const activateEmojiGroup = (groupId: string) => {
+      emojiTabs
+        .querySelectorAll<HTMLButtonElement>("[data-emoji-tab]")
+        .forEach(tab => {
+          const active = tab.dataset.emojiTab === groupId;
+          tab.setAttribute("aria-selected", String(active));
+          tab.tabIndex = active ? 0 : -1;
+        });
+      emojiContents
+        .querySelectorAll<HTMLElement>("[data-emoji-content]")
+        .forEach(content => {
+          content.hidden = content.dataset.emojiContent !== groupId;
+        });
+    };
     const renderEmojiPicker = (manifest: EmojiManifest | null) => {
-      emojiGroups.replaceChildren();
+      emojiTabs.replaceChildren();
+      emojiContents.replaceChildren();
       emojiEmpty.hidden = Boolean(manifest);
       emojiTrigger.disabled = !manifest;
       if (!manifest) return;
-      for (const group of manifest.groups) {
-        const groupElement = document.createElement("section");
-        groupElement.className = "emoji-group";
-        const heading = document.createElement("h3");
-        heading.textContent = group.label;
-        groupElement.append(heading);
+      for (const [index, group] of manifest.groups.entries()) {
+        const tab = document.createElement("button");
+        tab.type = "button";
+        tab.className = "emoji-tab";
+        tab.dataset.emojiTab = group.id;
+        tab.id = `emoji-tab-${sectionIndex}-${group.id}`;
+        tab.setAttribute("role", "tab");
+        tab.setAttribute(
+          "aria-controls",
+          `emoji-content-${sectionIndex}-${group.id}`
+        );
+        tab.textContent = group.label;
+        tab.tabIndex = index === 0 ? 0 : -1;
+        emojiTabs.append(tab);
+
+        const content = document.createElement("section");
+        content.className = "emoji-content";
+        content.dataset.emojiContent = group.id;
+        content.id = `emoji-content-${sectionIndex}-${group.id}`;
+        content.setAttribute("role", "tabpanel");
+        content.setAttribute("aria-labelledby", tab.id);
+        content.hidden = index !== 0;
         const grid = document.createElement("div");
         grid.className = "emoji-grid";
-        grid.setAttribute("role", "group");
-        grid.setAttribute("aria-label", group.label);
         for (const item of group.items) {
           const button = document.createElement("button");
           button.type = "button";
@@ -231,20 +283,45 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           button.append(image);
           grid.append(button);
         }
-        groupElement.append(grid);
-        emojiGroups.append(groupElement);
+        content.append(grid);
+        emojiContents.append(content);
       }
     };
     const pickerId = `emoji-panel-${sectionIndex}`;
     emojiPanel.id = pickerId;
     emojiTrigger.setAttribute("aria-controls", pickerId);
-    emojiTrigger.addEventListener("click", () =>
-      setEmojiPanelOpen(Boolean(emojiPanel.hidden))
+    emojiTrigger.addEventListener("click", () => {
+      cancelEmojiClose();
+      setEmojiPanelOpen(Boolean(emojiPanel.hidden));
+    });
+    picker.addEventListener("pointerenter", () => {
+      cancelEmojiClose();
+      setEmojiPanelOpen(true);
+    });
+    picker.addEventListener("pointerleave", scheduleEmojiClose);
+    picker.addEventListener("focusin", cancelEmojiClose);
+    picker.addEventListener("focusout", event => {
+      if (!picker.contains(event.relatedTarget as Node | null))
+        scheduleEmojiClose();
+    });
+    emojiPanel.addEventListener("pointerenter", cancelEmojiClose);
+    emojiPanel.addEventListener("pointerdown", event =>
+      event.stopPropagation()
     );
-    picker
-      .querySelector<HTMLButtonElement>("[data-emoji-close]")!
-      .addEventListener("click", () => setEmojiPanelOpen(false));
+    emojiPanel.addEventListener("wheel", event => event.stopPropagation(), {
+      passive: true,
+    });
+    emojiPanel.addEventListener("touchmove", event => event.stopPropagation(), {
+      passive: true,
+    });
     picker.addEventListener("click", event => {
+      const tab = (event.target as HTMLElement).closest<HTMLButtonElement>(
+        "[data-emoji-tab]"
+      );
+      if (tab) {
+        activateEmojiGroup(tab.dataset.emojiTab!);
+        return;
+      }
       const target = (event.target as HTMLElement).closest<HTMLButtonElement>(
         "[data-emoji-id]"
       );
@@ -256,17 +333,29 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       setEmojiPanelOpen(false);
       input.focus();
     });
+    picker.addEventListener("keydown", event => {
+      const tab = (event.target as HTMLElement).closest<HTMLButtonElement>(
+        "[data-emoji-tab]"
+      );
+      if (!tab || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+      const tabs = [
+        ...emojiTabs.querySelectorAll<HTMLButtonElement>("[data-emoji-tab]"),
+      ];
+      const current = tabs.indexOf(tab);
+      const next =
+        (current + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) %
+        tabs.length;
+      event.preventDefault();
+      activateEmojiGroup(tabs[next].dataset.emojiTab!);
+      tabs[next].focus();
+    });
     document.addEventListener("keydown", event => {
       if (event.key === "Escape" && !emojiPanel.hidden)
-        setEmojiPanelOpen(false);
-    });
-    document.addEventListener("focusin", event => {
-      if (!emojiPanel.hidden && !picker.contains(event.target as Node))
-        setEmojiPanelOpen(false, false);
+        setEmojiPanelOpen(false, true);
     });
     document.addEventListener("pointerdown", event => {
       if (!emojiPanel.hidden && !picker.contains(event.target as Node))
-        setEmojiPanelOpen(false, false);
+        setEmojiPanelOpen(false);
     });
 
     const showIdentity = (authenticated: boolean) => {
@@ -323,7 +412,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
             dateStyle: "medium",
             timeStyle: "short",
           });
-          return `<article class="comment${item.parent_id ? " comment--reply" : ""}" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}" data-comment-body="${safe(item.body)}">${item.parent_id ? '<span class="comment-reply-marker" aria-hidden="true"></span>' : ""}<div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time datetime="${createdAt.toISOString()}">${formattedTime}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by a moderator.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
+          return `<article class="comment${item.parent_id ? " comment--reply" : ""}" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}" data-comment-body="${safe(item.body)}">${item.parent_id ? replyMarker : ""}<div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time datetime="${createdAt.toISOString()}">${formattedTime}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by a moderator.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
         };
         const ordered: string[] = [];
         const flatten = (item: any, depth: number) => {

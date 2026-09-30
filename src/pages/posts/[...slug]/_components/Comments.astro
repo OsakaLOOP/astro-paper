@@ -141,8 +141,14 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           item.parent_id && ids.has(item.parent_id) ? item.parent_id : null;
         byParent.set(key, [...(byParent.get(key) ?? []), item]);
       }
-      const render = (item: any, depth: number): string =>
-        `<article class="comment" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}"><div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time>${new Date(item.created_at).toLocaleDateString()}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by a moderator.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}${item.parent_id ? `<div class="comment-reply">Replying to a comment above</div>` : ""}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
+      const render = (item: any, depth: number): string => {
+        const createdAt = new Date(item.created_at);
+        const formattedTime = createdAt.toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        });
+        return `<article class="comment${item.parent_id ? " comment--reply" : ""}" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}">${item.parent_id ? '<span class="comment-reply-marker" aria-hidden="true"></span>' : ""}<div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time datetime="${createdAt.toISOString()}">${formattedTime}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by a moderator.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
+      };
       const ordered: string[] = [];
       const flatten = (item: any, depth: number) => {
         ordered.push(render(item, depth));

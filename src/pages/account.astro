@@ -19,7 +19,12 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       <h2>Profile</h2><label class="account-field"
         >Display name<input data-name maxlength="120" /></label
       ><label class="account-field"
-        >Website<input data-website type="url" maxlength="500" placeholder="https://example.com" /></label
+        >Website<input
+          data-website
+          type="url"
+          maxlength="500"
+          placeholder="https://example.com"
+        /></label
       ><p class="account-muted" data-email></p><button
         class="comment-submit"
         data-save>Save changes</button

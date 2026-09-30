@@ -14,7 +14,8 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     fetch(me, { credentials: "include" }).then(async response => {
       if (!response.ok) return;
       const user = await response.json();
-      control.innerHTML = `<a class="auth-name" href="/account">${String(user.name ?? "Reader").replace(/[&<>"']/g, "")}</a><span class="auth-divider" aria-hidden="true">·</span><button class="auth-link auth-button" type="button">Log out</button>`;
+      control.innerHTML = `<a class="auth-name nav-link" data-auth-link href="/account">${String(user.name ?? "Reader").replace(/[&<>"']/g, "")}</a><span class="auth-divider" aria-hidden="true">·</span><button class="auth-link auth-button" type="button">Log out</button>`;
+      document.dispatchEvent(new CustomEvent("auth:updated"));
       control.querySelector(".auth-button")?.addEventListener("click", async () => {
         await fetch(`${api}/blog/auth/logout`, { method: "POST", credentials: "include", headers: { Origin: location.origin } });
         location.reload();

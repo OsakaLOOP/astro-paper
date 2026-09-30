@@ -219,7 +219,11 @@ const isActive = (path: string) => {
       ""
     );
 
-    document.querySelectorAll<HTMLAnchorElement>("#menu-items a.nav-link").forEach(
+    document
+      .querySelectorAll<HTMLAnchorElement>(
+        "#menu-items a.nav-link, a[data-auth-link]"
+      )
+      .forEach(
       link => {
         const targetPath = new URL(link.href).pathname.replace(/\/+$/, "");
         const active =
@@ -264,4 +268,5 @@ const isActive = (path: string) => {
 
   syncActiveNav();
   document.addEventListener("astro:after-swap", syncActiveNavAfterSwap);
+  document.addEventListener("auth:updated", syncActiveNav);
 </script>

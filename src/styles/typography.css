@@ -45,10 +45,6 @@
       @apply border-border;
     }
 
-    img {
-      @apply border-border mx-auto border;
-    }
-
     img[role="button"] {
       @apply cursor-zoom-in;
 

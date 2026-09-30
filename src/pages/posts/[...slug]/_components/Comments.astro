@@ -56,15 +56,12 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
 <script>
   import { marked } from "marked";
   import DOMPurify from "dompurify";
-
-  type EmojiItem = {
-    id: string;
-    src: string;
-    alt: string;
-    type: string;
-  };
-  type EmojiGroup = { id: string; label: string; items: EmojiItem[] };
-  type EmojiManifest = { version: number; groups: EmojiGroup[] };
+  import {
+    createEmojiIndex,
+    splitEmojiText,
+    type EmojiItem,
+    type EmojiManifest,
+  } from "@/utils/emoji";
 
   let emojiManifestPromise: Promise<EmojiManifest | null> | undefined;
   const loadEmojiManifest = () => {
@@ -82,8 +79,6 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
     return emojiManifestPromise;
   };
 
-  const escapeRegExp = (value: string) =>
-    value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const sections = [...document.querySelectorAll<HTMLElement>(".comments")];
   for (const [sectionIndex, section] of sections.entries()) {
     const api = section.dataset.commentsApi!,
@@ -108,6 +103,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
     const debugEnabled = section.dataset.commentsDebug === "true";
     const startedAt = performance.now();
     let emojiManifest: EmojiManifest | null = null;
+    let emojiIndex: ReadonlyMap<string, EmojiItem> = new Map();
     let rerenderComments: (() => void) | undefined;
     const debugLog = (event: string, details: Record<string, unknown> = {}) => {
       if (!debugEnabled) return;
@@ -143,64 +139,36 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           }
         );
       }
-      const items = emojiManifest.groups.flatMap(group => group.items);
-      const itemById = new Map(items.map(item => [item.id, item]));
-      const placeholders = new Map<string, EmojiItem>();
-      const tokenPattern = new RegExp(
-        `\\((${items
-          .map(item => item.id)
-          .sort((left, right) => right.length - left.length)
-          .map(escapeRegExp)
-          .join("|")})\\)`,
-        "gu"
-      );
-      const source = value.replace(tokenPattern, (_, id: string) => {
-        const item = itemById.get(id);
-        if (!item) return _;
-        const placeholder = `\uE000EMOJI${placeholders.size}\uE001`;
-        placeholders.set(placeholder, item);
-        return placeholder;
-      });
       const html = DOMPurify.sanitize(
-        marked.parse(source, { async: false }) as string,
+        marked.parse(value, { async: false }) as string,
         { USE_PROFILES: { html: true } }
       );
-      if (!placeholders.size) return html;
       const container = document.createElement("div");
       container.innerHTML = html;
-      const placeholderPattern = /\uE000EMOJI(\d+)\uE001/gu;
       const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
       const textNodes: Text[] = [];
       while (walker.nextNode()) textNodes.push(walker.currentNode as Text);
       for (const textNode of textNodes) {
         if (textNode.parentElement?.closest("code, pre")) continue;
         const text = textNode.nodeValue ?? "";
-        placeholderPattern.lastIndex = 0;
-        let match: RegExpExecArray | null;
-        let lastIndex = 0;
-        let changed = false;
+        const parts = splitEmojiText(text, emojiIndex);
+        if (parts.length === 1) continue;
         const fragment = document.createDocumentFragment();
-        while ((match = placeholderPattern.exec(text))) {
-          const item = placeholders.get(`\uE000EMOJI${match[1]}\uE001`);
-          if (!item) continue;
-          changed = true;
-          fragment.append(
-            document.createTextNode(text.slice(lastIndex, match.index))
-          );
+        for (const part of parts) {
+          if (typeof part === "string") {
+            fragment.append(document.createTextNode(part));
+            continue;
+          }
           const image = document.createElement("img");
           image.className = "comment-emoji";
-          image.src = item.src;
-          image.alt = item.alt;
-          image.title = item.alt;
+          image.src = part.src;
+          image.alt = part.alt;
+          image.title = part.alt;
           image.draggable = false;
           image.loading = "lazy";
           fragment.append(image);
-          lastIndex = match.index + match[0].length;
         }
-        if (changed) {
-          fragment.append(document.createTextNode(text.slice(lastIndex)));
-          textNode.parentNode?.replaceChild(fragment, textNode);
-        }
+        textNode.parentNode?.replaceChild(fragment, textNode);
       }
       return container.innerHTML;
     };
@@ -523,6 +491,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
     });
     loadEmojiManifest().then(manifest => {
       emojiManifest = manifest;
+      emojiIndex = manifest ? createEmojiIndex(manifest) : new Map();
       renderEmojiPicker(manifest);
       if (!preview.hidden) preview.innerHTML = renderMarkdown(input.value);
       rerenderComments?.();

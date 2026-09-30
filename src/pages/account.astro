@@ -16,8 +16,10 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
   <Footer />
 </Layout>
 <script>
-  const page = document.querySelector<HTMLElement>("[data-account-api]");
-  if (page) {
+  function initAccountPage() {
+    const page = document.querySelector<HTMLElement>("[data-account-api]");
+    if (!page || page.dataset.accountInitialized) return;
+    page.dataset.accountInitialized = "true";
     const accountPage = page;
     const api = page.dataset.accountApi!, state = page.querySelector<HTMLElement>("[data-state]")!;
     const profile = page.querySelector<HTMLElement>("[data-profile]")!, notifications = page.querySelector<HTMLElement>("[data-notifications]")!, security = page.querySelector<HTMLElement>("[data-security]")!;
@@ -38,4 +40,6 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     subscriptions.addEventListener("click", async event => { const button = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-remove]"); if (!button) return; await fetch(`${api}/blog/account/subscriptions/${encodeURIComponent(button.dataset.remove!)}`, { method:"PUT", credentials:"include", headers:{"Content-Type":"application/json", Origin:location.origin}, body:JSON.stringify({enabled:false}) }); await load(); });
     load().catch(() => { state.textContent = "Account is temporarily unavailable."; });
   }
+  document.addEventListener("astro:page-load", initAccountPage);
+  initAccountPage();
 </script>

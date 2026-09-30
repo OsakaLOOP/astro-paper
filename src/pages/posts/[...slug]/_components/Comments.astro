@@ -91,6 +91,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
     for (const [sectionIndex, section] of sections.entries()) {
       if (mounted.has(section)) continue;
       const lifecycle = new AbortController();
+      const listenerOptions = { signal: lifecycle.signal };
       mounted.set(section, lifecycle);
       const api = section.dataset.commentsApi!,
         post = section.dataset.post!,
@@ -125,7 +126,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         if (!debugEnabled) return;
         globalThis.console.debug(
           `[comments][${new Date().toISOString()}][+${(performance.now() - startedAt).toFixed(1)}ms] ${event}`,
-          details
+          { post, ...details }
         );
       };
       debugLog("init", { post });
@@ -173,7 +174,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           if (textNode.parentElement?.closest("code, pre")) continue;
           const text = textNode.nodeValue ?? "";
           const parts = splitEmojiText(text, emojiIndex);
-          if (parts.length === 1) continue;
+          if (parts.length === 1 && typeof parts[0] === "string") continue;
           const fragment = document.createDocumentFragment();
           for (const part of parts) {
             if (typeof part === "string") {
@@ -209,6 +210,9 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         if (closeTimer !== undefined) window.clearTimeout(closeTimer);
         closeTimer = undefined;
       };
+      lifecycle.signal.addEventListener("abort", cancelEmojiClose, {
+        once: true,
+      });
       const scheduleEmojiClose = () => {
         cancelEmojiClose();
         closeTimer = window.setTimeout(() => setEmojiPanelOpen(false), 120);
@@ -279,260 +283,389 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       const pickerId = `emoji-panel-${sectionIndex}`;
       emojiPanel.id = pickerId;
       emojiTrigger.setAttribute("aria-controls", pickerId);
-      emojiTrigger.addEventListener("click", () => {
-        cancelEmojiClose();
-        setEmojiPanelOpen(Boolean(emojiPanel.hidden));
-      });
-      picker.addEventListener("pointerenter", () => {
-        cancelEmojiClose();
-        setEmojiPanelOpen(true);
-      });
-      picker.addEventListener("pointerleave", scheduleEmojiClose);
-      picker.addEventListener("focusin", cancelEmojiClose);
-      picker.addEventListener("focusout", event => {
-        if (!picker.contains(event.relatedTarget as Node | null))
-          scheduleEmojiClose();
-      });
-      emojiPanel.addEventListener("pointerenter", cancelEmojiClose);
-      emojiPanel.addEventListener("pointerdown", event =>
-        event.stopPropagation()
+      emojiTrigger.addEventListener(
+        "click",
+        () => {
+          cancelEmojiClose();
+          setEmojiPanelOpen(Boolean(emojiPanel.hidden));
+        },
+        listenerOptions
+      );
+      picker.addEventListener(
+        "pointerenter",
+        () => {
+          cancelEmojiClose();
+          setEmojiPanelOpen(true);
+        },
+        listenerOptions
+      );
+      picker.addEventListener(
+        "pointerleave",
+        scheduleEmojiClose,
+        listenerOptions
+      );
+      picker.addEventListener("focusin", cancelEmojiClose, listenerOptions);
+      picker.addEventListener(
+        "focusout",
+        event => {
+          if (!picker.contains(event.relatedTarget as Node | null))
+            scheduleEmojiClose();
+        },
+        listenerOptions
+      );
+      emojiPanel.addEventListener(
+        "pointerenter",
+        cancelEmojiClose,
+        listenerOptions
+      );
+      emojiPanel.addEventListener(
+        "pointerdown",
+        event => event.stopPropagation(),
+        listenerOptions
       );
       emojiPanel.addEventListener("wheel", event => event.stopPropagation(), {
         passive: true,
+        ...listenerOptions,
       });
       emojiPanel.addEventListener(
         "touchmove",
         event => event.stopPropagation(),
         {
           passive: true,
+          ...listenerOptions,
         }
       );
-      picker.addEventListener("click", event => {
-        const tab = (event.target as HTMLElement).closest<HTMLButtonElement>(
-          "[data-emoji-tab]"
-        );
-        if (tab) {
-          activateEmojiGroup(tab.dataset.emojiTab!);
-          return;
-        }
-        const target = (event.target as HTMLElement).closest<HTMLButtonElement>(
-          "[data-emoji-id]"
-        );
-        if (!target) return;
-        const start = input.selectionStart ?? input.value.length;
-        const end = input.selectionEnd ?? start;
-        input.setRangeText(`(${target.dataset.emojiId})`, start, end, "end");
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-        setEmojiPanelOpen(false);
-        input.focus();
-      });
-      picker.addEventListener("keydown", event => {
-        const tab = (event.target as HTMLElement).closest<HTMLButtonElement>(
-          "[data-emoji-tab]"
-        );
-        if (!tab || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
-        const tabs = [
-          ...emojiTabs.querySelectorAll<HTMLButtonElement>("[data-emoji-tab]"),
-        ];
-        const current = tabs.indexOf(tab);
-        const next =
-          (current + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) %
-          tabs.length;
-        event.preventDefault();
-        activateEmojiGroup(tabs[next].dataset.emojiTab!);
-        tabs[next].focus();
-      });
-      document.addEventListener("keydown", event => {
-        if (event.key === "Escape" && !emojiPanel.hidden)
-          setEmojiPanelOpen(false, true);
-      });
-      document.addEventListener("pointerdown", event => {
-        if (!emojiPanel.hidden && !picker.contains(event.target as Node))
+      picker.addEventListener(
+        "click",
+        event => {
+          const tab = (event.target as HTMLElement).closest<HTMLButtonElement>(
+            "[data-emoji-tab]"
+          );
+          if (tab) {
+            activateEmojiGroup(tab.dataset.emojiTab!);
+            return;
+          }
+          const target = (
+            event.target as HTMLElement
+          ).closest<HTMLButtonElement>("[data-emoji-id]");
+          if (!target) return;
+          const start = input.selectionStart ?? input.value.length;
+          const end = input.selectionEnd ?? start;
+          input.setRangeText(`(${target.dataset.emojiId})`, start, end, "end");
+          input.dispatchEvent(new Event("input", { bubbles: true }));
           setEmojiPanelOpen(false);
-      });
+          input.focus();
+        },
+        listenerOptions
+      );
+      picker.addEventListener(
+        "keydown",
+        event => {
+          const tab = (event.target as HTMLElement).closest<HTMLButtonElement>(
+            "[data-emoji-tab]"
+          );
+          if (!tab || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+          const tabs = [
+            ...emojiTabs.querySelectorAll<HTMLButtonElement>(
+              "[data-emoji-tab]"
+            ),
+          ];
+          const current = tabs.indexOf(tab);
+          const next =
+            (current + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) %
+            tabs.length;
+          event.preventDefault();
+          activateEmojiGroup(tabs[next].dataset.emojiTab!);
+          tabs[next].focus();
+        },
+        listenerOptions
+      );
+      document.addEventListener(
+        "keydown",
+        event => {
+          if (event.key === "Escape" && !emojiPanel.hidden)
+            setEmojiPanelOpen(false, true);
+        },
+        { signal: lifecycle.signal }
+      );
+      document.addEventListener(
+        "pointerdown",
+        event => {
+          if (!emojiPanel.hidden && !picker.contains(event.target as Node))
+            setEmojiPanelOpen(false);
+        },
+        { signal: lifecycle.signal }
+      );
 
       const showIdentity = (authenticated: boolean) => {
         editor.hidden = !authenticated;
         login.hidden = authenticated;
         debugLog("identity-state", { authenticated });
       };
+      const showActionError = (action: string, error: unknown) => {
+        if (lifecycle.signal.aborted || !section.isConnected) return;
+        if (error instanceof BlogRequestError && error.status === 401)
+          showIdentity(false);
+        feedback.textContent = `${action} failed. ${describeBlogError(error)}`;
+        feedback.hidden = false;
+        debugLog("action-error", { action, error: String(error) });
+      };
+      const clearFeedback = () => {
+        feedback.hidden = true;
+        feedback.textContent = "";
+      };
       const showError = (error: unknown) => {
         if (lifecycle.signal.aborted || !section.isConnected) return;
-        feedback.textContent = `Comments could not be loaded. ${describeBlogError(error)}`;
-        feedback.hidden = false;
+        rerenderComments = undefined;
+        count.textContent = "Unavailable";
+        list.innerHTML = `<div class="comments-error" role="alert"><p>Comments could not be loaded. ${safe(describeBlogError(error))}</p><button type="button" class="comment-action comments-retry" data-retry>Try again</button></div>`;
       };
       section.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach(tab =>
-        tab.addEventListener("click", () => {
-          const isPreview = tab.dataset.tab === "preview";
-          section
-            .querySelectorAll<HTMLButtonElement>("[data-tab]")
-            .forEach(item =>
-              item.setAttribute("aria-selected", String(item === tab))
-            );
-          input.hidden = isPreview;
-          preview.hidden = !isPreview;
-          if (isPreview) preview.innerHTML = renderMarkdown(input.value);
-        })
-      );
-      async function loadComments() {
-        const requestStarted = performance.now();
-        debugLog("comments-request-start");
-        const payload = await requestBlogApi<any>(
-          `${api}/blog/comments?post=${encodeURIComponent(post)}`,
-          { signal: lifecycle.signal }
-        );
-        if (lifecycle.signal.aborted || !section.isConnected) return;
-        if (
-          !payload ||
-          !Array.isArray(payload.items) ||
-          typeof payload.total !== "number"
+        tab.addEventListener(
+          "click",
+          () => {
+            const isPreview = tab.dataset.tab === "preview";
+            section
+              .querySelectorAll<HTMLButtonElement>("[data-tab]")
+              .forEach(item =>
+                item.setAttribute("aria-selected", String(item === tab))
+              );
+            input.hidden = isPreview;
+            preview.hidden = !isPreview;
+            if (isPreview) preview.innerHTML = renderMarkdown(input.value);
+          },
+          listenerOptions
         )
-          throw new BlogRequestError("response");
-        debugLog("comments-response", {
-          ms: +(performance.now() - requestStarted).toFixed(1),
-        });
-        debugLog("comments-payload", {
-          total: payload.total,
-          items: payload.items?.length,
-          viewer: Boolean(payload.viewer),
-        });
-        count.textContent = `${payload.total} comments`;
-        subscribe.checked = payload.subscribed;
-        showIdentity(Boolean(payload.viewer));
-        const items = payload.items as any[];
-        const ids = new Set(items.map(item => item.id));
-        const byParent = new Map<string | null, any[]>();
-        for (const item of items) {
-          const key =
-            item.parent_id && ids.has(item.parent_id) ? item.parent_id : null;
-          byParent.set(key, [...(byParent.get(key) ?? []), item]);
+      );
+      let requestId = 0;
+      let requestController: AbortController | null = null;
+      const isCurrentRequest = (id: number, controller: AbortController) =>
+        !lifecycle.signal.aborted &&
+        section.isConnected &&
+        requestId === id &&
+        requestController === controller;
+      async function loadComments(reason = "initial") {
+        if (lifecycle.signal.aborted || !section.isConnected) return;
+        requestController?.abort();
+        const controller = new AbortController();
+        const id = ++requestId;
+        requestController = controller;
+        const requestStarted = performance.now();
+        debugLog("comments-request-start", { reason, id });
+        if (reason === "initial" || reason === "retry") {
+          rerenderComments = undefined;
+          list.innerHTML = `<p class="comments-loading">Loading comments…</p>`;
+          count.textContent = "Loading";
         }
-        const renderCommentList = () => {
-          const render = (item: any, depth: number): string => {
-            const createdAt = new Date(item.created_at);
-            const formattedTime = createdAt.toLocaleString(undefined, {
-              dateStyle: "medium",
-              timeStyle: "short",
-            });
-            return `<article class="comment${item.parent_id ? " comment--reply" : ""}" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}" data-comment-body="${safe(item.body)}">${item.parent_id ? replyMarker : ""}<div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time datetime="${createdAt.toISOString()}">${formattedTime}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by a moderator.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
-          };
-          const ordered: string[] = [];
-          const flatten = (item: any, depth: number) => {
-            ordered.push(render(item, depth));
-            for (const child of byParent.get(item.id) ?? [])
-              flatten(child, depth + 1);
-          };
-          for (const item of byParent.get(null) ?? []) flatten(item, 0);
-          list.innerHTML =
-            ordered.join("") ||
-            `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
-          debugLog("comments-rendered", { items: ordered.length });
-        };
-        rerenderComments = renderCommentList;
-        renderCommentList();
-      }
-      subscribe.addEventListener("change", async () => {
-        await fetch(
-          `${api}/blog/account/subscriptions/${encodeURIComponent(post)}`,
-          {
-            method: "PUT",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-              Origin: location.origin,
-            },
-            body: JSON.stringify({ enabled: subscribe.checked }),
+        try {
+          const payload = await requestBlogApi<any>(
+            `${api}/blog/comments?post=${encodeURIComponent(post)}`,
+            { signal: AbortSignal.any([lifecycle.signal, controller.signal]) }
+          );
+          if (
+            !payload ||
+            !Array.isArray(payload.items) ||
+            typeof payload.total !== "number"
+          )
+            throw new BlogRequestError("response");
+          if (!isCurrentRequest(id, controller)) return;
+          debugLog("comments-response", {
+            ms: +(performance.now() - requestStarted).toFixed(1),
+            id,
+          });
+          debugLog("comments-payload", {
+            total: payload.total,
+            items: payload.items.length,
+            viewer: Boolean(payload.viewer),
+            id,
+          });
+          count.textContent = `${payload.total} comments`;
+          subscribe.checked = payload.subscribed;
+          showIdentity(Boolean(payload.viewer));
+          const items = payload.items as any[];
+          const ids = new Set(items.map(item => item.id));
+          const byParent = new Map<string | null, any[]>();
+          for (const item of items) {
+            const key =
+              item.parent_id && ids.has(item.parent_id) ? item.parent_id : null;
+            byParent.set(key, [...(byParent.get(key) ?? []), item]);
           }
-        );
-      });
-      section
-        .querySelector("[data-submit]")
-        ?.addEventListener("click", async () => {
+          const renderCommentList = () => {
+            const render = (item: any, depth: number): string => {
+              const createdAt = new Date(item.created_at);
+              const formattedTime = createdAt.toLocaleString(undefined, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              });
+              return `<article class="comment${item.parent_id ? " comment--reply" : ""}" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}" data-comment-body="${safe(item.body)}">${item.parent_id ? replyMarker : ""}<div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time datetime="${createdAt.toISOString()}">${formattedTime}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by an admin.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
+            };
+            const ordered: string[] = [];
+            const flatten = (item: any, depth: number) => {
+              ordered.push(render(item, depth));
+              for (const child of byParent.get(item.id) ?? [])
+                flatten(child, depth + 1);
+            };
+            for (const item of byParent.get(null) ?? []) flatten(item, 0);
+            list.innerHTML =
+              ordered.join("") ||
+              `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
+            debugLog("comments-rendered", { items: ordered.length, id });
+          };
+          rerenderComments = renderCommentList;
+          renderCommentList();
+        } catch (error) {
+          if (controller.signal.aborted || lifecycle.signal.aborted) {
+            debugLog("comments-request-aborted", { reason, id });
+            return;
+          }
+          debugLog("comments-request-error", {
+            reason,
+            id,
+            error: String(error),
+          });
+          if (isCurrentRequest(id, controller)) showError(error);
+        } finally {
+          if (requestController === controller) requestController = null;
+        }
+      }
+      subscribe.addEventListener(
+        "change",
+        async () => {
+          const enabled = subscribe.checked;
+          subscribe.disabled = true;
+          clearFeedback();
+          try {
+            await requestBlogApi(
+              `${api}/blog/account/subscriptions/${encodeURIComponent(post)}`,
+              {
+                method: "PUT",
+                signal: lifecycle.signal,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ enabled }),
+              }
+            );
+          } catch (error) {
+            if (!lifecycle.signal.aborted) subscribe.checked = !enabled;
+            showActionError("Updating subscription", error);
+          } finally {
+            subscribe.disabled = false;
+          }
+        },
+        { signal: lifecycle.signal }
+      );
+      const submit = section.querySelector<HTMLButtonElement>("[data-submit]")!;
+      submit.addEventListener(
+        "click",
+        async () => {
           const value = input.value.trim();
-          if (!value) return;
+          if (!value || submit.disabled) return;
+          submit.disabled = true;
+          clearFeedback();
           const parent = section.dataset.replyTo;
           const editId = section.dataset.editId;
-          const response = editId
-            ? await fetch(`${api}/blog/comments/${editId}`, {
-                method: "PATCH",
-                credentials: "include",
-                headers: {
-                  "Content-Type": "application/json",
-                  Origin: location.origin,
-                },
-                body: JSON.stringify({
-                  body: value,
-                  version: Number(section.dataset.editVersion),
-                }),
-              })
-            : await fetch(`${api}/blog/comments`, {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                  "Content-Type": "application/json",
-                  Origin: location.origin,
-                },
-                body: JSON.stringify({
-                  id: crypto.randomUUID(),
-                  post,
-                  body: value,
-                  parent_id: parent || undefined,
-                  subscribe: subscribe.checked,
-                }),
-              });
-          if (response.ok) {
+          try {
+            await requestBlogApi(
+              editId
+                ? `${api}/blog/comments/${editId}`
+                : `${api}/blog/comments`,
+              {
+                method: editId ? "PATCH" : "POST",
+                signal: lifecycle.signal,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(
+                  editId
+                    ? {
+                        body: value,
+                        version: Number(section.dataset.editVersion),
+                      }
+                    : {
+                        id: crypto.randomUUID(),
+                        post,
+                        body: value,
+                        parent_id: parent || undefined,
+                        subscribe: subscribe.checked,
+                      }
+                ),
+              }
+            );
+            if (lifecycle.signal.aborted || !section.isConnected) return;
             input.value = "";
             delete section.dataset.replyTo;
             delete section.dataset.editId;
             delete section.dataset.editVersion;
             input.placeholder = "Leave a comment…";
-            await loadComments();
-          } else if (response.status === 401) {
-            showIdentity(false);
+            await loadComments("refresh");
+          } catch (error) {
+            showActionError(
+              editId ? "Editing comment" : "Sending comment",
+              error
+            );
+          } finally {
+            submit.disabled = false;
           }
-        });
-      list.addEventListener("click", async event => {
-        const target = (event.target as HTMLElement).closest<HTMLElement>(
-          "[data-delete],[data-reply],[data-edit]"
-        );
-        if (!target) return;
-        const id = target.dataset.delete;
-        if (id) {
-          if (!confirm("Delete this comment?")) return;
-          const response = await fetch(`${api}/blog/comments/${id}`, {
-            method: "DELETE",
-            credentials: "include",
-            headers: { Origin: location.origin },
-          });
-          if (response.status === 401) showIdentity(false);
-          await loadComments();
-          return;
-        }
-        if (target.dataset.reply) {
-          section.dataset.replyTo = target.dataset.reply;
-          input.focus();
-          input.placeholder = "Reply to this comment…";
-          return;
-        }
-        if (target.dataset.edit) {
-          const article = target.closest<HTMLElement>(".comment")!;
-          section.dataset.editId = target.dataset.edit;
-          section.dataset.editVersion = target.dataset.version;
-          input.value = article.dataset.commentBody ?? "";
-          input.placeholder = "Edit your comment…";
-          input.focus();
-        }
-      });
+        },
+        { signal: lifecycle.signal }
+      );
+      list.addEventListener(
+        "click",
+        async event => {
+          const target = (event.target as HTMLElement).closest<HTMLElement>(
+            "[data-delete],[data-reply],[data-edit],[data-retry]"
+          );
+          if (!target) return;
+          if (target.dataset.retry !== undefined) {
+            void loadComments("retry");
+            return;
+          }
+          const id = target.dataset.delete;
+          if (id) {
+            const button = target as HTMLButtonElement;
+            if (button.disabled || !confirm("Delete this comment?")) return;
+            button.disabled = true;
+            clearFeedback();
+            try {
+              await requestBlogApi(`${api}/blog/comments/${id}`, {
+                method: "DELETE",
+                signal: lifecycle.signal,
+              });
+              await loadComments("refresh");
+            } catch (error) {
+              showActionError("Deleting comment", error);
+            } finally {
+              button.disabled = false;
+            }
+            return;
+          }
+          if (target.dataset.reply) {
+            section.dataset.replyTo = target.dataset.reply;
+            input.focus();
+            input.placeholder = "Reply to this comment…";
+            return;
+          }
+          if (target.dataset.edit) {
+            const article = target.closest<HTMLElement>(".comment")!;
+            section.dataset.editId = target.dataset.edit;
+            section.dataset.editVersion = target.dataset.version;
+            input.value = article.dataset.commentBody ?? "";
+            input.placeholder = "Edit your comment…";
+            input.focus();
+          }
+        },
+        { signal: lifecycle.signal }
+      );
       loadEmojiManifest().then(manifest => {
+        if (lifecycle.signal.aborted || !section.isConnected) return;
         emojiManifest = manifest;
         emojiIndex = manifest ? createEmojiIndex(manifest) : new Map();
-        renderEmojiPicker(manifest);
-        if (!preview.hidden) preview.innerHTML = renderMarkdown(input.value);
-        rerenderComments?.();
+        try {
+          renderEmojiPicker(manifest);
+          if (!preview.hidden) preview.innerHTML = renderMarkdown(input.value);
+          rerenderComments?.();
+        } catch (error) {
+          showError(error);
+        }
       });
-      loadComments().catch(error => {
-        if (!lifecycle.signal.aborted) showError(error);
-      });
+      void loadComments();
     }
   }
   document.addEventListener("astro:before-swap", () => {

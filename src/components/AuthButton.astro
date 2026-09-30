@@ -59,9 +59,10 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       if (!isCurrent()) return;
       if (!user || typeof user.id !== "string" || typeof user.name !== "string")
         throw new BlogRequestError("response");
-      control.innerHTML = `<a class="auth-name" href="/account"></a><span class="auth-divider" aria-hidden="true">·</span><button class="auth-link auth-button" type="button" data-auth-logout>Log out</button>`;
+      control.innerHTML = `<a class="auth-name nav-link" data-auth-link href="/account"></a><span class="auth-divider" aria-hidden="true">·</span><button class="auth-link auth-button" type="button" data-auth-logout>Log out</button>`;
       control.querySelector<HTMLAnchorElement>(".auth-name")!.textContent =
         user.name || "Reader";
+      document.dispatchEvent(new CustomEvent("auth:updated"));
     } catch (error) {
       if (!isCurrent()) return;
       if (error instanceof BlogRequestError && error.status === 401)
@@ -101,6 +102,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
             if (!controller.signal.aborted && control.isConnected)
               showError(control, error);
           } finally {
+            button.disabled = false;
             if (requests.get(control) === controller) requests.delete(control);
           }
         });

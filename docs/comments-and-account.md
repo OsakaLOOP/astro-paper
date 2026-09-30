@@ -92,6 +92,9 @@ GIF 继续使用普通图片元素，因此预览和评论中的动画保持播�
 的有效 `alt` 文本；替换结果通过 DOM API 或带白名单的安全 HTML 生成，仅允许本地
 `/emoji/` 资源路径和必要的图片属性。
 
+独立的表情标识（例如 `(AC_03)`）与嵌在文字、粗体或链接中的标识使用同一渲染规则；
+代码块和行内代码不替换。标识使用资源名中的下划线，不将 `(AC-03)` 等写法作为别名。
+
 ### 面板交互
 
 面板位于 `Write`、`Preview` 同一行的右侧，悬浮进入后打开，指针离开后关闭；面板
@@ -109,7 +112,7 @@ stay aligned with the third level.
 Deleted comments are hard-redacted in place: the body is cleared at deletion time.
 Ordinary readers receive no deleted row at all. The author can delete their own
 comment. An SM admin can delete any comment. Admins may see the redacted row and
-its metadata in their moderation view, but never recover its body.
+its metadata in their admin view, but never recover its body.
 
 ## Frontend lifecycle and failures
 

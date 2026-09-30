@@ -41,6 +41,37 @@ Ordinary readers receive no deleted row at all. The author can delete their own
 comment. An SM admin can delete any comment. Admins may see the redacted row and
 its metadata in their moderation view, but never recover its body.
 
+## Frontend lifecycle and failures
+
+Astro's `ClientRouter` executes processed component scripts once per browser
+session, not once per page visit. Comments therefore mount on `astro:page-load`
+(and immediately when their module is first imported), with one mount per section.
+`astro:before-swap` aborts the old section's requests and removes its listeners;
+the new article mounts with its own slug, state, and login return URL. Cleanup
+does not run at `astro:before-preparation`: a failed or cancelled navigation must
+leave the current article working.
+
+The header persists across navigation, but refreshes `/blog/auth/me` on each
+`astro:page-load`. Its login return URL is the current page, not the first page
+visited. The header request and article request are independent: comment
+permissions and editor visibility use only `comments.viewer`, never the order
+in which `/me` and `/comments` finish. A `/me` 401 is normal signed-out state;
+network failures and other statuses are not silently treated as signed out.
+
+Blog requests time out after 15 seconds, including response-body parsing. HTTP
+status and API error code, timeout, network/CORS failure, invalid JSON/payload,
+and rendering failure are displayed in the relevant frontend area. Loading
+failures show a `Try again` button. Navigation cancellation is not displayed as
+a service failure. Submit, edit, delete, and subscription failures are visible;
+failed submissions retain the draft. Mutations are not automatically retried.
+
+Lifecycle checks should cover direct article entry, home-to-article navigation,
+article-to-article navigation, leaving and returning, back/forward history,
+navigation while a response is pending, failed navigation, and repeated retries.
+Mocking successful API responses should still reproduce the old navigation-only
+`Loading` problem; the fixed version must issue a request for every new article
+section without duplicating mounts or allowing an old response to update it.
+
 ## Notification rules
 
 The article comment control is `Email me about new comments on this article`.

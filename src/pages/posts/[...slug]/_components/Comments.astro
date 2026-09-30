@@ -48,209 +48,335 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
     <span>Log in to join the discussion.</span>
     <a data-login-link>Log in</a>
   </div>
-  <div class="comments-list" data-list>
+  <p class="comments-error" data-feedback role="alert" hidden></p>
+  <div class="comments-list" data-list aria-live="polite">
     <p class="comments-loading">Loading comments…</p>
   </div>
 </section>
 <script>
   import { marked } from "marked";
   import DOMPurify from "dompurify";
-  const sections = [...document.querySelectorAll<HTMLElement>(".comments")];
-  for (const section of sections) {
-    const api = section.dataset.commentsApi!,
-      post = section.dataset.post!,
-      list = section.querySelector<HTMLElement>("[data-list]")!,
-      editor = section.querySelector<HTMLElement>("[data-editor]")!,
-      login = section.querySelector<HTMLElement>("[data-login]")!,
-      input = section.querySelector<HTMLTextAreaElement>("[data-input]")!,
-      preview = section.querySelector<HTMLElement>("[data-preview]")!,
-      count = section.querySelector<HTMLElement>("[data-count]")!,
-      subscribe = section.querySelector<HTMLInputElement>("[data-subscribe]")!;
-    const debugEnabled = section.dataset.commentsDebug === "true";
-    const startedAt = performance.now();
-    const debugLog = (event: string, details: Record<string, unknown> = {}) => {
-      if (!debugEnabled) return;
-      console.debug(
-        `[comments][${new Date().toISOString()}][+${(performance.now() - startedAt).toFixed(1)}ms] ${event}`,
-        details
-      );
-    };
-    debugLog("init", { post });
-    const safe = (value: unknown) =>
-      String(value ?? "").replace(
-        /[&<>"']/g,
-        c =>
-          ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;",
-          })[c]!
-      );
-    section.querySelector<HTMLAnchorElement>("[data-login-link]")!.href =
-      `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href + "#comments")}`;
-    const renderMarkdown = (value: string) =>
-      DOMPurify.sanitize(marked.parse(value, { async: false }) as string, {
-        USE_PROFILES: { html: true },
-      });
-    const showIdentity = (authenticated: boolean) => {
-      editor.hidden = !authenticated;
-      login.hidden = authenticated;
-      debugLog("identity-state", { authenticated });
-    };
-    section.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach(tab =>
-      tab.addEventListener("click", () => {
-        const isPreview = tab.dataset.tab === "preview";
-        section
-          .querySelectorAll<HTMLButtonElement>("[data-tab]")
-          .forEach(item =>
-            item.setAttribute("aria-selected", String(item === tab))
-          );
-        input.hidden = isPreview;
-        preview.hidden = !isPreview;
-        if (isPreview) preview.innerHTML = renderMarkdown(input.value);
-      })
-    );
-    async function loadComments() {
-      const requestStarted = performance.now();
-      debugLog("comments-request-start");
-      const response = await fetch(
-        `${api}/blog/comments?post=${encodeURIComponent(post)}`,
-        { credentials: "include" }
-      );
-      debugLog("comments-response", {
-        status: response.status,
-        ms: +(performance.now() - requestStarted).toFixed(1),
-      });
-      if (!response.ok) throw new Error();
-      const payload = await response.json();
-      debugLog("comments-payload", {
-        total: payload.total,
-        items: payload.items?.length,
-        viewer: Boolean(payload.viewer),
-      });
-      count.textContent = `${payload.total} comments`;
-      subscribe.checked = payload.subscribed;
-      showIdentity(Boolean(payload.viewer));
-      const items = payload.items as any[];
-      const ids = new Set(items.map(item => item.id));
-      const byParent = new Map<string | null, any[]>();
-      for (const item of items) {
-        const key =
-          item.parent_id && ids.has(item.parent_id) ? item.parent_id : null;
-        byParent.set(key, [...(byParent.get(key) ?? []), item]);
-      }
-      const render = (item: any, depth: number): string =>
-        `<article class="comment" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}"><div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time>${new Date(item.created_at).toLocaleDateString()}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by a moderator.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}${item.parent_id ? `<div class="comment-reply">Replying to a comment above</div>` : ""}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
-      const ordered: string[] = [];
-      const flatten = (item: any, depth: number) => {
-        ordered.push(render(item, depth));
-        for (const child of byParent.get(item.id) ?? [])
-          flatten(child, depth + 1);
+  import {
+    BlogRequestError,
+    describeBlogError,
+    requestBlogApi,
+  } from "@/scripts/blog-api";
+  const mounted = new Map<HTMLElement, AbortController>();
+  function initComments() {
+    const sections = [...document.querySelectorAll<HTMLElement>(".comments")];
+    for (const section of sections) {
+      if (mounted.has(section)) continue;
+      const lifecycle = new AbortController();
+      mounted.set(section, lifecycle);
+      const api = section.dataset.commentsApi!,
+        post = section.dataset.post!,
+        list = section.querySelector<HTMLElement>("[data-list]")!,
+        editor = section.querySelector<HTMLElement>("[data-editor]")!,
+        login = section.querySelector<HTMLElement>("[data-login]")!,
+        input = section.querySelector<HTMLTextAreaElement>("[data-input]")!,
+        preview = section.querySelector<HTMLElement>("[data-preview]")!,
+        count = section.querySelector<HTMLElement>("[data-count]")!,
+        subscribe =
+          section.querySelector<HTMLInputElement>("[data-subscribe]")!,
+        submit = section.querySelector<HTMLButtonElement>("[data-submit]")!,
+        feedback = section.querySelector<HTMLElement>("[data-feedback]")!;
+      let requestId = 0;
+      let requestController: AbortController | null = null;
+      const debugEnabled = section.dataset.commentsDebug === "true";
+      const startedAt = performance.now();
+      const debugLog = (
+        event: string,
+        details: Record<string, unknown> = {}
+      ) => {
+        if (!debugEnabled) return;
+        globalThis.console.debug(
+          `[comments][${new Date().toISOString()}][+${(performance.now() - startedAt).toFixed(1)}ms] ${event}`,
+          { post, ...details }
+        );
       };
-      for (const item of byParent.get(null) ?? []) flatten(item, 0);
-      list.innerHTML =
-        ordered.join("") ||
-        `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
-      debugLog("comments-rendered", { items: ordered.length });
-    }
-    subscribe.addEventListener("change", async () => {
-      await fetch(
-        `${api}/blog/account/subscriptions/${encodeURIComponent(post)}`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Origin: location.origin,
-          },
-          body: JSON.stringify({ enabled: subscribe.checked }),
-        }
-      );
-    });
-    section
-      .querySelector("[data-submit]")
-      ?.addEventListener("click", async () => {
-        const value = input.value.trim();
-        if (!value) return;
-        const parent = section.dataset.replyTo;
-        const editId = section.dataset.editId;
-        const response = editId
-          ? await fetch(`${api}/blog/comments/${editId}`, {
-              method: "PATCH",
-              credentials: "include",
-              headers: {
-                "Content-Type": "application/json",
-                Origin: location.origin,
-              },
-              body: JSON.stringify({
-                body: value,
-                version: Number(section.dataset.editVersion),
-              }),
-            })
-          : await fetch(`${api}/blog/comments`, {
-              method: "POST",
-              credentials: "include",
-              headers: {
-                "Content-Type": "application/json",
-                Origin: location.origin,
-              },
-              body: JSON.stringify({
-                id: crypto.randomUUID(),
-                post,
-                body: value,
-                parent_id: parent || undefined,
-                subscribe: subscribe.checked,
-              }),
-            });
-        if (response.ok) {
-          input.value = "";
-          delete section.dataset.replyTo;
-          delete section.dataset.editId;
-          delete section.dataset.editVersion;
-          input.placeholder = "Leave a comment…";
-          await loadComments();
-        } else if (response.status === 401) {
-          showIdentity(false);
-        }
-      });
-    list.addEventListener("click", async event => {
-      const target = (event.target as HTMLElement).closest<HTMLElement>(
-        "[data-delete],[data-reply],[data-edit]"
-      );
-      if (!target) return;
-      const id = target.dataset.delete;
-      if (id) {
-        if (!confirm("Delete this comment?")) return;
-        const response = await fetch(`${api}/blog/comments/${id}`, {
-          method: "DELETE",
-          credentials: "include",
-          headers: { Origin: location.origin },
+      debugLog("init", { post });
+      const safe = (value: unknown) =>
+        String(value ?? "").replace(
+          /[&<>"']/g,
+          c =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c]!
+        );
+      const returnTo = new URL(location.href);
+      returnTo.hash = "comments";
+      section.querySelector<HTMLAnchorElement>("[data-login-link]")!.href =
+        `${api}/blog/auth/login?returnTo=${encodeURIComponent(returnTo.href)}`;
+      const renderMarkdown = (value: string) =>
+        DOMPurify.sanitize(marked.parse(value, { async: false }) as string, {
+          USE_PROFILES: { html: true },
         });
-        if (response.status === 401) showIdentity(false);
-        await loadComments();
-        return;
+      const showIdentity = (authenticated: boolean) => {
+        editor.hidden = !authenticated;
+        login.hidden = authenticated;
+        debugLog("identity-state", { authenticated });
+      };
+      section.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach(tab =>
+        tab.addEventListener(
+          "click",
+          () => {
+            const isPreview = tab.dataset.tab === "preview";
+            section
+              .querySelectorAll<HTMLButtonElement>("[data-tab]")
+              .forEach(item =>
+                item.setAttribute("aria-selected", String(item === tab))
+              );
+            input.hidden = isPreview;
+            preview.hidden = !isPreview;
+            if (isPreview) preview.innerHTML = renderMarkdown(input.value);
+          },
+          { signal: lifecycle.signal }
+        )
+      );
+      const isCurrentRequest = (id: number, controller: AbortController) =>
+        !lifecycle.signal.aborted &&
+        section.isConnected &&
+        requestId === id &&
+        requestController === controller;
+      const setLoading = () => {
+        list.innerHTML = `<p class="comments-loading">Loading comments…</p>`;
+        count.textContent = "Loading";
+      };
+      const setError = (
+        message: string,
+        id: number,
+        controller: AbortController
+      ) => {
+        if (!isCurrentRequest(id, controller)) return;
+        count.textContent = "Unavailable";
+        list.innerHTML = `<div class="comments-error" role="alert"><p>Comments could not be loaded. ${safe(message)}</p><button type="button" class="comment-action comments-retry" data-retry>Try again</button></div>`;
+      };
+      const showActionError = (action: string, error: unknown) => {
+        if (lifecycle.signal.aborted || !section.isConnected) return;
+        if (error instanceof BlogRequestError && error.status === 401)
+          showIdentity(false);
+        feedback.textContent = `${action} failed. ${describeBlogError(error)}`;
+        feedback.hidden = false;
+        debugLog("action-error", { action, error: String(error) });
+      };
+      const clearFeedback = () => {
+        feedback.hidden = true;
+        feedback.textContent = "";
+      };
+      async function loadComments(reason = "initial") {
+        if (lifecycle.signal.aborted || !section.isConnected) return;
+        requestController?.abort();
+        const controller = new AbortController();
+        const id = ++requestId;
+        requestController = controller;
+        const requestStarted = performance.now();
+        debugLog("comments-request-start", { reason, id });
+        if (reason === "initial" || reason === "retry") setLoading();
+        try {
+          const payload = await requestBlogApi<any>(
+            `${api}/blog/comments?post=${encodeURIComponent(post)}`,
+            { signal: AbortSignal.any([lifecycle.signal, controller.signal]) }
+          );
+          debugLog("comments-response", {
+            ms: +(performance.now() - requestStarted).toFixed(1),
+            id,
+          });
+          if (
+            !payload ||
+            !Array.isArray(payload.items) ||
+            typeof payload.total !== "number"
+          )
+            throw new BlogRequestError("response");
+          if (!isCurrentRequest(id, controller)) return;
+          debugLog("comments-payload", {
+            total: payload.total,
+            items: payload.items.length,
+            viewer: Boolean(payload.viewer),
+            id,
+          });
+          const items = payload.items as any[];
+          const ids = new Set(items.map(item => item.id));
+          const byParent = new Map<string | null, any[]>();
+          for (const item of items) {
+            const key =
+              item.parent_id && ids.has(item.parent_id) ? item.parent_id : null;
+            byParent.set(key, [...(byParent.get(key) ?? []), item]);
+          }
+          const render = (item: any, depth: number): string =>
+            `<article class="comment" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}"><div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time>${new Date(item.created_at).toLocaleDateString()}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by a moderator.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}${item.parent_id ? `<div class="comment-reply">Replying to a comment above</div>` : ""}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
+          const ordered: string[] = [];
+          const flatten = (item: any, depth: number) => {
+            ordered.push(render(item, depth));
+            for (const child of byParent.get(item.id) ?? [])
+              flatten(child, depth + 1);
+          };
+          for (const item of byParent.get(null) ?? []) flatten(item, 0);
+          list.innerHTML =
+            ordered.join("") ||
+            `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
+          count.textContent = `${payload.total} comments`;
+          subscribe.checked = payload.subscribed;
+          showIdentity(Boolean(payload.viewer));
+          debugLog("comments-rendered", { items: ordered.length, id });
+        } catch (error) {
+          if (controller.signal.aborted || lifecycle.signal.aborted) {
+            debugLog("comments-request-aborted", { reason, id });
+            return;
+          }
+          debugLog("comments-request-error", {
+            reason,
+            id,
+            error: error instanceof Error ? error.message : String(error),
+          });
+          setError(describeBlogError(error), id, controller);
+        } finally {
+          if (requestController === controller) requestController = null;
+        }
       }
-      if (target.dataset.reply) {
-        section.dataset.replyTo = target.dataset.reply;
-        input.focus();
-        input.placeholder = "Reply to this comment…";
-        return;
-      }
-      if (target.dataset.edit) {
-        const article = target.closest<HTMLElement>(".comment")!;
-        const content = article.querySelector<HTMLElement>(".comment-content")!;
-        section.dataset.editId = target.dataset.edit;
-        section.dataset.editVersion = target.dataset.version;
-        input.value = content.innerText;
-        input.placeholder = "Edit your comment…";
-        input.focus();
-      }
-    });
-    loadComments().catch(() => {
-      list.innerHTML = `<p class="comments-empty">Comments are temporarily unavailable.</p>`;
-      count.textContent = "";
-    });
+      subscribe.addEventListener(
+        "change",
+        async () => {
+          const enabled = subscribe.checked;
+          subscribe.disabled = true;
+          clearFeedback();
+          try {
+            await requestBlogApi(
+              `${api}/blog/account/subscriptions/${encodeURIComponent(post)}`,
+              {
+                method: "PUT",
+                signal: lifecycle.signal,
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ enabled }),
+              }
+            );
+          } catch (error) {
+            if (!lifecycle.signal.aborted) subscribe.checked = !enabled;
+            showActionError("Updating subscription", error);
+          } finally {
+            subscribe.disabled = false;
+          }
+        },
+        { signal: lifecycle.signal }
+      );
+      submit.addEventListener(
+        "click",
+        async () => {
+          const value = input.value.trim();
+          if (!value || submit.disabled) return;
+          submit.disabled = true;
+          clearFeedback();
+          const parent = section.dataset.replyTo;
+          const editId = section.dataset.editId;
+          try {
+            if (editId) {
+              await requestBlogApi(`${api}/blog/comments/${editId}`, {
+                method: "PATCH",
+                signal: lifecycle.signal,
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  body: value,
+                  version: Number(section.dataset.editVersion),
+                }),
+              });
+            } else {
+              await requestBlogApi(`${api}/blog/comments`, {
+                method: "POST",
+                signal: lifecycle.signal,
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  id: crypto.randomUUID(),
+                  post,
+                  body: value,
+                  parent_id: parent || undefined,
+                  subscribe: subscribe.checked,
+                }),
+              });
+            }
+            if (lifecycle.signal.aborted || !section.isConnected) return;
+            input.value = "";
+            delete section.dataset.replyTo;
+            delete section.dataset.editId;
+            delete section.dataset.editVersion;
+            input.placeholder = "Leave a comment…";
+            await loadComments("refresh");
+          } catch (error) {
+            showActionError(
+              editId ? "Editing comment" : "Sending comment",
+              error
+            );
+          } finally {
+            submit.disabled = false;
+          }
+        },
+        { signal: lifecycle.signal }
+      );
+      list.addEventListener(
+        "click",
+        async event => {
+          const target = (event.target as HTMLElement).closest<HTMLElement>(
+            "[data-delete],[data-reply],[data-edit],[data-retry]"
+          );
+          if (!target) return;
+          if (target.dataset.retry !== undefined) {
+            void loadComments("retry");
+            return;
+          }
+          const id = target.dataset.delete;
+          if (id) {
+            const button = target as HTMLButtonElement;
+            if (button.disabled) return;
+            if (!confirm("Delete this comment?")) return;
+            button.disabled = true;
+            clearFeedback();
+            try {
+              await requestBlogApi(`${api}/blog/comments/${id}`, {
+                method: "DELETE",
+                signal: lifecycle.signal,
+              });
+              await loadComments("refresh");
+            } catch (error) {
+              showActionError("Deleting comment", error);
+            } finally {
+              button.disabled = false;
+            }
+            return;
+          }
+          if (target.dataset.reply) {
+            section.dataset.replyTo = target.dataset.reply;
+            input.focus();
+            input.placeholder = "Reply to this comment…";
+            return;
+          }
+          if (target.dataset.edit) {
+            const article = target.closest<HTMLElement>(".comment")!;
+            const content =
+              article.querySelector<HTMLElement>(".comment-content")!;
+            section.dataset.editId = target.dataset.edit;
+            section.dataset.editVersion = target.dataset.version;
+            input.value = content.innerText;
+            input.placeholder = "Edit your comment…";
+            input.focus();
+          }
+        },
+        { signal: lifecycle.signal }
+      );
+      void loadComments();
+    }
   }
+  document.addEventListener("astro:before-swap", () => {
+    for (const lifecycle of mounted.values()) lifecycle.abort();
+    mounted.clear();
+  });
+  document.addEventListener("astro:page-load", initComments);
+  initComments();
 </script>

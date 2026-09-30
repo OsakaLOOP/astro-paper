@@ -2,23 +2,116 @@
 import LinkButton from "./LinkButton.astro";
 const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
 ---
-<div class="auth-control" data-auth-api={api} data-auth-me={`${api}/blog/auth/me`}>
-  <LinkButton href={`${api}/blog/auth/login?returnTo=${encodeURIComponent(Astro.url.href)}`} class="auth-link">Log in</LinkButton>
+
+<div
+  class="auth-control"
+  data-auth-api={api}
+  data-auth-me={`${api}/blog/auth/me`}
+>
+  <LinkButton
+    href={`${api}/blog/auth/login?returnTo=${encodeURIComponent(Astro.url.href)}`}
+    class="auth-link">Log in</LinkButton
+  >
 </div>
 <script>
-  const controls = [...document.querySelectorAll<HTMLElement>(".auth-control")];
-  for (const control of controls) {
+  import {
+    BlogRequestError,
+    describeBlogError,
+    requestBlogApi,
+  } from "@/scripts/blog-api";
+  const requests = new Map<HTMLElement, AbortController>();
+  const bound = new WeakSet<HTMLElement>();
+  function showError(control: HTMLElement, error: unknown) {
+    const message = document.createElement("span");
+    message.className = "auth-error";
+    message.setAttribute("role", "alert");
+    message.textContent = `Account unavailable. ${describeBlogError(error)}`;
+    const retry = document.createElement("button");
+    retry.type = "button";
+    retry.className = "auth-link auth-button";
+    retry.dataset.authRetry = "";
+    retry.textContent = "Try again";
+    control.replaceChildren(message, retry);
+  }
+  async function loadIdentity(control: HTMLElement) {
     const me = control.dataset.authMe;
     const api = control.dataset.authApi;
-    if (!me || !api) continue;
-    fetch(me, { credentials: "include" }).then(async response => {
-      if (!response.ok) return;
-      const user = await response.json();
-      control.innerHTML = `<a class="auth-name" href="/account">${String(user.name ?? "Reader").replace(/[&<>"']/g, "")}</a><span class="auth-divider" aria-hidden="true">·</span><button class="auth-link auth-button" type="button">Log out</button>`;
-      control.querySelector(".auth-button")?.addEventListener("click", async () => {
-        await fetch(`${api}/blog/auth/logout`, { method: "POST", credentials: "include", headers: { Origin: location.origin } });
-        location.reload();
+    if (!me || !api) return;
+    requests.get(control)?.abort();
+    const controller = new AbortController();
+    requests.set(control, controller);
+    const isCurrent = () =>
+      !controller.signal.aborted &&
+      control.isConnected &&
+      requests.get(control) === controller;
+    const showLogin = () => {
+      const link = document.createElement("a");
+      link.className =
+        "group inline-flex items-center gap-1 hover:text-accent auth-link";
+      link.href = `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href)}`;
+      link.textContent = "Log in";
+      control.replaceChildren(link);
+    };
+    try {
+      const user = await requestBlogApi<{ id: string; name: string }>(me, {
+        signal: controller.signal,
       });
-    }).catch(() => {});
+      if (!isCurrent()) return;
+      if (!user || typeof user.id !== "string" || typeof user.name !== "string")
+        throw new BlogRequestError("response");
+      control.innerHTML = `<a class="auth-name" href="/account"></a><span class="auth-divider" aria-hidden="true">·</span><button class="auth-link auth-button" type="button" data-auth-logout>Log out</button>`;
+      control.querySelector<HTMLAnchorElement>(".auth-name")!.textContent =
+        user.name || "Reader";
+    } catch (error) {
+      if (!isCurrent()) return;
+      if (error instanceof BlogRequestError && error.status === 401)
+        showLogin();
+      else showError(control, error);
+    } finally {
+      if (requests.get(control) === controller) requests.delete(control);
+    }
   }
+  function initAuthControls() {
+    for (const control of document.querySelectorAll<HTMLElement>(
+      ".auth-control"
+    )) {
+      if (!bound.has(control)) {
+        bound.add(control);
+        control.addEventListener("click", async event => {
+          const button = (
+            event.target as HTMLElement
+          ).closest<HTMLButtonElement>("[data-auth-retry],[data-auth-logout]");
+          if (!button || button.disabled) return;
+          button.disabled = true;
+          if (button.hasAttribute("data-auth-retry")) {
+            await loadIdentity(control);
+            return;
+          }
+          requests.get(control)?.abort();
+          const controller = new AbortController();
+          requests.set(control, controller);
+          try {
+            await requestBlogApi(
+              `${control.dataset.authApi}/blog/auth/logout`,
+              { method: "POST", signal: controller.signal }
+            );
+            if (!controller.signal.aborted && control.isConnected)
+              location.reload();
+          } catch (error) {
+            if (!controller.signal.aborted && control.isConnected)
+              showError(control, error);
+          } finally {
+            if (requests.get(control) === controller) requests.delete(control);
+          }
+        });
+      }
+      void loadIdentity(control);
+    }
+  }
+  document.addEventListener("astro:before-swap", () => {
+    for (const controller of requests.values()) controller.abort();
+    requests.clear();
+  });
+  document.addEventListener("astro:page-load", initAuthControls);
+  if (document.readyState === "complete") initAuthControls();
 </script>

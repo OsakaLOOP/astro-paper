@@ -497,7 +497,7 @@
 
 .post-footer-layout {
   display: grid;
-  align-items: center;
+  align-items: start;
   margin-block: 2rem;
 }
 
@@ -522,7 +522,7 @@
 .post-footer-share {
   display: flex;
   min-width: 0;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 }
 

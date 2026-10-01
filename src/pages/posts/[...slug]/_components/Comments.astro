@@ -35,7 +35,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       data-input
       maxlength="2000"
       rows="4"
-      placeholder="批判も批評も雪\n評論無し、表現日和\n——『ポスト春』ヨルシカ"
+      placeholder="写下你的想法，和读者交流一下吧。"
     ></textarea>
     <div class="comment-preview" data-preview hidden></div>
     <div class="comments-editor-footer">
@@ -74,6 +74,31 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
   } from "@/utils/emoji";
 
   let emojiManifestPromise: Promise<EmojiManifest | null> | undefined;
+  let commentPlaceholdersPromise: Promise<string[]> | undefined;
+
+  const loadCommentPlaceholders = () => {
+    if (!commentPlaceholdersPromise) {
+      commentPlaceholdersPromise = fetch("/comments/placeholders.json", {
+        cache: "no-cache",
+      })
+        .then(async response => {
+          if (!response.ok) return [];
+          const payload = (await response.json()) as unknown;
+          const placeholders =
+            Array.isArray(payload) || payload === null
+              ? payload
+              : (payload as { placeholders?: unknown }).placeholders;
+          if (!Array.isArray(placeholders)) return [];
+          return placeholders.filter(
+            (placeholder): placeholder is string =>
+              typeof placeholder === "string" && placeholder.trim().length > 0
+          );
+        })
+        .catch(() => []);
+    }
+    return commentPlaceholdersPromise;
+  };
+
   const loadEmojiManifest = () => {
     if (!emojiManifestPromise) {
       emojiManifestPromise = fetch("/emoji/manifest.json", {
@@ -122,6 +147,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         emojiSwipeHint = picker.querySelector<HTMLElement>(
           "[data-emoji-swipe-hint]"
         )!;
+      let defaultPlaceholder = input.placeholder;
       const debugEnabled = section.dataset.commentsDebug === "true";
       const startedAt = performance.now();
       let emojiManifest: EmojiManifest | null = null;
@@ -159,6 +185,17 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         `${api}/blog/auth/login?returnTo=${encodeURIComponent(returnTo.href)}`;
       const replyMarker =
         '<span class="comment-reply-marker" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20h-7a4 4 0 0 1-4-4V4"></path><path d="m14 9-5-5-5 5"></path></svg></span>';
+
+      loadCommentPlaceholders().then(placeholders => {
+        if (lifecycle.signal.aborted || !section.isConnected) return;
+        if (placeholders.length > 0) {
+          defaultPlaceholder =
+            placeholders[Math.floor(Math.random() * placeholders.length)];
+          if (!section.dataset.replyTo && !section.dataset.editId) {
+            input.placeholder = defaultPlaceholder;
+          }
+        }
+      });
 
       const renderMarkdown = (value: string) => {
         if (!emojiManifest) {
@@ -712,7 +749,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
             delete section.dataset.replyTo;
             delete section.dataset.editId;
             delete section.dataset.editVersion;
-            input.placeholder = "Leave a comment…";
+            input.placeholder = defaultPlaceholder;
             await loadComments("refresh");
           } catch (error) {
             showActionError(

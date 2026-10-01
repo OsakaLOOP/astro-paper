@@ -4,10 +4,10 @@ export default defineAstroPaperConfig({
   site: {
     url: "https://loopo.cc/",
     title: "Loopo:443",
-    description: "Astro powered personal site",
+    description: "Personal blog of Loopo, a.k.a. Loop'Ōsaka, powered by Astro and AstroPaper, etc. Read the blog posts or check README for more info.",
     author: "Loopo",
     profile: "https://loopo.cc",
-    ogImage: "default-og.jpg",
+    ogImage: "default-og.png",
     lang: "en",
     timezone: "Asia/Tokyo",
     dir: "ltr",

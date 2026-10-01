@@ -179,7 +179,10 @@ const ogImage = ogImageUrl
 
       <AdjacentPostNav {prevPost} {nextPost} />
 
-      <Comments postSlug={getPostSlug(post.id, post.filePath)} />
+      <Comments
+        postSlug={getPostSlug(post.id, post.filePath)}
+        postTitle={title}
+      />
     </main>
   </div>
   <Footer />

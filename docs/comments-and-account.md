@@ -184,6 +184,24 @@ independently controlled by each user's third setting.
 
 ## SM mail integration
 
+All five blog notification types (new comment, reply, moderator removal, new
+article, article update) share the Loopo:443 wordmark, AstroPaper colors, dashed
+dividers, and a Google Sans Code font stack with monospace and CJK fallbacks.
+`/fonts/400.ttf` and `/fonts/700.ttf` expose the existing site font for clients
+that support web fonts. Mail clients that block web fonts use the monospace
+fallback; allow cross-origin font requests in the static host configuration.
+The article title is the main heading; comment submissions optionally provide
+`post_title`, with the slug retained as a fallback for older clients. Comment mail
+includes the complete comment with line breaks and, for replies, up to 320
+characters of the parent comment. Content mail includes the supplied description
+without a generic placeholder when it is absent. Both HTML and plain-text mail
+link `Manage notifications` to `/account/#notifications` on `PUBLIC_BLOG_ORIGIN`.
+Article URLs encode each slug segment separately so nested article paths work.
+Each type has its own action label and call to action. Moderator removal notices
+do not quote the deleted body or imply that the reader's account was suspended.
+Authentication verification and password-reset emails are owned by the separate
+SM service, not this blog; SM forwards blog mail without replacing its HTML.
+
 The blog service sends a signed service request to SM's internal mail endpoint. SM
 validates the service secret, calls the existing `Jobs.mail` queue, and never gives
 the blog service SMTP credentials. The request contains recipient, subject, text,

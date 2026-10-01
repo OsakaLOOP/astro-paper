@@ -1,7 +1,7 @@
 ---
 import EmojiPicker from "@/components/EmojiPicker.astro";
 
-const { postSlug } = Astro.props;
+const { postSlug, postTitle } = Astro.props;
 const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
 const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
 ---
@@ -11,6 +11,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
   id="comments"
   data-comments-api={api}
   data-post={postSlug}
+  data-post-title={postTitle}
   data-comments-debug={debug ? "true" : undefined}
 >
   <div class="comments-heading">
@@ -582,7 +583,8 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           count.textContent = `${payload.total} comments`;
           subscribe.checked =
             payload.subscribed ||
-            (!payload.subscription_configured && payload.auto_subscribe_comments);
+            (!payload.subscription_configured &&
+              payload.auto_subscribe_comments);
           showIdentity(Boolean(payload.viewer));
           const items = payload.items as any[];
           const ids = new Set(items.map(item => item.id));
@@ -683,6 +685,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
                     : {
                         id: crypto.randomUUID(),
                         post,
+                        post_title: section.dataset.postTitle,
                         body: value,
                         parent_id: parent || undefined,
                         subscribe: subscribe.checked,

@@ -49,7 +49,12 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
         >Save changes</button
       >
     </section>
-    <section class="account-section" data-notifications hidden>
+    <section
+      id="notifications"
+      class="account-section"
+      data-notifications
+      hidden
+    >
       <h2>Notifications</h2><div class="account-row">
         <label class="comment-subscribe"
           ><input type="checkbox" data-global /><span
@@ -163,6 +168,7 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
       accountPage.querySelector<HTMLAnchorElement>(
         "[data-security-link]"
       )!.href = "https://auth.loopo.cc/sign-in";
+      if (location.hash === "#notifications") notifications.scrollIntoView();
     }
     async function update(body: object) {
       await fetch(`${api}/blog/account`, {

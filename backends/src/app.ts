@@ -8,6 +8,11 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 import { HttpError } from "./errors.js";
+import {
+  commentMailTemplate,
+  commentRemovedMailTemplate,
+  contentMailTemplate,
+} from "./mail.js";
 
 export type Identity = { id: string; profile: Record<string, unknown> };
 export type MailMessage = {
@@ -50,41 +55,6 @@ const websiteUrl = {
 const params = { type: "object", required: ["id"], properties: { id: uuid } };
 const fields =
   "id,post_slug,user_id,author_name,author_url,author_email,body,parent_id,created_at,updated_at,deleted_at,version";
-const esc = (value: string) =>
-  value.replace(
-    /[&<>\"']/g,
-    c =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '\"': "&quot;",
-        "'": "&#39;",
-      })[c]!
-  );
-function mailTemplate(
-  article: string,
-  url: string,
-  author: string,
-  content: string,
-  action: string
-) {
-  const subject = `${action} · ${article}`;
-  const text = `${action}\n\n${author}: ${content}\n\nOpen the discussion: ${url}\n\nManage comment notifications in your account.`;
-  const html = `<div style="max-width:560px;margin:0 auto;font:16px/1.7 system-ui,sans-serif;color:#282728"><div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(action)} · ${esc(article)}</div><p style="color:#006cac;font:700 12px monospace;letter-spacing:.12em">LOOPO BLOG</p><h2 style="margin-bottom:8px">${esc(action)}</h2><p style="margin-top:0;color:#6b7280;font-size:14px">${esc(article)}</p><p><strong>${esc(author)}</strong></p><p style="white-space:pre-wrap">${esc(content)}</p><p><a href="${esc(url)}" style="color:#006cac">Open the discussion</a></p><hr style="border:0;border-top:1px solid #ece9e9;margin:24px 0"><p style="color:#6b7280;font-size:13px">Manage comment notifications in your account.</p></div>`;
-  return { subject, text, html };
-}
-function contentMailTemplate(
-  title: string,
-  url: string,
-  summary: string,
-  action: "New article" | "Article updated"
-) {
-  const subject = `${action} · ${title}`;
-  const text = `${action}\n\n${title}\n\n${summary}\n\nOpen the article: ${url}\n\nManage article and comment notifications in your account.`;
-  const html = `<div style="max-width:560px;margin:0 auto;font:16px/1.7 system-ui,sans-serif;color:#282728"><div style="display:none;max-height:0;overflow:hidden;opacity:0">${esc(action)} · ${esc(title)}</div><p style="color:#006cac;font:700 12px monospace;letter-spacing:.12em">LOOPO BLOG</p><h2 style="margin-bottom:8px">${esc(action)}</h2><h3>${esc(title)}</h3><p style="white-space:pre-wrap">${esc(summary)}</p><p><a href="${esc(url)}" style="color:#006cac">Open the article</a></p><hr style="border:0;border-top:1px solid #ece9e9;margin:24px 0"><p style="color:#6b7280;font-size:13px">Manage article and content notifications in your account.</p></div>`;
-  return { subject, text, html };
-}
 function validCommandSignature(
   body: string,
   eventId: string,
@@ -217,10 +187,18 @@ export async function buildApp(options: AppOptions) {
     if (!options.sendMail) return;
     await options.sendMail({ eventId: randomUUID(), to, subject, text, html });
   };
-  const postUrl = (slug: string) =>
-    `${process.env.PUBLIC_BLOG_ORIGIN ?? "https://www.loopo.cc"}/posts/${encodeURIComponent(slug)}/#comments`;
-  const contentUrl = (slug: string) =>
-    `${process.env.PUBLIC_BLOG_ORIGIN ?? "https://www.loopo.cc"}/posts/${encodeURIComponent(slug)}/`;
+  const blogOrigin = (
+    process.env.PUBLIC_BLOG_ORIGIN ?? "https://www.loopo.cc"
+  ).replace(/\/+$/, "");
+  const contentUrl = (slug: string) => {
+    const path = slug
+      .replace(/^\/+|\/+$/g, "")
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/");
+    return `${blogOrigin}/posts/${path}/`;
+  };
+  const postUrl = (slug: string) => `${contentUrl(slug)}#comments`;
   async function notifyComment(
     postSlug: string,
     comment: {
@@ -230,6 +208,7 @@ export async function buildApp(options: AppOptions) {
       author_email: string;
       body: string;
       parent_id?: string;
+      post_title?: string;
     }
   ) {
     if (!options.sendMail) return;
@@ -251,13 +230,26 @@ export async function buildApp(options: AppOptions) {
     for (const item of subscriptions.rows)
       if (item.user_id !== comment.user_id && item.email.toLowerCase() !== senderEmail)
         recipients.set(item.email.toLowerCase(), item.email);
+    let context: { author: string; content: string } | undefined;
     if (comment.parent_id) {
       const parent = (
-        await options.pool.query<{ user_id: string; author_email: string }>(
-          "SELECT user_id,author_email FROM site_blog.comments WHERE id=$1",
+        await options.pool.query<{
+          user_id: string;
+          author_email: string;
+          author_name: string;
+          body: string;
+        }>(
+          "SELECT user_id,author_email,author_name,body FROM site_blog.comments WHERE id=$1",
           [comment.parent_id]
         )
       ).rows[0];
+      if (parent?.body) {
+        const content = parent.body.trim();
+        context = {
+          author: parent.author_name,
+          content: content.length > 320 ? `${content.slice(0, 320)}…` : content,
+        };
+      }
       if (
         parent?.author_email &&
         parent.user_id !== comment.user_id &&
@@ -273,17 +265,13 @@ export async function buildApp(options: AppOptions) {
         recipients.set(parent.author_email.toLowerCase(), parent.author_email);
     }
     recipients.delete(senderEmail);
-    const excerpt = comment.body
-      .replace(/[`*_>#\[\]()]/g, "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 240);
-    const template = mailTemplate(
-      postSlug,
+    const template = commentMailTemplate(
+      comment.post_title?.trim() || postSlug,
       postUrl(postSlug),
       comment.author_name,
-      excerpt,
-      comment.parent_id ? "New reply" : "New comment"
+      comment.body,
+      comment.parent_id ? "New reply" : "New comment",
+      context
     );
     for (const to of recipients.values())
       await send(to, template.subject, template.text, template.html);
@@ -397,6 +385,7 @@ export async function buildApp(options: AppOptions) {
       Body: {
         id: string;
         post: string;
+        post_title?: string;
         body: string;
         parent_id?: string;
         subscribe?: boolean;
@@ -413,6 +402,7 @@ export async function buildApp(options: AppOptions) {
             properties: {
               id: uuid,
               post,
+              post_title: { type: "string", minLength: 1, maxLength: 240 },
               body,
               parent_id: uuid,
               subscribe: { type: "boolean" },
@@ -472,6 +462,7 @@ export async function buildApp(options: AppOptions) {
           author_email: p.email,
           body: input.body.trim(),
           parent_id: input.parent_id,
+          post_title: input.post_title,
         }).catch(error =>
           request.log.error({ err: error }, "Comment notification failed")
         );
@@ -532,12 +523,9 @@ export async function buildApp(options: AppOptions) {
           [request.params.id]
         );
         if (admin && old.user_id !== user.id && old.author_email) {
-          const mail = mailTemplate(
+          const mail = commentRemovedMailTemplate(
             old.post_slug,
-            postUrl(old.post_slug),
-            "The site admin",
-            "Your comment was removed by an admin.",
-            "Comment removed"
+            postUrl(old.post_slug)
           );
           void send(old.author_email, mail.subject, mail.text, mail.html).catch(
             error =>
@@ -714,7 +702,7 @@ export async function buildApp(options: AppOptions) {
       const template = contentMailTemplate(
         request.body.title,
         contentUrl(request.body.slug),
-        request.body.summary?.trim() || "A new update is available on the blog.",
+        request.body.summary?.trim() ?? "",
         request.body.kind === "new_article" ? "New article" : "Article updated"
       );
       const results = await Promise.allSettled(

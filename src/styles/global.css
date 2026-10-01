@@ -141,6 +141,8 @@
 
 .notification-link {
   flex: 0 0 auto;
+  margin-inline-start: auto;
+  text-align: right;
   color: var(--muted-foreground);
   font-size: 0.8rem;
   text-decoration: underline;
@@ -795,11 +797,8 @@
     grid-area: next;
   }
 
-  .post-footer-share {
+  .post-footer-layout .post-footer-share {
     grid-area: share;
-  }
-
-  .post-footer-share {
     padding-inline: 0;
     border-inline: 0;
   }

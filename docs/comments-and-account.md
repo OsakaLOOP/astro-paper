@@ -216,7 +216,9 @@ under `src/content/posts`; install them with `npm run hooks:install`. Hooks are
 non-blocking: a mail outage is reported to stderr but does not prevent a commit
 or merge. Content mail is sent only when the triggering commit message contains
 `[notify]`. A post's Front Matter `notify` field suppresses that post when set to
-`false`; omitted `notify` defaults to `true`.
+`false`; omitted `notify` defaults to `true`. Front Matter is read from the
+committed file, not the working tree, and supports YAML comments and multiline
+values.
 
 ## Acceptance checklist
 

@@ -67,21 +67,21 @@ const homePath = getRelativeLocaleUrl(locale, "");
         </LinkButton>{" "}
         for more info.
       </p>
-      {
-        (
-          <div class="mt-4 flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
-            {socials.length > 0 && (
-              <div class="flex min-w-0 max-sm:flex-col sm:items-center">
-                <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">
-                  {t.home.socialLinks}:
-                </div>
-                <Socials />
+      <div
+        class="mt-4 flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start"
+      >
+        {
+          socials.length > 0 && (
+            <div class="flex min-w-0 max-sm:flex-col sm:items-center">
+              <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">
+                {t.home.socialLinks}:
               </div>
-            )}
-            <NotificationLink />
-          </div>
-        )
-      }
+              <Socials />
+            </div>
+          )
+        }
+        <NotificationLink />
+      </div>
     </section>
 
     {

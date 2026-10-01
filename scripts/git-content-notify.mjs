@@ -1,5 +1,4 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
 import { basename, extname, relative, resolve } from "node:path";
 import { createHmac } from "node:crypto";
 
@@ -35,14 +34,17 @@ try {
 }
 if (!changes) process.exit(0);
 
-const parseFrontmatter = file => {
-  const source = readFileSync(resolve(root, file), "utf8");
-  const match = source.match(/^---\s*\n([\s\S]*?)\n---/);
-  const value = key => match?.[1]?.match(new RegExp(`^${key}:\\s*["']?(.+?)["']?\\s*$`, "m"))?.[1]?.trim() ?? "";
+const { parseFrontmatter } = await import("@astrojs/markdown-remark");
+const readPost = file => {
+  const source = execFileSync("git", ["show", `${commit}:${file}`], {
+    cwd: root,
+    encoding: "utf8",
+  });
+  const { frontmatter } = parseFrontmatter(source);
   return {
-    title: value("title") || basename(file, extname(file)),
-    summary: value("description"),
-    notify: value("notify").toLowerCase() !== "false",
+    title: frontmatter.title || basename(file, extname(file)),
+    summary: frontmatter.description ?? "",
+    notify: frontmatter.notify !== false,
   };
 };
 const slugFor = file => relative(resolve(root, "src/content/posts"), resolve(root, file)).replace(/\\/g, "/").replace(/\.(md|mdx)$/i, "");
@@ -52,7 +54,7 @@ for (const line of changes.split("\n")) {
   const [status, ...pathParts] = line.split(/\s+/);
   const file = pathParts.at(-1);
   if (!file || !/\.(md|mdx)$/i.test(file)) continue;
-  const { title, summary, notify } = parseFrontmatter(file);
+  const { title, summary, notify } = readPost(file);
   if (!notify) continue;
   const payload = {
     event_id: `${commit}:${file}`,

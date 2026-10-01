@@ -11,6 +11,7 @@ type Props = {
   description?: string;
   ogImage?: string;
   canonicalURL?: string;
+  type?: "website" | "article";
 };
 
 const { site } = config;
@@ -19,10 +20,14 @@ const {
   title = site.title,
   description = site.description,
   ogImage = resolveDefaultOgImagePath(config),
-  canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
+  type = "website",
 } = Astro.props;
 
-const socialImageURL = new URL(ogImage, Astro.site ?? Astro.url);
+const canonicalUrl = new URL(
+  Astro.props.canonicalURL ?? Astro.url.pathname,
+  Astro.site ?? Astro.url
+).href;
+const socialImageUrl = new URL(ogImage, Astro.site ?? Astro.url).href;
 const rssHref = getRelativeLocaleUrl(
   Astro.currentLocale ?? config.site.lang,
   "rss.xml"
@@ -40,7 +45,7 @@ const rssHref = getRelativeLocaleUrl(
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href={getAssetPath("favicon.svg")} />
     <link rel="icon" href={getAssetPath("favicon.ico")} />
-    <link rel="canonical" href={canonicalURL} />
+    <link rel="canonical" href={canonicalUrl} />
     <meta name="generator" content={Astro.generator} />
     <!-- Primary meta -->
     <title>{title}</title>
@@ -50,19 +55,19 @@ const rssHref = getRelativeLocaleUrl(
     <link rel="sitemap" href={getAssetPath("sitemap-index.xml")} />
 
     <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
     <meta property="og:site_name" content={site.title} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:image" content={socialImageURL} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={socialImageUrl} />
 
     <!-- Twitter / X -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={socialImageURL} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalUrl} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageUrl} />
 
     <!-- RSS autodiscovery -->
     <link

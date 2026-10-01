@@ -26,7 +26,7 @@ const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 const homePath = getRelativeLocaleUrl(locale, "");
 ---
 
-<Layout>
+<Layout description={config.site.description}>
   <Header />
   <main
     id="main-content"

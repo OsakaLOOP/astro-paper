@@ -218,6 +218,12 @@ or merge.
 
 ## Acceptance checklist
 
+- Edited comments show the edit icon and latest edit time beside the creation time.
+- Article views are stored by the existing local blog API and deduplicated per
+  article/IP for three hours; summary counts appear in article lists and posts.
+- SM administrators can query article, daily, authenticated-user, and recent
+  visit statistics through the signed blog API integration.
+
 - Header login/profile/logout actions are LinkButton-consistent and keyboard usable.
 - `/account` edits the blog display name and manages global/article subscriptions.
 - Markdown preview and rendered comments are sanitized.

@@ -472,6 +472,28 @@
   font-size: 0.75rem;
 }
 
+.comment-edited {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.comment-edited svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.article-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
 .comment p {
   margin: 0.5rem 0;
   line-height: 1.7;

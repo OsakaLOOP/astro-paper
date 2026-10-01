@@ -1,8 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { getPostUrl } from "@/utils/getPostPaths";
+import { getPostSlug, getPostUrl } from "@/utils/getPostPaths";
 import { toTransitionName } from "@/utils/toTransitionName";
 import Datetime from "./Datetime.astro";
+import ArticleStats from "./ArticleStats.astro";
 
 type Props = {
   variant?: "h2" | "h3";
@@ -27,5 +28,6 @@ const { title, description, ...props } = data;
     </Heading>
   </a>
   <Datetime {...props} />
+  <ArticleStats slug={getPostSlug(id, filePath)} />
   <p>{description}</p>
 </li>

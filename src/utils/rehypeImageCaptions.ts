@@ -9,6 +9,12 @@ type Node = {
 const isElement = (node: Node | undefined, tagName?: string) =>
   node?.type === "element" && (!tagName || node.tagName === tagName);
 
+const isCaptionImage = (node: Node) => {
+  if (!isElement(node, "img")) return false;
+  const className = node.properties?.className;
+  return !(Array.isArray(className) && className.includes("emoji-inline"));
+};
+
 const createCaption = (value: string): Node => ({
   type: "element",
   tagName: "figcaption",
@@ -28,15 +34,43 @@ const createFigure = (image: Node): Node => {
   };
 };
 
+const hasContent = (children: Node[]) =>
+  children.some(child => child.type !== "text" || Boolean(child.value?.trim()));
+
+const splitImageParagraph = (paragraph: Node) => {
+  if (!paragraph.children?.some(isCaptionImage)) return null;
+
+  const replacements: Node[] = [];
+  let textChildren: Node[] = [];
+  const flushText = () => {
+    if (hasContent(textChildren)) {
+      replacements.push({ ...paragraph, children: textChildren });
+    }
+    textChildren = [];
+  };
+
+  for (const child of paragraph.children) {
+    if (isCaptionImage(child)) {
+      flushText();
+      replacements.push(createFigure(child));
+    } else {
+      textChildren.push(child);
+    }
+  }
+  flushText();
+  return replacements;
+};
+
 const transform = (node: Node) => {
   if (!node.children) return;
 
   for (let index = 0; index < node.children.length; index += 1) {
     const child = node.children[index];
-    if (isElement(child, "p") && child.children?.length === 1) {
-      const image = child.children[0];
-      if (isElement(image, "img")) {
-        node.children[index] = createFigure(image);
+    if (isElement(child, "p") && child.children) {
+      const replacements = splitImageParagraph(child);
+      if (replacements) {
+        node.children.splice(index, 1, ...replacements);
+        index += replacements.length - 1;
         continue;
       }
     }

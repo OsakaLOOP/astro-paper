@@ -16,4 +16,22 @@ including `004_notifications.sql`, before restarting the container. The blog
 migrations are site-owned and must be applied with the SM migration role; they
 are not part of SM's `core.schema_migrations` table.
 
+## Article analytics
+
+Apply `008_analytics.sql` with the same migration role. Configure
+`SITE_ANALYTICS_SECRET` on this service and set `BLOG_ANALYTICS_SECRET` in SM
+to the same random value (at least 32 characters). Set SM's
+`BLOG_ANALYTICS_URL` to `https://api.loopo.cc/blog/analytics/admin`. The public
+site uses the existing `PUBLIC_BLOG_API` endpoint; no separate analytics service
+is required.
+
+`POST /blog/analytics/view` records at most one view per article and visitor in
+a rolling three-hour window. Authenticated visitors use their user ID and
+anonymous visitors use an HMAC of their IP; a recent match on either the user
+or IP also suppresses the event. Only aggregate counts are exposed by
+`GET /blog/analytics`.
+The SM-only signed analytics endpoint returns article totals, daily counts,
+authenticated users, and recent visits. IP addresses are HMAC-hashed before
+storage and are not exposed in the report.
+
 For local development set `SITE_ISSUER=http://127.0.0.1:3000/api/auth`, `SITE_API_URL=http://127.0.0.1:4100`, and `FRONTEND_ORIGINS=http://127.0.0.1:4321`.

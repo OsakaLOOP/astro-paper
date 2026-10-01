@@ -1,8 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { getPostUrl } from "@/utils/getPostPaths";
+import { getPostSlug, getPostUrl } from "@/utils/getPostPaths";
 import { toTransitionName } from "@/utils/toTransitionName";
 import Datetime from "./Datetime.astro";
+import ArticleStats from "./ArticleStats.astro";
 
 type Props = {
   variant?: "h2" | "h3";
@@ -26,6 +27,10 @@ const { title, description, ...props } = data;
       {title}
     </Heading>
   </a>
-  <Datetime {...props} />
+  <div class="flex items-center gap-2">
+    <Datetime {...props} />
+    <span aria-hidden="true" class="text-muted-foreground">|</span>
+    <ArticleStats slug={getPostSlug(id, filePath)} />
+  </div>
   <p>{description}</p>
 </li>

@@ -291,6 +291,7 @@
   align-items: center;
   gap: 0.25rem;
   overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
   padding: 0.1rem 0.1rem 0.55rem;
   scrollbar-width: thin;
@@ -472,6 +473,74 @@
   font-size: 0.75rem;
 }
 
+.comment-edited {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.comment-edited svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.article-stats {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.post-footer-layout {
+  display: grid;
+  align-items: start;
+  margin-block: 2rem;
+}
+
+.post-footer-layout--both {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.post-footer-layout--prev-only,
+.post-footer-layout--next-only {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.post-footer-layout--empty {
+  grid-template-columns: 1fr;
+}
+
+.post-footer-prev,
+.post-footer-next {
+  min-width: 0;
+}
+
+.post-footer-share {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.post-footer-layout--both .post-footer-share {
+  padding-inline: 1.5rem;
+  border-inline: 1px solid var(--border);
+}
+
+.post-footer-layout--prev-only .post-footer-share {
+  padding-inline-start: 1.5rem;
+  border-inline-start: 1px solid var(--border);
+}
+
+.post-footer-layout--next-only .post-footer-share {
+  padding-inline-end: 1.5rem;
+  border-inline-end: 1px solid var(--border);
+}
+
 .comment p {
   margin: 0.5rem 0;
   line-height: 1.7;
@@ -486,7 +555,7 @@
   max-width: 4rem;
   max-height: 4rem;
   margin: 0;
-  vertical-align: middle;
+  vertical-align: text-bottom;
   object-fit: contain;
 }
 
@@ -548,13 +617,13 @@
   background: transparent;
 }
 
-.comment-subscribe input:checked+.comment-check {
+.comment-subscribe input:checked + .comment-check {
   border-color: var(--accent);
   background: var(--accent);
   box-shadow: inset 0 0 0 2px var(--background);
 }
 
-.comment-subscribe input:focus-visible+.comment-check {
+.comment-subscribe input:focus-visible + .comment-check {
   outline: 2px dashed var(--accent);
   outline-offset: 2px;
 }
@@ -677,6 +746,16 @@
 }
 
 @media (max-width: 640px) {
+  .post-footer-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .post-footer-share {
+    padding-inline: 0;
+    border-inline: 0;
+  }
+
   .comments-heading {
     align-items: center;
   }

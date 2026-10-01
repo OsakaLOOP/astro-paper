@@ -1,0 +1,70 @@
+---
+const { slug, record = false } = Astro.props;
+const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
+---
+
+<span
+  class="article-stats"
+  data-article-stats
+  data-stats-api={api}
+  data-post-slug={slug}
+  data-record={record ? "true" : undefined}
+  aria-label="Article views"
+>
+  <span aria-hidden="true">◉</span>
+  <span data-view-count>—</span>
+  <span>views</span>
+</span>
+
+<script>
+  const initialized = new WeakSet<HTMLElement>();
+  async function loadArticleStats() {
+    const nodes = [
+      ...document.querySelectorAll<HTMLElement>("[data-article-stats]"),
+    ];
+    const groups = new Map<string, HTMLElement[]>();
+    for (const node of nodes) {
+      if (initialized.has(node)) continue;
+      initialized.add(node);
+      const api = node.dataset.statsApi!;
+      groups.set(api, [...(groups.get(api) ?? []), node]);
+    }
+    for (const [api, items] of groups) {
+      const recordNodes = items.filter(node => node.dataset.record === "true");
+      await Promise.all(
+        recordNodes.map(node =>
+          fetch(`${api}/blog/analytics/view`, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ post: node.dataset.postSlug }),
+            keepalive: true,
+          }).catch(() => undefined)
+        )
+      );
+      const slugs = [...new Set(items.map(node => node.dataset.postSlug!))];
+      if (!slugs.length) continue;
+      try {
+        const query = new URLSearchParams({ posts: slugs.join(",") });
+        const response = await fetch(`${api}/blog/analytics?${query}`, {
+          credentials: "include",
+          cache: "no-store",
+        });
+        if (!response.ok) continue;
+        const payload = (await response.json()) as {
+          items: { post_slug: string; views: number }[];
+        };
+        const counts = new Map(
+          payload.items.map(item => [item.post_slug, item.views])
+        );
+        for (const node of items) {
+          const output = node.querySelector<HTMLElement>("[data-view-count]");
+          if (output)
+            output.textContent = String(counts.get(node.dataset.postSlug!) ?? 0);
+        }
+      } catch {}
+    }
+  }
+  document.addEventListener("astro:page-load", loadArticleStats);
+  loadArticleStats();
+</script>

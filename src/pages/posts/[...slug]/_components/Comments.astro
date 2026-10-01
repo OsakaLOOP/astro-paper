@@ -1,5 +1,6 @@
 ---
 import EmojiPicker from "@/components/EmojiPicker.astro";
+import IconEdit from "@/assets/icons/IconEdit.svg";
 
 const { postSlug, postTitle } = Astro.props;
 const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
@@ -52,6 +53,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
     <a data-login-link>Log in</a>
   </div>
   <p class="comments-error" data-feedback role="alert" hidden></p>
+  <span data-comment-edit-icon hidden><IconEdit /></span>
   <div class="comments-list" data-list aria-live="polite">
     <p class="comments-loading">Loading comments…</p>
   </div>
@@ -106,6 +108,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         subscribe =
           section.querySelector<HTMLInputElement>("[data-subscribe]")!,
         feedback = section.querySelector<HTMLElement>("[data-feedback]")!,
+        editIcon = section.querySelector<HTMLElement>("[data-comment-edit-icon]")!,
         picker = section.querySelector<HTMLElement>("[data-emoji-picker]")!,
         emojiTrigger = picker.querySelector<HTMLButtonElement>(
           "[data-emoji-trigger]"
@@ -602,7 +605,17 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
                 dateStyle: "medium",
                 timeStyle: "short",
               });
-              return `<article class="comment${item.parent_id ? " comment--reply" : ""}" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}" data-comment-body="${safe(item.body)}">${item.parent_id ? replyMarker : ""}<div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time datetime="${createdAt.toISOString()}">${formattedTime}</time></div>${item.deleted_at ? `<p class="account-muted">Comment removed by an admin.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
+              const editedAt = item.updated_at ? new Date(item.updated_at) : null;
+              const editedLabel = editedAt
+                ? editedAt.toLocaleString(undefined, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })
+                : "";
+              const edited = editedAt
+                ? `<span class="comment-edited" title="Edited ${editedLabel}">${editIcon.innerHTML}<time datetime="${editedAt.toISOString()}">${editedLabel}</time></span>`
+                : "";
+              return `<article class="comment${item.parent_id ? " comment--reply" : ""}" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}" data-comment-body="${safe(item.body)}">${item.parent_id ? replyMarker : ""}<div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time datetime="${createdAt.toISOString()}">${formattedTime}</time>${edited}</div>${item.deleted_at ? `<p class="account-muted">Comment removed by an admin.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
             };
             const ordered: string[] = [];
             const flatten = (item: any, depth: number) => {

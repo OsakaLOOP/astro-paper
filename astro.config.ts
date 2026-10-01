@@ -19,6 +19,7 @@ import {
 import { transformerFileName } from "./src/utils/transformers/fileName";
 import config from "./astro-paper.config";
 import { rehypeEmoji, type EmojiManifest } from "./src/utils/emoji";
+import { rehypeImageCaptions } from "./src/utils/rehypeImageCaptions";
 
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -49,7 +50,12 @@ export default defineConfig({
   markdown: {
     processor: unified({
       remarkPlugins: [remarkMath],
-      rehypePlugins: [rehypeCallouts, rehypeKatex, rehypeEmoji(emojiManifest)],
+      rehypePlugins: [
+        rehypeCallouts,
+        rehypeKatex,
+        rehypeEmoji(emojiManifest),
+        rehypeImageCaptions,
+      ],
     }),
     shikiConfig: {
       themes: { light: "min-light", dark: "night-owl" },

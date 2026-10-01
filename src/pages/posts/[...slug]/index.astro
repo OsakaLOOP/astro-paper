@@ -4,6 +4,7 @@ import PostLayout from "@/layouts/PostLayout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Datetime from "@/components/Datetime.astro";
+import ArticleStats from "@/components/ArticleStats.astro";
 import Tag from "@/components/Tag.astro";
 import PostSidebar from "@/components/PostSidebar.astro";
 import { getPostSlug, getPostUrl } from "@/utils/getPostPaths";
@@ -141,6 +142,10 @@ const ogImage = ogImageUrl
           |
         </span>
         <EditPost {hideEditPost} {post} class="max-sm:hidden" />
+        <span aria-hidden="true" class="text-muted-foreground max-sm:hidden">
+          |
+        </span>
+        <ArticleStats slug={getPostSlug(post.id, post.filePath)} record />
       </div>
 
       <article
@@ -173,11 +178,9 @@ const ogImage = ogImageUrl
         }
       </ul>
 
-      <ShareLinks />
-
-      <hr class="my-8 border-dashed" />
-
-      <AdjacentPostNav {prevPost} {nextPost} />
+      <AdjacentPostNav {prevPost} {nextPost}>
+        <ShareLinks />
+      </AdjacentPostNav>
 
       <Comments
         postSlug={getPostSlug(post.id, post.filePath)}

@@ -35,6 +35,7 @@ export interface AppOptions {
   autoSubscribeCommentsDefault?: boolean;
   contentNotificationsDefault?: boolean;
   commandSecret?: string;
+  analyticsSecret?: string;
   sendMail?: (message: MailMessage) => Promise<void>;
   logger?: boolean;
   commentsDebug?: boolean;
@@ -153,6 +154,19 @@ export async function buildApp(options: AppOptions) {
       options.moderatorIds?.includes(user.id) ||
       options.authorUserId === user.id
     );
+  const analyticsIdentity = (request: FastifyRequest, user: Identity | null) => {
+    const ipHash = createHmac(
+      "sha256",
+      options.analyticsSecret ?? options.commandSecret ?? "site-blog-analytics"
+    )
+      .update(request.ip)
+      .digest("hex");
+    return {
+      visitorKey: user ? `user:${user.id}` : `ip:${ipHash}`,
+      userId: user?.id ?? null,
+      ipHash,
+    };
+  };
   const getProfile = async (user: Identity) => {
     const email = String(user.profile.email ?? "");
     const name =
@@ -284,6 +298,115 @@ export async function buildApp(options: AppOptions) {
       )
         throw new HttpError(403, "ORIGIN_REJECTED");
     });
+    api.post<{ Body: { post: string } }>(
+      "/blog/analytics/view",
+      {
+        config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
+        schema: {
+          body: {
+            type: "object",
+            additionalProperties: false,
+            required: ["post"],
+            properties: { post },
+          },
+        },
+      },
+      async request => {
+        const user = await options.getUser(request);
+        const identity = analyticsIdentity(request, user);
+        const client = await options.pool.connect();
+        try {
+          await client.query("BEGIN");
+          await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [request.body.post]);
+          const accepted = await client.query(
+            `INSERT INTO site_blog.article_view_visitors(post_slug,visitor_key,user_id,ip_hash)
+             SELECT $1,$2,$3,$4
+             WHERE NOT EXISTS (
+               SELECT 1 FROM site_blog.article_view_visitors
+               WHERE post_slug=$1
+                 AND last_viewed_at > now() - interval '3 hours'
+                 AND (visitor_key=$2 OR ip_hash=$4)
+             )
+             ON CONFLICT(post_slug,visitor_key) DO UPDATE SET
+               last_viewed_at=now(), view_count=site_blog.article_view_visitors.view_count+1,
+               user_id=COALESCE(excluded.user_id,site_blog.article_view_visitors.user_id),
+               ip_hash=excluded.ip_hash
+             WHERE site_blog.article_view_visitors.last_viewed_at <= now() - interval '3 hours'
+             RETURNING view_count`,
+            [request.body.post, identity.visitorKey, identity.userId, identity.ipHash]
+          );
+          if (accepted.rowCount) {
+            await client.query(
+              `INSERT INTO site_blog.article_view_events(post_slug,visitor_key,user_id,ip_hash,user_agent,referrer)
+               VALUES($1,$2,$3,$4,$5,$6)`,
+              [
+                request.body.post,
+                identity.visitorKey,
+                identity.userId,
+                identity.ipHash,
+                String(request.headers["user-agent"] ?? "").slice(0, 500) || null,
+                String(request.headers.referer ?? "").slice(0, 1000) || null,
+              ]
+            );
+          }
+          await client.query("COMMIT");
+          return { recorded: Boolean(accepted.rowCount) };
+        } catch (error) {
+          await client.query("ROLLBACK").catch(() => undefined);
+          throw error;
+        } finally {
+          client.release();
+        }
+      }
+    );
+    api.get<{ Querystring: { post?: string; posts?: string } }>(
+      "/blog/analytics",
+      {
+        schema: {
+          querystring: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              post,
+              posts: { type: "string", minLength: 1, maxLength: 6000 },
+            },
+          },
+        },
+      },
+      async request => {
+        const slugs = [
+          ...(request.query.post ? [request.query.post] : []),
+          ...(request.query.posts?.split(",") ?? []),
+        ]
+          .map(value => value.trim())
+          .filter(Boolean);
+        const uniqueSlugs = [...new Set(slugs)];
+        if (!uniqueSlugs.length || uniqueSlugs.length > 100)
+          throw new HttpError(400, "POSTS_REQUIRED");
+        const rows = (
+          await options.pool.query<{
+            post_slug: string;
+            views: string;
+            unique_visitors: string;
+          }>(
+            `SELECT post_slug, COALESCE(SUM(view_count),0)::bigint AS views,
+                    count(*)::bigint AS unique_visitors
+             FROM site_blog.article_view_visitors
+             WHERE post_slug=ANY($1::text[])
+             GROUP BY post_slug`,
+            [uniqueSlugs]
+          )
+        ).rows;
+        const bySlug = new Map(rows.map(row => [row.post_slug, row]));
+        return {
+          items: uniqueSlugs.map(slug => ({
+            post_slug: slug,
+            views: Number(bySlug.get(slug)?.views ?? 0),
+            unique_visitors: Number(bySlug.get(slug)?.unique_visitors ?? 0),
+          })),
+        };
+      }
+    );
     api.get<{ Querystring: { post: string; after?: string; limit?: number } }>(
       "/blog/comments",
       {
@@ -654,6 +777,117 @@ export async function buildApp(options: AppOptions) {
       }
     );
   });
+  app.post<{
+    Body: {
+      event_id: string;
+      post?: string;
+      from?: string;
+      to?: string;
+      limit?: number;
+      offset?: number;
+    };
+  }>(
+    "/blog/analytics/admin",
+    {
+      schema: {
+        body: {
+          type: "object",
+          additionalProperties: false,
+          required: ["event_id"],
+          properties: {
+            event_id: { type: "string", minLength: 1, maxLength: 200 },
+            post,
+            from: { type: "string", format: "date-time" },
+            to: { type: "string", format: "date-time" },
+            limit: { type: "integer", minimum: 1, maximum: 200 },
+            offset: { type: "integer", minimum: 0, maximum: 10000 },
+          },
+        },
+      },
+    },
+    async request => {
+      const raw = JSON.stringify(request.body);
+      if (
+        !validCommandSignature(
+          raw,
+          request.body.event_id,
+          request.headers["x-site-command-timestamp"],
+          request.headers["x-site-command-signature"],
+          options.analyticsSecret
+        )
+      )
+        throw new HttpError(401, "ANALYTICS_UNAUTHORIZED");
+      const limit = request.body.limit ?? 50;
+      const offset = request.body.offset ?? 0;
+      const filters = ["1=1"];
+      const values: unknown[] = [];
+      if (request.body.post) {
+        values.push(request.body.post);
+        filters.push(`post_slug=$${values.length}`);
+      }
+      if (request.body.from) {
+        values.push(request.body.from);
+        filters.push(`viewed_at >= $${values.length}::timestamptz`);
+      }
+      if (request.body.to) {
+        values.push(request.body.to);
+        filters.push(`viewed_at < $${values.length}::timestamptz`);
+      }
+      const where = filters.join(" AND ");
+      const [summary, posts, users, days, recent] = await Promise.all([
+        options.pool.query(
+          `SELECT count(*)::bigint AS total_views,
+                  count(DISTINCT visitor_key)::bigint AS unique_visitors,
+                  count(DISTINCT user_id)::bigint AS authenticated_visitors
+           FROM site_blog.article_view_events WHERE ${where}`,
+          values
+        ),
+        options.pool.query(
+          `SELECT post_slug, count(*)::bigint AS views,
+                  count(DISTINCT visitor_key)::bigint AS unique_visitors,
+                  max(viewed_at) AS last_viewed_at
+           FROM site_blog.article_view_events WHERE ${where}
+           GROUP BY post_slug ORDER BY views DESC, post_slug
+           LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
+          [...values, limit, offset]
+        ),
+        options.pool.query(
+          `SELECT e.user_id, COALESCE(p.display_name,'Reader') AS display_name,
+                  p.email, count(*)::bigint AS views,
+                  count(DISTINCT e.post_slug)::bigint AS articles,
+                  max(e.viewed_at) AS last_viewed_at
+           FROM site_blog.article_view_events e
+           LEFT JOIN site_blog.profiles p ON p.user_id=e.user_id
+           WHERE ${where} AND e.user_id IS NOT NULL
+           GROUP BY e.user_id,p.display_name,p.email
+           ORDER BY views DESC,e.user_id
+           LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
+          [...values, limit, offset]
+        ),
+        options.pool.query(
+          `SELECT date_trunc('day', viewed_at) AS day, count(*)::bigint AS views,
+                  count(DISTINCT visitor_key)::bigint AS unique_visitors
+           FROM site_blog.article_view_events WHERE ${where}
+           GROUP BY day ORDER BY day DESC LIMIT 366`,
+          values
+        ),
+        options.pool.query(
+          `SELECT id,post_slug,user_id,user_agent,referrer,viewed_at
+           FROM site_blog.article_view_events WHERE ${where}
+           ORDER BY viewed_at DESC,id DESC
+           LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
+          [...values, limit, offset]
+        ),
+      ]);
+      return {
+        summary: summary.rows[0],
+        posts: posts.rows,
+        users: users.rows,
+        days: days.rows,
+        recent: recent.rows,
+      };
+    }
+  );
   app.post<{
     Body: {
       event_id: string;

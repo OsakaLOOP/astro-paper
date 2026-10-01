@@ -555,7 +555,7 @@
   max-width: 4rem;
   max-height: 4rem;
   margin: 0;
-  vertical-align: middle;
+  vertical-align: text-bottom;
   object-fit: contain;
 }
 

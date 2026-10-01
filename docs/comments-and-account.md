@@ -214,7 +214,9 @@ The content endpoint is `POST /blog/hooks/content`. It accepts `new_article` and
 `.githooks/post-commit` and `.githooks/post-merge` hooks inspect changed files
 under `src/content/posts`; install them with `npm run hooks:install`. Hooks are
 non-blocking: a mail outage is reported to stderr but does not prevent a commit
-or merge.
+or merge. Content mail is sent only when the triggering commit message contains
+`[notify]`. A post's Front Matter `notify` field suppresses that post when set to
+`false`; omitted `notify` defaults to `true`.
 
 ## Acceptance checklist
 

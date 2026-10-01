@@ -1,0 +1,46 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import config from "@/config";
+
+const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
+const locale = Astro.currentLocale ?? config.site.lang;
+const accountPath = `${getRelativeLocaleUrl(locale, "account")}#notifications`;
+const accountUrl = new URL(accountPath, Astro.url).href;
+const loginUrl = `${api}/blog/auth/login?returnTo=${encodeURIComponent(accountUrl)}`;
+---
+
+<a
+  class="notification-link"
+  data-notification-link
+  data-api={api}
+  data-account-url={accountPath}
+  data-login-url={loginUrl}
+  href={loginUrl}
+>
+  Log in to manage notifications
+</a>
+
+<script>
+  const initialized = new WeakSet<HTMLAnchorElement>();
+
+  async function initNotificationLink() {
+    for (const link of document.querySelectorAll<HTMLAnchorElement>(
+      "[data-notification-link]"
+    )) {
+      if (initialized.has(link)) continue;
+      initialized.add(link);
+      try {
+        const response = await fetch(`${link.dataset.api}/blog/auth/me`, {
+          credentials: "include",
+          cache: "no-store",
+        });
+        if (!response.ok) continue;
+        link.href = link.dataset.accountUrl!;
+        link.textContent = "Manage notifications";
+      } catch {}
+    }
+  }
+
+  document.addEventListener("astro:page-load", initNotificationLink);
+  initNotificationLink();
+</script>

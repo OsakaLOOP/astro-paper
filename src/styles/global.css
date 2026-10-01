@@ -139,6 +139,19 @@
   font-size: 0.75rem;
 }
 
+.notification-link {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 0.25em;
+}
+
+.notification-link:hover {
+  color: var(--accent);
+}
+
 .comments {
   border-top: 1px dashed var(--border);
   margin-top: 3rem;
@@ -747,8 +760,43 @@
 
 @media (max-width: 640px) {
   .post-footer-layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 1.5rem;
+  }
+
+  .post-footer-layout--both {
+    grid-template-areas:
+      "share share"
+      "prev next";
+  }
+
+  .post-footer-layout--prev-only {
+    grid-template-areas:
+      "share share"
+      "prev .";
+  }
+
+  .post-footer-layout--next-only {
+    grid-template-areas:
+      "share share"
+      ". next";
+  }
+
+  .post-footer-layout--empty {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    grid-template-areas: "share";
+  }
+
+  .post-footer-prev {
+    grid-area: prev;
+  }
+
+  .post-footer-next {
+    grid-area: next;
+  }
+
+  .post-footer-share {
+    grid-area: share;
   }
 
   .post-footer-share {

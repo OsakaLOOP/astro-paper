@@ -7,6 +7,7 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Socials from "@/components/Socials.astro";
+import NotificationLink from "@/components/NotificationLink.astro";
 import Card from "@/components/Card.astro";
 import LinkButton from "@/components/LinkButton.astro";
 import { getSortedPosts } from "@/utils/getSortedPosts";
@@ -67,12 +68,17 @@ const homePath = getRelativeLocaleUrl(locale, "");
         for more info.
       </p>
       {
-        socials.length > 0 && (
-          <div class="mt-4 flex max-sm:flex-col sm:items-center">
-            <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">
-              {t.home.socialLinks}:
-            </div>
-            <Socials />
+        (
+          <div class="mt-4 flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
+            {socials.length > 0 && (
+              <div class="flex min-w-0 max-sm:flex-col sm:items-center">
+                <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">
+                  {t.home.socialLinks}:
+                </div>
+                <Socials />
+              </div>
+            )}
+            <NotificationLink />
           </div>
         )
       }

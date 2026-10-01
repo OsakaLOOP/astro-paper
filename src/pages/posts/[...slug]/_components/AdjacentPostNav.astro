@@ -19,17 +19,25 @@ type Props = {
 const { prevPost, nextPost } = Astro.props;
 const locale = Astro.currentLocale ?? config.site.lang;
 const t = useTranslations(locale);
+const layout =
+  prevPost && nextPost
+    ? "both"
+    : prevPost
+      ? "prev-only"
+      : nextPost
+        ? "next-only"
+        : "empty";
 ---
 
 <div
   data-pagefind-ignore
-  class="post-adjacent-nav grid grid-cols-1 gap-6 sm:grid-cols-2"
+  class:list={["post-footer-layout", `post-footer-layout--${layout}`]}
 >
   {
     prevPost && (
       <a
         href={getPostUrl(prevPost.id, prevPost.filePath, locale)}
-        class="flex w-full gap-1 hover:opacity-75"
+        class="post-footer-prev flex w-full gap-1 hover:opacity-75"
       >
         <IconArrowLeft class="inline-block flex-none rtl:rotate-180" />
         <div>
@@ -39,11 +47,14 @@ const t = useTranslations(locale);
       </a>
     )
   }
+  <div class="post-footer-share">
+    <slot />
+  </div>
   {
     nextPost && (
       <a
         href={getPostUrl(nextPost.id, nextPost.filePath, locale)}
-        class="flex w-full justify-end gap-1 text-end hover:opacity-75 sm:col-start-2"
+        class="post-footer-next flex w-full justify-end gap-1 text-end hover:opacity-75"
       >
         <div>
           <span>{t.post.nextPost}</span>

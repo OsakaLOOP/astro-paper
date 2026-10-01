@@ -291,6 +291,7 @@
   align-items: center;
   gap: 0.25rem;
   overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior-x: contain;
   padding: 0.1rem 0.1rem 0.55rem;
   scrollbar-width: thin;
@@ -496,12 +497,25 @@
 
 .post-footer-layout {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
   margin-block: 2rem;
 }
 
-.post-adjacent-nav {
+.post-footer-layout--both {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.post-footer-layout--prev-only,
+.post-footer-layout--next-only {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.post-footer-layout--empty {
+  grid-template-columns: 1fr;
+}
+
+.post-footer-prev,
+.post-footer-next {
   min-width: 0;
 }
 
@@ -509,8 +523,22 @@
   display: flex;
   min-width: 0;
   align-items: center;
+  justify-content: center;
+}
+
+.post-footer-layout--both .post-footer-share {
+  padding-inline: 1.5rem;
+  border-inline: 1px solid var(--border);
+}
+
+.post-footer-layout--prev-only .post-footer-share {
   padding-inline-start: 1.5rem;
   border-inline-start: 1px solid var(--border);
+}
+
+.post-footer-layout--next-only .post-footer-share {
+  padding-inline-end: 1.5rem;
+  border-inline-end: 1px solid var(--border);
 }
 
 .comment p {
@@ -724,8 +752,8 @@
   }
 
   .post-footer-share {
-    padding-inline-start: 0;
-    border-inline-start: 0;
+    padding-inline: 0;
+    border-inline: 0;
   }
 
   .comments-heading {

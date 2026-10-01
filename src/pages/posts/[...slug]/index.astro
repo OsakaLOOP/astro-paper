@@ -178,12 +178,9 @@ const ogImage = ogImageUrl
         }
       </ul>
 
-      <div class="post-footer-layout">
-        <AdjacentPostNav {prevPost} {nextPost} />
-        <div class="post-footer-share">
-          <ShareLinks />
-        </div>
-      </div>
+      <AdjacentPostNav {prevPost} {nextPost}>
+        <ShareLinks />
+      </AdjacentPostNav>
 
       <Comments
         postSlug={getPostSlug(post.id, post.filePath)}

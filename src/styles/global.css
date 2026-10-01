@@ -28,11 +28,13 @@
     scrollbar-width: auto;
     scrollbar-color: var(--color-muted) transparent;
   }
+
   a,
   button,
   #main-content {
     @apply outline-accent outline-offset-1 focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-dashed;
   }
+
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
@@ -433,6 +435,11 @@
   margin: 0;
   vertical-align: middle;
   object-fit: contain;
+}
+.comment-emoji {
+  width: 4rem;
+  height: 4rem;
+  max-height: 4rem;
 }
 .comment-action {
   color: var(--muted-foreground);

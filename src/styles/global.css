@@ -96,15 +96,18 @@
   gap: 0.55rem;
   font-size: 0.8rem;
 }
+
 .auth-link,
 .auth-name {
   color: var(--foreground);
   text-decoration: none;
 }
+
 .auth-link:hover,
 .auth-name:hover {
   color: var(--accent);
 }
+
 .auth-button {
   border: 0;
   background: transparent;
@@ -112,41 +115,49 @@
   cursor: pointer;
   font: inherit;
 }
+
 .auth-divider {
   color: var(--muted-foreground);
 }
+
 .auth-control .auth-name {
   display: block;
   min-width: 0;
   max-width: 9rem;
 }
+
 .auth-name-label {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .auth-error {
   max-width: 20rem;
   color: var(--muted-foreground);
   font-size: 0.75rem;
 }
+
 .comments {
   border-top: 1px dashed var(--border);
   margin-top: 3rem;
   padding: 2.5rem 0 1rem;
 }
+
 .comments-heading {
   display: flex;
   justify-content: space-between;
   align-items: end;
   margin-bottom: 1.5rem;
 }
+
 .comments-heading h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
 }
+
 .comments-kicker {
   color: var(--accent);
   font:
@@ -155,15 +166,18 @@
   letter-spacing: 0.12em;
   margin: 0;
 }
+
 .comments-count {
   color: var(--muted-foreground);
   font-size: 0.8rem;
 }
+
 .comments-editor {
   border: 1px solid var(--border);
   padding: 1rem;
   margin-bottom: 1.5rem;
 }
+
 .comments-editor textarea {
   width: 100%;
   resize: vertical;
@@ -173,6 +187,7 @@
   outline: 0;
   line-height: 1.7;
 }
+
 .comments-editor-header {
   position: relative;
   display: flex;
@@ -181,28 +196,34 @@
   gap: 1rem;
   margin-bottom: 0.5rem;
 }
+
 .comments-tabs {
   display: flex;
   gap: 1rem;
   font-size: 0.8rem;
 }
+
 .comments-tab {
   color: var(--muted-foreground);
   background: none;
   border: 0;
   padding: 0;
 }
+
 .comments-tab[aria-selected="true"] {
   color: var(--accent);
 }
+
 .comment-preview {
   min-height: 5rem;
   line-height: 1.7;
 }
+
 .emoji-picker {
   position: relative;
   margin-inline-start: auto;
 }
+
 .emoji-trigger {
   border: 1px solid var(--border);
   color: var(--muted-foreground);
@@ -216,20 +237,24 @@
     border-color 0.15s ease,
     background-color 0.15s ease;
 }
+
 .emoji-trigger:hover {
   color: var(--accent);
   border-color: var(--accent);
 }
+
 .emoji-trigger:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
+
 .emoji-trigger:focus-visible,
 .emoji-tab:focus-visible,
 .emoji-item:focus-visible {
   outline: 2px dashed var(--accent);
   outline-offset: 2px;
 }
+
 .emoji-panel {
   position: absolute;
   z-index: 5;
@@ -245,6 +270,7 @@
   padding: 0.65rem;
   box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 0.1);
 }
+
 .emoji-panel::before {
   content: "";
   position: absolute;
@@ -252,9 +278,11 @@
   inset-inline: 0;
   height: 0.45rem;
 }
+
 .emoji-panel[hidden] {
   display: none;
 }
+
 .emoji-tabs {
   flex: 0 0 2.25rem;
   min-height: 2.25rem;
@@ -267,6 +295,7 @@
   padding: 0.1rem 0.1rem 0.55rem;
   scrollbar-width: thin;
 }
+
 .emoji-tab {
   flex: 0 0 auto;
   border: 0;
@@ -279,10 +308,12 @@
   cursor: pointer;
   white-space: nowrap;
 }
+
 .emoji-tab[aria-selected="true"] {
   border-color: var(--accent);
   color: var(--accent);
 }
+
 .emoji-contents {
   flex: 1 1 auto;
   min-height: 0;
@@ -292,9 +323,11 @@
   scrollbar-width: thin;
   touch-action: pan-y;
 }
+
 .emoji-content[hidden] {
   display: none;
 }
+
 .emoji-picker[data-touch="true"] .emoji-contents {
   display: flex;
   overflow-x: auto;
@@ -305,9 +338,11 @@
   padding: 0;
   touch-action: pan-x pan-y;
 }
+
 .emoji-picker[data-touch="true"] .emoji-contents::-webkit-scrollbar {
   display: none;
 }
+
 .emoji-picker[data-touch="true"] .emoji-content {
   flex: 0 0 100%;
   min-width: 0;
@@ -319,6 +354,7 @@
   scrollbar-width: thin;
   padding: 0.1rem 0.1rem 0.25rem;
 }
+
 .emoji-swipe-hint {
   position: absolute;
   inset-inline: 0.35rem;
@@ -331,9 +367,11 @@
   opacity: 0.55;
   pointer-events: none;
 }
+
 .emoji-swipe-hint[hidden] {
   display: none;
 }
+
 .emoji-swipe-hint svg {
   width: 1.5rem;
   height: 1.5rem;
@@ -341,15 +379,18 @@
   background: color-mix(in srgb, var(--background) 60%, transparent);
   box-shadow: 0 1px 5px rgb(0 0 0 / 0.08);
 }
+
 .emoji-swipe-hint[data-at-start="true"] svg:first-child,
 .emoji-swipe-hint[data-at-end="true"] svg:last-child {
   visibility: hidden;
 }
+
 .emoji-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(3.25rem, 1fr));
   gap: 0.35rem;
 }
+
 .emoji-item {
   display: grid;
   place-items: center;
@@ -363,10 +404,12 @@
     border-color 0.15s ease,
     background-color 0.15s ease;
 }
+
 .emoji-item:hover {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
+
 .emoji-item img {
   display: block;
   width: 3rem;
@@ -375,11 +418,13 @@
   max-height: 100%;
   object-fit: contain;
 }
+
 .emoji-empty {
   margin: 0.5rem 0 0;
   color: var(--muted-foreground);
   font-size: 0.75rem;
 }
+
 .comments-editor-footer {
   display: flex;
   align-items: center;
@@ -387,6 +432,7 @@
   color: var(--muted-foreground);
   font-size: 0.75rem;
 }
+
 .comment-submit {
   border: 1px dashed var(--accent);
   color: var(--accent);
@@ -394,53 +440,56 @@
   padding: 0.45rem 0.75rem;
   font-weight: 600;
 }
+
 .comments-login {
   border: 1px solid var(--border);
   padding: 1rem;
   color: var(--muted-foreground);
   font-size: 0.9rem;
 }
+
 .comments-login a {
   color: var(--accent);
   margin-left: 0.5rem;
   text-decoration: underline;
   cursor: pointer;
 }
+
 .comment {
   padding: 1rem 0;
   border-bottom: 1px solid var(--border);
 }
+
 .comment-meta {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   font-size: 0.85rem;
 }
+
 .comment-meta time {
   color: var(--muted-foreground);
   font-size: 0.75rem;
 }
+
 .comment p {
   margin: 0.5rem 0;
   line-height: 1.7;
   word-break: break-word;
 }
+
 .emoji-inline,
 .comment-emoji {
   display: inline-block;
-  width: 6rem;
-  height: 6rem;
-  max-width: 100%;
-  max-height: 6rem;
+  width: auto;
+  height: auto;
+  max-width: 4rem;
+  max-height: 4rem;
   margin: 0;
   vertical-align: middle;
   object-fit: contain;
 }
-.comment-emoji {
-  width: 4rem;
-  height: 4rem;
-  max-height: 4rem;
-}
+
 .comment-action {
   color: var(--muted-foreground);
   background: none;
@@ -449,13 +498,16 @@
   font-size: 0.75rem;
   cursor: pointer;
 }
+
 .comment-action:hover {
   color: var(--accent);
 }
+
 .comment {
   position: relative;
   margin-inline-start: min(6rem, calc(var(--comment-depth, 0) * 2rem));
 }
+
 .comment-reply-marker {
   position: absolute;
   inset-inline-start: -2rem;
@@ -466,11 +518,13 @@
   height: 1.25rem;
   color: var(--muted-foreground);
 }
+
 .comment-reply-marker svg {
   display: block;
   width: 1.15rem;
   height: 1.15rem;
 }
+
 .comment-subscribe {
   display: inline-flex;
   gap: 0.5rem;
@@ -479,11 +533,13 @@
   font-size: 0.75rem;
   cursor: pointer;
 }
+
 .comment-subscribe input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
+
 .comment-check {
   display: inline-block;
   width: 0.9rem;
@@ -491,61 +547,74 @@
   border: 1px solid var(--muted-foreground);
   background: transparent;
 }
-.comment-subscribe input:checked + .comment-check {
+
+.comment-subscribe input:checked+.comment-check {
   border-color: var(--accent);
   background: var(--accent);
   box-shadow: inset 0 0 0 2px var(--background);
 }
-.comment-subscribe input:focus-visible + .comment-check {
+
+.comment-subscribe input:focus-visible+.comment-check {
   outline: 2px dashed var(--accent);
   outline-offset: 2px;
 }
+
 .account-page {
   max-width: 42rem;
   margin-inline: auto;
   padding: 3rem 1rem;
 }
+
 .account-header {
   border-bottom: 1px dashed var(--border);
   padding-bottom: 1.5rem;
   margin-bottom: 1.5rem;
 }
+
 .account-section {
   border-bottom: 1px solid var(--border);
   padding: 1.25rem 0;
 }
+
 .account-section h2 {
   font-size: 1.1rem;
   margin: 0 0 0.75rem;
 }
+
 .account-muted {
   color: var(--muted-foreground);
   font-size: 0.85rem;
 }
+
 .account-field {
   display: grid;
   gap: 0.35rem;
   margin: 0.8rem 0;
   font-size: 0.85rem;
 }
+
 .account-field input {
   border: 1px solid var(--border);
   padding: 0.55rem 0.65rem;
   background: transparent;
   color: inherit;
 }
+
 .account-email {
   display: flex;
   gap: 0.5rem;
   margin: 1rem 0 0;
 }
+
 .account-email span:first-child {
   color: var(--foreground);
   font-weight: 600;
 }
+
 .account-save {
   margin-top: 1.5rem;
 }
+
 .account-row {
   display: flex;
   align-items: center;
@@ -553,9 +622,11 @@
   gap: 1rem;
   padding: 0.65rem 0;
 }
+
 .account-subscription {
   align-items: flex-start;
 }
+
 .account-subscription-link {
   display: grid;
   flex: 1;
@@ -564,56 +635,70 @@
   color: var(--foreground);
   overflow-wrap: anywhere;
 }
+
 .account-subscription-link:hover .account-subscription-title {
   color: var(--accent);
 }
+
 .account-subscription-title {
   font-size: 0.85rem;
 }
+
 .account-subscription-path {
   color: var(--muted-foreground);
   font-size: 0.75rem;
 }
+
 .account-subscription .comment-action {
   flex-shrink: 0;
   padding: 0;
 }
+
 .comments-empty,
 .comments-loading,
 .comments-error {
   color: var(--muted-foreground);
   font-size: 0.9rem;
 }
+
 .comments-error {
   border: 1px dashed var(--border);
   padding: 1rem;
 }
+
 .comments-error p {
   margin: 0 0 0.75rem;
 }
+
 .comments-retry {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }
+
 @media (max-width: 640px) {
   .comments-heading {
     align-items: center;
   }
+
   .auth-control {
     padding: 0.65rem 1rem;
     justify-content: center;
   }
+
   .comments-editor-footer {
     align-items: flex-start;
     gap: 1rem;
   }
+
   .comments-editor-header {
     gap: 0.5rem;
   }
+
   .comments-tabs {
     gap: 0.75rem;
   }
+
   .emoji-panel {
     inset-inline-end: -0.5rem;
   }

@@ -30,8 +30,10 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       groups.set(api, [...(groups.get(api) ?? []), node]);
     }
     for (const [api, items] of groups) {
+      const slugs = [...new Set(items.map(node => node.dataset.postSlug!))];
+      if (!slugs.length) continue;
       const recordNodes = items.filter(node => node.dataset.record === "true");
-      await Promise.all(
+      const recording = Promise.all(
         recordNodes.map(node =>
           fetch(`${api}/blog/analytics/view`, {
             method: "POST",
@@ -39,30 +41,38 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ post: node.dataset.postSlug }),
             keepalive: true,
-          }).catch(() => undefined)
+            signal: AbortSignal.timeout(15_000),
+          })
+            .then(response => response.ok)
+            .catch(() => false)
         )
       );
-      const slugs = [...new Set(items.map(node => node.dataset.postSlug!))];
-      if (!slugs.length) continue;
-      try {
-        const query = new URLSearchParams({ posts: slugs.join(",") });
-        const response = await fetch(`${api}/blog/analytics?${query}`, {
-          credentials: "include",
-          cache: "no-store",
-        });
-        if (!response.ok) continue;
-        const payload = (await response.json()) as {
-          items: { post_slug: string; views: number }[];
-        };
-        const counts = new Map(
-          payload.items.map(item => [item.post_slug, item.views])
-        );
-        for (const node of items) {
-          const output = node.querySelector<HTMLElement>("[data-view-count]");
-          if (output)
-            output.textContent = String(counts.get(node.dataset.postSlug!) ?? 0);
-        }
-      } catch {}
+      const loadCounts = async () => {
+        try {
+          const query = new URLSearchParams({ posts: slugs.join(",") });
+          const response = await fetch(`${api}/blog/analytics?${query}`, {
+            credentials: "omit",
+            cache: "no-store",
+            signal: AbortSignal.timeout(15_000),
+          });
+          if (!response.ok) return;
+          const payload = (await response.json()) as {
+            items: { post_slug: string; views: number }[];
+          };
+          const counts = new Map(
+            payload.items.map(item => [item.post_slug, item.views])
+          );
+          for (const node of items) {
+            const output = node.querySelector<HTMLElement>("[data-view-count]");
+            if (output)
+              output.textContent = String(
+                counts.get(node.dataset.postSlug!) ?? 0
+              );
+          }
+        } catch {}
+      };
+      await loadCounts();
+      if ((await recording).some(Boolean)) await loadCounts();
     }
   }
   document.addEventListener("astro:page-load", loadArticleStats);

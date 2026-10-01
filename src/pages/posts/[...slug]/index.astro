@@ -86,16 +86,16 @@ if (typeof initOgImage === "string") {
   ogImageUrl = initOgImage.src;
 }
 
+const postUrl = getPostUrl(post.id, post.filePath, locale).replace(/\/+$/, "");
 if (!ogImageUrl && config.features.dynamicOgImage) {
-  const postUrl = getPostUrl(post.id, post.filePath, locale).replace(
-    /\/+$/,
-    ""
-  );
   ogImageUrl = `${postUrl}/index.png`;
 }
 
 const ogImage = ogImageUrl
   ? new URL(ogImageUrl, Astro.url.origin).href
+  : undefined;
+const qqImage = config.features.dynamicOgImage
+  ? new URL(`${postUrl}/qq.png`, Astro.site ?? Astro.url).href
   : undefined;
 ---
 
@@ -103,6 +103,7 @@ const ogImage = ogImageUrl
   title={`${title} | ${config.site.title}`}
   description={description}
   ogImage={ogImage}
+  {qqImage}
   canonicalURL={canonicalURL}
   pubDatetime={pubDatetime}
   modDatetime={modDatetime}

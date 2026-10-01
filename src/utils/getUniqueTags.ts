@@ -26,3 +26,13 @@ export function getUniqueTags(posts: CollectionEntry<"posts">[]) {
     .sort((tagA, tagB) => tagA.tag.localeCompare(tagB.tag));
   return tags;
 }
+
+export function getTagCounts(posts: CollectionEntry<"posts">[]) {
+  const counts = new Map<string, number>();
+  for (const post of posts.filter(postFilter)) {
+    for (const tag of new Set(post.data.tags.map(slugifyStr))) {
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    }
+  }
+  return counts;
+}

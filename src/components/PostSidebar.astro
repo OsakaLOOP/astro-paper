@@ -3,7 +3,7 @@ import type { MarkdownHeading } from "astro";
 import { getCollection } from "astro:content";
 import Tag from "@/components/Tag.astro";
 import { useTranslations } from "@/i18n";
-import { getUniqueTags } from "@/utils/getUniqueTags";
+import { getTagCounts, getUniqueTags } from "@/utils/getUniqueTags";
 import { postFilter } from "@/utils/postFilter";
 import { slugifyStr } from "@/utils/slugify";
 
@@ -15,12 +15,7 @@ type Props = {
 const { headings, postTags } = Astro.props;
 const t = useTranslations(Astro.currentLocale);
 const posts = (await getCollection("posts")).filter(postFilter);
-const counts = new Map<string, number>();
-for (const post of posts) {
-  for (const tag of new Set(post.data.tags.map(slugifyStr))) {
-    counts.set(tag, (counts.get(tag) ?? 0) + 1);
-  }
-}
+const counts = getTagCounts(posts);
 const currentTags = new Set(postTags.map(slugifyStr));
 const tags = getUniqueTags(posts)
   .map(tag => ({

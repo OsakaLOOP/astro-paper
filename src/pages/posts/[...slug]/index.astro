@@ -142,8 +142,11 @@ const ogImage = ogImageUrl
           |
         </span>
         <EditPost {hideEditPost} {post} class="max-sm:hidden" />
+        <span aria-hidden="true" class="text-muted-foreground max-sm:hidden">
+          |
+        </span>
+        <ArticleStats slug={getPostSlug(post.id, post.filePath)} record />
       </div>
-      <ArticleStats slug={getPostSlug(post.id, post.filePath)} record />
 
       <article
         id="article"

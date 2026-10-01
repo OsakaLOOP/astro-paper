@@ -27,7 +27,10 @@ const { title, description, ...props } = data;
       {title}
     </Heading>
   </a>
-  <Datetime {...props} />
-  <ArticleStats slug={getPostSlug(id, filePath)} />
+  <div class="flex items-center gap-2">
+    <Datetime {...props} />
+    <span aria-hidden="true" class="text-muted-foreground">|</span>
+    <ArticleStats slug={getPostSlug(id, filePath)} />
+  </div>
   <p>{description}</p>
 </li>

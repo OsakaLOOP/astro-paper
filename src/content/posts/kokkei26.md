@@ -13,10 +13,13 @@ description: Greetings with the coming of Kokkeisetsu, 2026.
 ---
 
 ![爬紫金山](_assets/hiking.jpg)
+
 ![合影](_assets/fumo.jpg)
-中秋三天就这么稀里糊涂地过来了, day1 和小团体爬紫金山唱k, day2 在家吃寿喜锅, day3 睡到昏死并补作业.
+
+中秋三天就这么稀里糊涂地过来了, day1 和小团体爬紫金山唱k, day2 和朋友在家吃寿喜锅, day3 睡到昏死并补作业.
 
 ![摄于回家路上](_assets/kokkei-01.jpeg)
+
 ![转自人民网](_assets/kokkei-02.jpg)
 
 国庆呢? 我认为比较合理的时间分配是回家三天两晚, 自己待五天, 于是订了3号走5号回的票; 我妈则认为我在电话里告诉她30号下午4点放学等价于同意她这个时候来接, 所以现在我正坐在家里写这个 post. 本来就没啥计划, 现在更不知道干什么了.

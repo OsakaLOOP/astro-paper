@@ -45,6 +45,33 @@
       @apply border-border;
     }
 
+    .post-image {
+      display: block;
+      width: fit-content;
+      max-width: 100%;
+      margin: 2rem auto;
+      text-align: center;
+
+      img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin-inline: auto;
+        border: 1px solid
+          color-mix(in srgb, var(--muted-foreground) 35%, transparent);
+        box-shadow: 0 2px 8px
+          color-mix(in srgb, var(--muted-foreground) 18%, transparent);
+      }
+
+      figcaption {
+        margin-top: 0.6rem;
+        color: var(--muted-foreground);
+        font-size: 0.8em;
+        line-height: 1.5;
+        text-align: center;
+      }
+    }
+
     img[role="button"] {
       @apply cursor-zoom-in;
 

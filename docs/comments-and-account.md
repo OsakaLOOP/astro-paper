@@ -204,9 +204,11 @@ SM service, not this blog; SM forwards blog mail without replacing its HTML.
 
 The blog service sends a signed service request to SM's internal mail endpoint. SM
 validates the service secret, calls the existing `Jobs.mail` queue, and never gives
-the blog service SMTP credentials. The request contains recipient, subject, text,
-HTML, event id, and a five-minute timestamp window. The blog service retries only
-transport failures; SM owns delivery retries and Message-ID generation.
+the blog service SMTP credentials. The request contains recipient, sender display
+name, subject, text, HTML, event id, and a five-minute timestamp window. The sender
+display name is used only for blog notifications; authentication emails continue
+to use the configured SMTP sender. The blog service retries only transport
+failures; SM owns delivery retries and Message-ID generation.
 
 The content endpoint is `POST /blog/hooks/content`. It accepts `new_article` and
 `content_update` payloads and requires `X-Site-Command-Timestamp` plus an

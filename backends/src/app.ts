@@ -18,6 +18,7 @@ export type Identity = { id: string; profile: Record<string, unknown> };
 export type MailMessage = {
   eventId: string;
   to: string;
+  fromName?: string;
   subject: string;
   text: string;
   html: string;
@@ -194,12 +195,20 @@ export async function buildApp(options: AppOptions) {
   };
   const send = async (
     to: string,
+    fromName: string,
     subject: string,
     text: string,
     html: string
   ) => {
     if (!options.sendMail) return;
-    await options.sendMail({ eventId: randomUUID(), to, subject, text, html });
+    await options.sendMail({
+      eventId: randomUUID(),
+      to,
+      fromName,
+      subject,
+      text,
+      html,
+    });
   };
   const blogOrigin = (
     process.env.PUBLIC_BLOG_ORIGIN ?? "https://www.loopo.cc"
@@ -288,7 +297,7 @@ export async function buildApp(options: AppOptions) {
       context
     );
     for (const to of recipients.values())
-      await send(to, template.subject, template.text, template.html);
+      await send(to, template.fromName, template.subject, template.text, template.html);
   }
   await app.register(async api => {
     api.addHook("onRequest", async request => {
@@ -650,7 +659,7 @@ export async function buildApp(options: AppOptions) {
             old.post_slug,
             postUrl(old.post_slug)
           );
-          void send(old.author_email, mail.subject, mail.text, mail.html).catch(
+          void send(old.author_email, mail.fromName, mail.subject, mail.text, mail.html).catch(
             error =>
               request.log.error({ err: error }, "Deletion notification failed")
           );
@@ -945,6 +954,7 @@ export async function buildApp(options: AppOptions) {
             options.sendMail!({
               eventId: `${request.body.event_id}:${to.toLowerCase()}`,
               to,
+              fromName: template.fromName,
               subject: template.subject,
               text: template.text,
               html: template.html,

@@ -19,7 +19,15 @@ const lines = (value: string) => esc(value).replace(/\r\n|\r|\n/g, "<br>");
 
 type Context = { author: string; content: string };
 
+type NotificationSender =
+  | "评论通知"
+  | "回复通知"
+  | "评论删除通知"
+  | "新文章通知"
+  | "文章更新通知";
+
 function notificationTemplate(input: {
+  fromName: NotificationSender;
   title: string;
   url: string;
   action: string;
@@ -28,7 +36,7 @@ function notificationTemplate(input: {
   context?: Context;
   linkLabel: string;
 }) {
-  const { title, url, action, content, author, context, linkLabel } = input;
+  const { fromName, title, url, action, content, author, context, linkLabel } = input;
   const homeUrl = `${new URL(url).origin}/`;
   const accountUrl = new URL("account/#notifications", homeUrl).href;
   const regularFontUrl = new URL("fonts/400.ttf", homeUrl).href;
@@ -107,7 +115,7 @@ function notificationTemplate(input: {
   </table>
 </body>
 </html>`;
-  return { subject, text, html };
+  return { fromName, subject, text, html };
 }
 
 export function commentMailTemplate(
@@ -119,6 +127,7 @@ export function commentMailTemplate(
   context?: Context
 ) {
   return notificationTemplate({
+    fromName: action === "New reply" ? "回复通知" : "评论通知",
     title: article,
     url,
     author,
@@ -132,6 +141,7 @@ export function commentMailTemplate(
 
 export function commentRemovedMailTemplate(article: string, url: string) {
   return notificationTemplate({
+    fromName: "评论删除通知",
     title: article,
     url,
     action: "Comment removed",
@@ -147,6 +157,7 @@ export function contentMailTemplate(
   action: "New article" | "Article updated"
 ) {
   return notificationTemplate({
+    fromName: action === "Article updated" ? "文章更新通知" : "新文章通知",
     title,
     url,
     content: summary,

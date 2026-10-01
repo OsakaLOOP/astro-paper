@@ -32,6 +32,17 @@ const rssHref = getRelativeLocaleUrl(
   Astro.currentLocale ?? config.site.lang,
   "rss.xml"
 );
+const serializeScriptValue = (value: string) =>
+  JSON.stringify(value).replace(
+    /[<>&\u2028\u2029]/g,
+    character => `\\u${character.charCodeAt(0).toString(16).padStart(4, "0")}`
+  );
+const wechatShareScript = [
+  `var WECHAT_TITLE = ${serializeScriptValue(title)};`,
+  `var WECHAT_DESC = ${serializeScriptValue(description)};`,
+  `var WECHAT_IMAGE = ${serializeScriptValue(socialImageUrl)};`,
+  "var WCHAT_NO_GA = '';",
+].join("\n");
 ---
 
 <!doctype html>
@@ -47,6 +58,15 @@ const rssHref = getRelativeLocaleUrl(
     <link rel="icon" href={getAssetPath("favicon.ico")} />
     <link rel="canonical" href={canonicalUrl} />
     <meta name="generator" content={Astro.generator} />
+
+    <!-- QQ / non-Open Graph sharing -->
+    <meta itemprop="name" content={title} />
+    <meta itemprop="image" content={socialImageUrl} />
+    <meta name="description" itemprop="description" content={description} />
+
+    <!-- WeChat sharing -->
+    <script is:inline set:html={wechatShareScript} />
+
     <!-- Primary meta -->
     <title>{title}</title>
     <meta name="title" content={title} />

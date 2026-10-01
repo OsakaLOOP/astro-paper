@@ -12,7 +12,7 @@ const mailUrl = process.env.SM_MAIL_URL;
 const mailSecret = process.env.SM_MAIL_SECRET;
 const sendMail = mailUrl && mailSecret ? async (message: import("./app.js").MailMessage) => {
   const timestamp = Math.floor(Date.now() / 1000);
-  const payload = { event_id: message.eventId, to: message.to, subject: message.subject, text: message.text, html: message.html };
+  const payload = { event_id: message.eventId, to: message.to, from_name: message.fromName, subject: message.subject, text: message.text, html: message.html };
   const body = JSON.stringify(payload);
   const signature = createHmac("sha256", mailSecret).update(`${message.eventId}.${timestamp}.${body}`).digest("hex");
   for (let attempt = 0; attempt < 3; attempt += 1) {

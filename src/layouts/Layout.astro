@@ -75,7 +75,6 @@ const wechatShareScript = [
     <!-- QQ / non-Open Graph sharing -->
     <meta itemprop="name" content={title} />
     <meta itemprop="image" content={qqImageUrl} />
-    <meta name="description" itemprop="description" content={description} />
 
     <!-- WeChat sharing -->
     <script is:inline set:html={wechatShareScript} />
@@ -83,7 +82,7 @@ const wechatShareScript = [
     <!-- Primary meta -->
     <title>{title}</title>
     <meta name="title" content={title} />
-    <meta name="description" content={description} />
+    <meta name="description" itemprop="description" content={description} />
     <meta name="author" content={site.author} />
     <link rel="sitemap" href={getAssetPath("sitemap-index.xml")} />
 

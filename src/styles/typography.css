@@ -161,3 +161,18 @@
     }
   }
 }
+
+.app-prose .katex-display {
+  display: flex;
+  max-width: 100%;
+  padding-block: 0.25em;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+
+.app-prose .katex-display > .katex {
+  flex: 0 0 auto;
+  margin-inline: auto;
+}

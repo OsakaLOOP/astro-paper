@@ -23,6 +23,7 @@ import { rehypeImageCaptions } from "./src/utils/rehypeImageCaptions";
 
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import remarkDisplayMath from "./src/utils/remarkDisplayMath";
 
 const emojiManifest = JSON.parse(
   readFileSync(
@@ -49,7 +50,7 @@ export default defineConfig({
   },
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkMath],
+      remarkPlugins: [remarkMath, remarkDisplayMath],
       rehypePlugins: [
         rehypeCallouts,
         rehypeKatex,

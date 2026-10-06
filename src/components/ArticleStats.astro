@@ -1,4 +1,6 @@
 ---
+import IconEye from "@/assets/icons/IconEye.svg";
+
 const { slug, record = false } = Astro.props;
 const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
 ---
@@ -11,7 +13,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
   data-record={record ? "true" : undefined}
   aria-label="Article views"
 >
-  <span aria-hidden="true">◉</span>
+  <IconEye class="size-4" aria-hidden="true" />
   <span data-view-count>—</span>
   <span>views</span>
 </span>

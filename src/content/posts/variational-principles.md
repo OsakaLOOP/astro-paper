@@ -6,7 +6,8 @@ slug: variational-principles
 featured: true
 draft: false
 tags:
-  - Physics[Mechanics]
+  - Physics
+  - Mechanics
   - Variational Principles
   - Manuscript
   - Archived

@@ -181,11 +181,11 @@ $$
 
 对应关系如表.
 
-| 全微分 $\mathrm{d}F$ | 泛函变分 $\delta S$ |
-| : --------------------------------------------------- | : ------------------------------------------------- |
-| 求和 $\displaystyle{\sum_n^N}$ | 积分 $\displaystyle{\int \mathrm{d}x}$ |
+| 全微分 $\mathrm{d}F$                                    |                  泛函变分 $\delta S$                   |
+| :------------------------------------------------------ | :----------------------------------------------------: |
+| 求和 $\displaystyle{\sum_n^N}$                          |         积分 $\displaystyle{\int \mathrm{d}x}$         |
 | 偏导数 $\displaystyle{\frac{\partial F}{\partial x_n}}$ | 泛函导数 $\displaystyle{\frac{\delta S}{\delta f(x)}}$ |
-| 坐标分量微分 $\mathrm{d}x_n$ | 函数变分 $\delta f(x)$ |
+| 坐标分量微分 $\mathrm{d}x_n$                            |                 函数变分 $\delta f(x)$                 |
 
 ---
 

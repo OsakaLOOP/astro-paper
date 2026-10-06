@@ -7,12 +7,12 @@ featured: true
 draft: false
 tags:
   - Essay
-  - Philosophy
-  - Sociology
-  - Neurodiversity
+  - 哲学
+  - 社会科学
+  - 神经多样性
   - Archived
 
-description: An essay on Loopo:443 focusing on the sharedness of experience, neurodiversity and rewarding patterns of humanity.
+description: 关于事物普遍性与特殊性, 共同经验与非典型经验, 主体间性, 神经多样性, 奖励函数, 人生规划等话题的讨论.
 ---
 
 我相信，万物的**特殊性**，远大于**普遍性**。

@@ -6,13 +6,13 @@ slug: variational-principles
 featured: true
 draft: false
 tags:
-  - Physics
-  - Mechanics
-  - Variational Principles
-  - Manuscript
+  - Notes
+  - 物理学
+  - 理论力学
+  - 变分法
   - Archived
 
-description: A manuscript on Variational Principles applied in Mechanics, as well as its explanations and derivations.
+description: 完整讲解了作为理论力学基础的变分学初步及其主要概念、方法. 推导了泛函与泛函极值、变分与泛函导数、Euler-Lagrange 方程及其推广等内容.
 ---
 
 > 这是我在寒假期间陆续整理的理论力学笔记的第一部分. 后续还会更新约束的变分问题.

@@ -9,7 +9,7 @@ tags:
   - Miscellaneous
   - Archived
 
-description: First post on Loopo:443.
+description: 这是 Loopo:443 上的第一篇博客!
 ---
 
 > TLS handshake confirmed...

@@ -9,7 +9,7 @@ tags:
   - 時候の挨拶
   - Archived
 
-description: Greetings with the coming of Kokkeisetsu, 2026.
+description: 如题. 国庆祝福, 以及碎碎念和 todo.
 ---
 
 ![爬紫金山](_assets/hiking.jpg)

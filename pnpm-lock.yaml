@@ -42,8 +42,8 @@ importers:
         specifier: 3.15.0
         version: 3.15.0
       katex:
-        specifier: ^0.18.9
-        version: 0.18.9
+        specifier: 0.16.47
+        version: 0.16.47
       lodash.kebabcase:
         specifier: ^4.1.1
         version: 4.1.1
@@ -2252,10 +2252,6 @@ packages:
 
   katex@0.16.47:
     resolution: {integrity: sha512-Eeo8Ys1doU1z+x8AZsPpQu+p/QcZBI5PeOo7QGQdy2x2m0MU/hYagBbGOmXwr5KVbEfVuWv9LpnQWeehogurjg==}
-    hasBin: true
-
-  katex@0.18.9:
-    resolution: {integrity: sha512-8ad9RyoKsb/g8/yLFE+KAlP+DhbCTRUNi/V9XGsxn0R+trJJltNwzcDNo0q/DEkOy5fQUQTAQyCXCYSE+OakTQ==}
     hasBin: true
 
   keyv@4.5.4:
@@ -5515,10 +5511,6 @@ snapshots:
   katex@0.16.47:
     dependencies:
       commander: 8.3.0
-
-  katex@0.18.9:
-    dependencies:
-      commander: 15.0.0
 
   keyv@4.5.4:
     dependencies:

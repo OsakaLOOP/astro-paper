@@ -1,19 +1,24 @@
-import type { APIRoute } from "astro";
+import type { APIContext, APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import { fontData, experimental_getFontFileURL } from "astro:assets";
-import satori from "satori";
+import satori, { type SatoriOptions } from "satori";
 import sharp from "sharp";
 import { getFontPathByWeight } from "@/utils/getFontPathByWeight";
 import { getPostSlug } from "@/utils/getPostPaths";
+import { renderQqImage } from "@/utils/renderQqImage";
 import config from "@/config";
 
 export async function getStaticPaths() {
+  return getImageStaticPaths();
+}
+
+export async function getImageStaticPaths(target: "og" | "qq" = "og") {
   if (!config.features.dynamicOgImage) {
     return [];
   }
 
   const posts = await getCollection("posts").then(p =>
-    p.filter(({ data }) => !data.draft && !data.ogImage)
+    p.filter(({ data }) => !data.draft && (target === "qq" || !data.ogImage))
   );
 
   return posts.map(post => ({
@@ -22,7 +27,12 @@ export async function getStaticPaths() {
   }));
 }
 
-export const GET: APIRoute = async ({ props, url }) => {
+export const GET: APIRoute = context => generatePostImage(context);
+
+export async function generatePostImage(
+  { props, url }: APIContext,
+  target: "og" | "qq" = "og"
+) {
   if (!config.features.dynamicOgImage) {
     return new Response(null, { status: 404, statusText: "Not found" });
   }
@@ -60,6 +70,33 @@ export const GET: APIRoute = async ({ props, url }) => {
     ),
   ]);
 
+  const imageFonts: SatoriOptions["fonts"] = [
+    {
+      name: "Google Sans Code",
+      data: regularData,
+      weight: 400,
+      style: "normal",
+    },
+    { name: "Google Sans Code", data: boldData, weight: 700, style: "normal" },
+    {
+      name: "Noto Sans SC",
+      data: cjkRegularData,
+      weight: 400,
+      style: "normal",
+    },
+    { name: "Noto Sans SC", data: cjkBoldData, weight: 700, style: "normal" },
+  ];
+  if (target === "qq") {
+    const svg = await renderQqImage({
+      title: props.data.title,
+      footer: `by ${props.data.author} · ${config.site.title}`,
+      fonts: imageFonts,
+    });
+    const pngBuffer = await sharp(Buffer.from(svg)).png().toBuffer();
+    return new Response(new Uint8Array(pngBuffer), {
+      headers: { "Content-Type": "image/png" },
+    });
+  }
   const svg = await satori(
     {
       type: "div",
@@ -168,7 +205,10 @@ export const GET: APIRoute = async ({ props, url }) => {
                           {
                             type: "span",
                             props: {
-                              style: { overflow: "hidden", fontWeight: "bold" },
+                              style: {
+                                overflow: "hidden",
+                                fontWeight: "bold",
+                              },
                               children: config.site.title,
                             },
                           },
@@ -187,32 +227,7 @@ export const GET: APIRoute = async ({ props, url }) => {
       width: 1200,
       height: 630,
       embedFont: true,
-      fonts: [
-        {
-          name: "Google Sans Code",
-          data: regularData,
-          weight: 400,
-          style: "normal",
-        },
-        {
-          name: "Google Sans Code",
-          data: boldData,
-          weight: 700,
-          style: "normal",
-        },
-        {
-          name: "Noto Sans SC",
-          data: cjkRegularData,
-          weight: 400,
-          style: "normal",
-        },
-        {
-          name: "Noto Sans SC",
-          data: cjkBoldData,
-          weight: 700,
-          style: "normal",
-        },
-      ],
+      fonts: imageFonts,
     }
   );
 
@@ -221,4 +236,4 @@ export const GET: APIRoute = async ({ props, url }) => {
   return new Response(new Uint8Array(pngBuffer), {
     headers: { "Content-Type": "image/png" },
   });
-};
+}

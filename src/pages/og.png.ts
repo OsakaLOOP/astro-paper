@@ -1,11 +1,17 @@
-import type { APIRoute } from "astro";
-import satori from "satori";
+import type { APIContext, APIRoute } from "astro";
+import satori, { type SatoriOptions } from "satori";
 import sharp from "sharp";
 import { fontData, experimental_getFontFileURL } from "astro:assets";
 import { getFontPathByWeight } from "@/utils/getFontPathByWeight";
+import { renderQqImage } from "@/utils/renderQqImage";
 import config from "@/config";
 
-export const GET: APIRoute = async context => {
+export const GET: APIRoute = context => generateSiteImage(context);
+
+export async function generateSiteImage(
+  context: APIContext,
+  target: "og" | "qq" = "og"
+) {
   const fonts = fontData["--font-og"];
   const regularFontPath = getFontPathByWeight(fonts, 400);
   const boldFontPath = getFontPathByWeight(fonts, 700);
@@ -39,6 +45,33 @@ export const GET: APIRoute = async context => {
     ),
   ]);
 
+  const imageFonts: SatoriOptions["fonts"] = [
+    {
+      name: "Google Sans Code",
+      data: regularData,
+      weight: 400,
+      style: "normal",
+    },
+    { name: "Google Sans Code", data: boldData, weight: 700, style: "normal" },
+    {
+      name: "Noto Sans SC",
+      data: cjkRegularData,
+      weight: 400,
+      style: "normal",
+    },
+    { name: "Noto Sans SC", data: cjkBoldData, weight: 700, style: "normal" },
+  ];
+  if (target === "qq") {
+    const svg = await renderQqImage({
+      title: config.site.title,
+      footer: new URL(config.site.url).hostname,
+      fonts: imageFonts,
+    });
+    const pngBuffer = await sharp(Buffer.from(svg)).png().toBuffer();
+    return new Response(new Uint8Array(pngBuffer), {
+      headers: { "Content-Type": "image/png" },
+    });
+  }
   const svg = await satori(
     {
       type: "div",
@@ -141,7 +174,10 @@ export const GET: APIRoute = async context => {
                         children: {
                           type: "span",
                           props: {
-                            style: { overflow: "hidden", fontWeight: "bold" },
+                            style: {
+                              overflow: "hidden",
+                              fontWeight: "bold",
+                            },
                             children: new URL(config.site.url).hostname,
                           },
                         },
@@ -159,32 +195,7 @@ export const GET: APIRoute = async context => {
       width: 1200,
       height: 630,
       embedFont: true,
-      fonts: [
-        {
-          name: "Google Sans Code",
-          data: regularData,
-          weight: 400,
-          style: "normal",
-        },
-        {
-          name: "Google Sans Code",
-          data: boldData,
-          weight: 700,
-          style: "normal",
-        },
-        {
-          name: "Noto Sans SC",
-          data: cjkRegularData,
-          weight: 400,
-          style: "normal",
-        },
-        {
-          name: "Noto Sans SC",
-          data: cjkBoldData,
-          weight: 700,
-          style: "normal",
-        },
-      ],
+      fonts: imageFonts,
     }
   );
 
@@ -193,4 +204,4 @@ export const GET: APIRoute = async context => {
   return new Response(new Uint8Array(pngBuffer), {
     headers: { "Content-Type": "image/png" },
   });
-};
+}

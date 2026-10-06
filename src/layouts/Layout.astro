@@ -10,6 +10,7 @@ type Props = {
   title?: string;
   description?: string;
   ogImage?: string;
+  qqImage?: string;
   canonicalURL?: string;
   type?: "website" | "article";
 };
@@ -20,6 +21,7 @@ const {
   title = site.title,
   description = site.description,
   ogImage = resolveDefaultOgImagePath(config),
+  qqImage = config.features.dynamicOgImage ? getAssetPath("qq.png") : ogImage,
   type = "website",
 } = Astro.props;
 
@@ -28,6 +30,7 @@ const canonicalUrl = new URL(
   Astro.site ?? Astro.url
 ).href;
 const socialImageUrl = new URL(ogImage, Astro.site ?? Astro.url).href;
+const qqImageUrl = new URL(qqImage, Astro.site ?? Astro.url).href;
 const rssHref = getRelativeLocaleUrl(
   Astro.currentLocale ?? config.site.lang,
   "rss.xml"
@@ -55,15 +58,23 @@ const wechatShareScript = [
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href={getAssetPath("favicon.svg")} />
-    <link rel="icon" type="image/png" sizes="100x100" href={getAssetPath("favicon.png")} />
-    <link rel="apple-touch-icon" sizes="100x100" href={getAssetPath("favicon.png")} />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="100x100"
+      href={getAssetPath("favicon.png")}
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="100x100"
+      href={getAssetPath("favicon.png")}
+    />
     <link rel="canonical" href={canonicalUrl} />
     <meta name="generator" content={Astro.generator} />
 
     <!-- QQ / non-Open Graph sharing -->
     <meta itemprop="name" content={title} />
-    <meta itemprop="image" content={socialImageUrl} />
-    <meta name="description" itemprop="description" content={description} />
+    <meta itemprop="image" content={qqImageUrl} />
 
     <!-- WeChat sharing -->
     <script is:inline set:html={wechatShareScript} />
@@ -71,7 +82,7 @@ const wechatShareScript = [
     <!-- Primary meta -->
     <title>{title}</title>
     <meta name="title" content={title} />
-    <meta name="description" content={description} />
+    <meta name="description" itemprop="description" content={description} />
     <meta name="author" content={site.author} />
     <link rel="sitemap" href={getAssetPath("sitemap-index.xml")} />
 

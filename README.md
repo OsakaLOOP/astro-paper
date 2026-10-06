@@ -74,6 +74,13 @@ Inside of AstroPaper, you'll see the following folders and files:
 
 All blog posts are stored in the `src/content/posts/` directory. You can organise posts into subdirectories — the subdirectory name becomes part of the post URL.
 
+With `features.dynamicOgImage` enabled, QQ's non-OG `itemprop="image"` uses a
+separate 1200×1200 share image (`/qq.png` for the site and
+`/posts/<slug>/qq.png` for articles). The image generator's `"qq"` target fits
+the complete title on one line using the actual font width. Open Graph,
+Twitter, and WeChat continue to use the existing landscape images. Article
+QQ images are also generated for posts with a custom `ogImage`.
+
 ## 首页 HotLinks
 
 首页在 Social Links 右侧显示 HotLinks，头像列表由 `src/data/hotlinks.json` 在构建时生成，按数组顺序排列。文件提供一个示例条目，可按实际需求替换或新增。

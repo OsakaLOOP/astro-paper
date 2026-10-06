@@ -140,7 +140,7 @@ const qqImage = config.features.dynamicOgImage
           {title}
         </h1>
 
-        <div class="my-2 flex items-center gap-2">
+        <div class="post-header-meta my-2 flex items-center gap-2">
           <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
           <span
             aria-hidden="true"
@@ -201,6 +201,18 @@ const qqImage = config.features.dynamicOgImage
   </div>
   <Footer />
 </PostLayout>
+
+<style>
+  .post-header-meta :global(.article-stats) {
+    font-size: var(--text-sm);
+  }
+
+  @media (width >= 40rem) {
+    .post-header-meta :global(.article-stats) {
+      font-size: var(--text-base);
+    }
+  }
+</style>
 
 <script is:inline data-astro-rerun>
   function createProgressBar() {

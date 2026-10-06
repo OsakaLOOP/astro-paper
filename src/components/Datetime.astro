@@ -11,7 +11,7 @@ dayjs.extend(timezone);
 
 type Props = {
   class?: string;
-  size?: "sm" | "lg";
+  size?: "xs" | "sm" | "lg";
   pubDatetime: string | Date;
   timezone?: string;
   modDatetime?: string | Date | null;
@@ -37,23 +37,36 @@ const date = datetime.format("D MMM, YYYY");
 ---
 
 <div
-  class:list={["text-muted-foreground flex items-center gap-x-2", className]}
+  class:list={[
+    "text-muted-foreground flex items-center",
+    size === "xs" ? "gap-x-1" : "gap-x-2",
+    className,
+  ]}
 >
   <IconCalendar
     class:list={[
-      "inline-block size-6 min-w-5.5",
+      "inline-block shrink-0",
+      size === "xs" ? "size-3.5" : "size-6 min-w-5.5",
       { "scale-90": size === "sm" },
     ]}
   />
   {
     isModified && (
-      <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
+      <span
+        class:list={[
+          size === "xs" ? "sr-only" : "text-sm",
+          { "sm:text-base": size === "lg" },
+        ]}
+      >
         {t.post.updatedAt}:
       </span>
     )
   }
   <time
-    class:list={["text-sm", { "sm:text-base": size === "lg" }]}
+    class:list={[
+      size === "xs" ? "text-[0.7rem]" : "text-sm",
+      { "sm:text-base": size === "lg" },
+    ]}
     datetime={datetime.toISOString()}
   >
     {date}

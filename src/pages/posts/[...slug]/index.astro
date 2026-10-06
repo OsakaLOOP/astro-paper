@@ -118,35 +118,45 @@ const qqImage = config.features.dynamicOgImage
       { "mt-8": !config.features.showBackButton },
     ]}
   >
-    <PostSidebar {headings} postTags={tags} />
+    <PostSidebar
+      {title}
+      {headings}
+      postTags={tags}
+      {pubDatetime}
+      {modDatetime}
+      {timezone}
+      postSlug={getPostSlug(post.id, post.filePath)}
+    />
     <main
       id="main-content"
       class="order-2 min-w-0 lg:order-none"
       data-pagefind-body
     >
-      <h1
-        style={{ viewTransitionName: toTransitionName(post.id) }}
-        class="text-accent inline-block text-2xl font-bold sm:text-3xl"
-      >
-        {title}
-      </h1>
-
-      <div class="my-2 flex items-center gap-2">
-        <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
-        <span
-          aria-hidden="true"
-          class:list={[
-            "text-muted-foreground max-sm:hidden",
-            { hidden: !config.features.editPost?.enabled || hideEditPost },
-          ]}
+      <div id="post-header">
+        <h1
+          style={{ viewTransitionName: `post-${toTransitionName(post.id)}` }}
+          class="text-accent inline-block text-2xl font-bold sm:text-3xl"
         >
-          |
-        </span>
-        <EditPost {hideEditPost} {post} class="max-sm:hidden" />
-        <span aria-hidden="true" class="text-muted-foreground max-sm:hidden">
-          |
-        </span>
-        <ArticleStats slug={getPostSlug(post.id, post.filePath)} record />
+          {title}
+        </h1>
+
+        <div class="my-2 flex items-center gap-2">
+          <Datetime {pubDatetime} {modDatetime} {timezone} size="lg" />
+          <span
+            aria-hidden="true"
+            class:list={[
+              "text-muted-foreground max-sm:hidden",
+              { hidden: !config.features.editPost?.enabled || hideEditPost },
+            ]}
+          >
+            |
+          </span>
+          <EditPost {hideEditPost} {post} class="max-sm:hidden" />
+          <span aria-hidden="true" class="text-muted-foreground max-sm:hidden">
+            |
+          </span>
+          <ArticleStats slug={getPostSlug(post.id, post.filePath)} record />
+        </div>
       </div>
 
       <article

@@ -176,3 +176,13 @@
   flex: 0 0 auto;
   margin-inline: auto;
 }
+
+@media (width < 64rem) {
+  .app-prose .katex-display {
+    scrollbar-width: none;
+  }
+
+  .app-prose .katex-display::-webkit-scrollbar {
+    display: none;
+  }
+}

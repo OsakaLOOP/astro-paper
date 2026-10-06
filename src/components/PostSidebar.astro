@@ -2,17 +2,32 @@
 import type { MarkdownHeading } from "astro";
 import { getCollection } from "astro:content";
 import Tag from "@/components/Tag.astro";
+import Datetime from "@/components/Datetime.astro";
+import ArticleStats from "@/components/ArticleStats.astro";
 import { useTranslations } from "@/i18n";
 import { getTagCounts, getUniqueTags } from "@/utils/getUniqueTags";
 import { postFilter } from "@/utils/postFilter";
 import { slugifyStr } from "@/utils/slugify";
 
 type Props = {
+  title: string;
   headings: MarkdownHeading[];
   postTags: string[];
+  pubDatetime: Date;
+  modDatetime?: Date | null;
+  timezone?: string;
+  postSlug: string;
 };
 
-const { headings, postTags } = Astro.props;
+const {
+  title,
+  headings,
+  postTags,
+  pubDatetime,
+  modDatetime,
+  timezone,
+  postSlug,
+} = Astro.props;
 const t = useTranslations(Astro.currentLocale);
 const posts = (await getCollection("posts")).filter(postFilter);
 const counts = getTagCounts(posts);
@@ -39,6 +54,28 @@ let sectionNumber = 0;
 <aside
   class="contents lg:sticky lg:top-6 lg:block lg:min-w-0 lg:space-y-8 lg:self-start"
 >
+  <section
+    id="post-sidebar-summary"
+    class="post-sidebar-summary hidden lg:block"
+    aria-label={title}
+  >
+    <div
+      class="post-sidebar-summary__content"
+      data-visible="false"
+      aria-hidden="true"
+    >
+      <p
+        class="text-accent m-0 text-[1.125rem] leading-snug font-bold wrap-break-word"
+      >
+        {title}
+      </p>
+      <div class="mt-2 flex flex-col items-start gap-1">
+        <Datetime {pubDatetime} {modDatetime} {timezone} />
+        <ArticleStats slug={postSlug} />
+      </div>
+    </div>
+  </section>
+
   {
     tocHeadings.length > 0 && (
       <section class="order-1 lg:order-none">
@@ -104,6 +141,39 @@ let sectionNumber = 0;
 </aside>
 
 <style>
+  .post-sidebar-summary {
+    position: relative;
+    min-height: 5.75rem;
+    overflow: hidden;
+  }
+
+  .post-sidebar-summary__content {
+    transform: translateY(0.75rem);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 260ms ease,
+      visibility 0s linear 420ms;
+  }
+
+  .post-sidebar-summary__content[data-visible="true"] {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0ms;
+  }
+
+  .post-sidebar-summary__content :global(.article-stats) {
+    font-size: 0.7rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .post-sidebar-summary__content {
+      transition: opacity 0.01ms linear;
+    }
+  }
+
   .toc-link[data-visible="true"] {
     color: var(--color-highlight-text);
   }
@@ -137,6 +207,39 @@ let sectionNumber = 0;
 
 <script>
   let removeListeners = () => {};
+  let removeSummaryListeners = () => {};
+
+  function initSidebarSummary() {
+    removeSummaryListeners();
+    const summary = document.querySelector<HTMLElement>(
+      "#post-sidebar-summary"
+    );
+    const content = summary?.querySelector<HTMLElement>(
+      ".post-sidebar-summary__content"
+    );
+    const header = document.getElementById("post-header");
+    if (!summary || !content || !header) return;
+
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const headerHidden = header.getBoundingClientRect().bottom <= 0;
+      content.dataset.visible = String(headerHidden);
+      content.setAttribute("aria-hidden", String(!headerHidden));
+    };
+    const scheduleUpdate = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    removeSummaryListeners = () => {
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      cancelAnimationFrame(frame);
+    };
+  }
 
   function initTableOfContents() {
     removeListeners();
@@ -265,5 +368,10 @@ let sectionNumber = 0;
     };
   }
 
-  document.addEventListener("astro:page-load", initTableOfContents);
+  const initPostSidebar = () => {
+    initSidebarSummary();
+    initTableOfContents();
+  };
+
+  document.addEventListener("astro:page-load", initPostSidebar);
 </script>

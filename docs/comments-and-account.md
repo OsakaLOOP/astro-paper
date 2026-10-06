@@ -195,6 +195,9 @@ The article title is the main heading; comment submissions optionally provide
 includes the complete comment with line breaks and, for replies, up to 320
 characters of the parent comment. Content mail includes the supplied description
 without a generic placeholder when it is absent. Both HTML and plain-text mail
+for new articles and article updates include a brief GitHub Actions notice that
+the site may still be building or deploying and readers can retry shortly.
+Both HTML and plain-text mail
 link `Manage notifications` to `/account/#notifications` on `PUBLIC_BLOG_ORIGIN`.
 Article URLs encode each slug segment separately so nested article paths work.
 Each type has its own action label and call to action. Moderator removal notices
@@ -221,6 +224,50 @@ or merge. Content mail is sent only when the triggering commit message contains
 `false`; omitted `notify` defaults to `true`. Front Matter is read from the
 committed file, not the working tree, and supports YAML comments and multiline
 values.
+
+### GitHub Actions setup
+
+`.github/workflows/content-notify.yml` runs notifications on pushes to `main`
+that change files under `src/content/posts`. The job is skipped unless the final
+commit message contains `[notify]`, avoiding runner work for ordinary edits. It
+does not build the site or wait for deployment; if notification links must already
+be live, move the sending step after your deployment succeeds.
+
+In the GitHub repository, open **Settings → Secrets and variables → Actions** and
+add these repository secrets:
+
+| Secret | Value |
+| --- | --- |
+| `BLOG_API_URL` | The API origin, e.g. `https://api.loopo.cc`, without `/blog/hooks/content`. |
+| `SITE_COMMAND_SECRET` | The same secret configured on the running blog backend. |
+
+Do not configure a GitHub repository webhook for this endpoint: GitHub's webhook
+payload and signature headers differ from the blog's signed command format. No
+SMTP credentials, SM mail secret, or backend `.env` file belong in Actions.
+The backend must already have `SM_MAIL_URL` and `SM_MAIL_SECRET` configured; the
+latter must match SM's `BLOG_MAIL_SECRET`.
+
+Publish an article with a final commit message such as
+`docs: publish an article [notify]`. The existing script compares only
+`HEAD^..HEAD`: when pushing multiple commits it inspects only the last one. For a
+squash or merge commit, include `[notify]` in that resulting commit's message.
+Deleted articles do not trigger mail. `notify: false` suppresses an article;
+`draft` and future publication dates do not, so suppress those explicitly.
+
+Recipients must enable **Email me about new articles and content updates** in
+`/account`; the comment notification switch is independent. The workflow uses
+`--strict`, making configuration, diff, and delivery request failures fail the
+job, while local Git hooks retain their non-blocking behavior. Successful API
+responses, including the recipient count, are printed in the Actions log; they
+confirm acceptance by the API and SM queue, not delivery to an inbox. Each content
+request times out after 15 seconds. A workflow run has a five-minute time limit.
+The commit/file event ID is unchanged when rerunning a failed workflow, allowing
+SM's event deduplication to prevent duplicate queue entries.
+
+If local Git hooks are installed as well, the same event may reach the API from
+both the local commit and Actions. Both use the same commit/file event ID. To use
+only Actions, disable local hooks with `git config --local core.hooksPath /dev/null`
+(this disables every Git hook for this clone).
 
 ## Acceptance checklist
 

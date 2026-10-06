@@ -20,11 +20,7 @@ const lines = (value: string) => esc(value).replace(/\r\n|\r|\n/g, "<br>");
 type Context = { author: string; content: string };
 
 type NotificationSender =
-  | "评论通知"
-  | "回复通知"
-  | "评论删除通知"
-  | "新文章通知"
-  | "文章更新通知";
+  "评论通知" | "回复通知" | "评论删除通知" | "新文章通知" | "文章更新通知";
 
 function notificationTemplate(input: {
   fromName: NotificationSender;
@@ -35,8 +31,19 @@ function notificationTemplate(input: {
   author?: string;
   context?: Context;
   linkLabel: string;
+  notice?: string;
 }) {
-  const { fromName, title, url, action, content, author, context, linkLabel } = input;
+  const {
+    fromName,
+    title,
+    url,
+    action,
+    content,
+    author,
+    context,
+    linkLabel,
+    notice,
+  } = input;
   const homeUrl = `${new URL(url).origin}/`;
   const accountUrl = new URL("account/#notifications", homeUrl).href;
   const regularFontUrl = new URL("fonts/400.ttf", homeUrl).href;
@@ -54,6 +61,7 @@ function notificationTemplate(input: {
     content,
     context && `In reply to ${context.author}:\n${context.content}`,
     `${linkLabel}: ${url}`,
+    notice,
     `Manage notifications: ${accountUrl}`,
   ]
     .filter(Boolean)
@@ -108,6 +116,7 @@ function notificationTemplate(input: {
           ${content ? `<p style="margin:0 0 20px;overflow-wrap:anywhere;word-break:break-word">${lines(content)}</p>` : ""}
           ${context ? `<div class="mail-rule mail-muted" style="margin:0 0 20px;padding:0 0 0 16px;border-left:2px solid #ece9e9;color:#6b7280;font-size:13px"><p style="margin:0 0 6px">In reply to ${esc(context.author)}</p><p style="margin:0;overflow-wrap:anywhere;word-break:break-word">${lines(context.content)}</p></div>` : ""}
           <p style="margin:24px 0"><a class="mail-link" href="${esc(url)}" style="color:#006cac;text-decoration:underline;text-underline-offset:4px">${esc(linkLabel)} &rarr;</a></p>
+          ${notice ? `<p class="mail-muted" style="margin:0 0 20px;color:#6b7280;font-size:12px;overflow-wrap:anywhere;word-break:break-word">${lines(notice)}</p>` : ""}
           <div class="mail-rule" style="padding-top:16px;border-top:1px dashed #ece9e9;font-size:12px"><a class="mail-muted" href="${esc(accountUrl)}" style="color:#6b7280;text-decoration:underline;text-underline-offset:3px">Manage notifications</a></div>
         </td></tr>
       </table>
@@ -164,5 +173,7 @@ export function contentMailTemplate(
     action,
     linkLabel:
       action === "Article updated" ? "Read updated article" : "Read article",
+    notice:
+      "This notification was triggered by GitHub Actions. The site may still be building or deploying; if the article is unavailable or outdated, please try again shortly.",
   });
 }

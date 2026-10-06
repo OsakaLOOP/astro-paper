@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { basename, extname, relative, resolve } from "node:path";
 import { createHmac } from "node:crypto";
 
+const strict = process.argv.includes("--strict");
 const root = execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" }).trim();
 const commit = execFileSync("git", ["rev-parse", "HEAD"], {
   cwd: root,
@@ -17,7 +18,7 @@ const api = process.env.BLOG_API_URL ?? process.env.PUBLIC_BLOG_API;
 const secret = process.env.SITE_COMMAND_SECRET;
 if (!api || !secret) {
   console.error("Content notifications skipped: BLOG_API_URL/PUBLIC_BLOG_API and SITE_COMMAND_SECRET are required.");
-  process.exit(0);
+  process.exit(strict ? 1 : 0);
 }
 
 const hook = process.argv[2] ?? "commit";
@@ -29,8 +30,9 @@ try {
     ["diff", "--name-status", "--diff-filter=AMR", "--find-renames", range, "--", "src/content/posts"],
     { cwd: root, encoding: "utf8" }
   ).trim();
-} catch {
-  process.exit(0);
+} catch (error) {
+  if (strict) console.error("Content notification diff failed:", error);
+  process.exit(strict ? 1 : 0);
 }
 if (!changes) process.exit(0);
 
@@ -74,9 +76,16 @@ for (const line of changes.split("\n")) {
         "X-Site-Command-Signature": signature,
       },
       body,
+      signal: AbortSignal.timeout(15000),
     });
-    if (!response.ok) console.error(`Content notification failed for ${file}: ${response.status} ${await response.text()}`);
+    if (!response.ok) {
+      console.error(`Content notification failed for ${file}: ${response.status} ${await response.text()}`);
+      if (strict) process.exitCode = 1;
+    } else {
+      console.log(`Content notification accepted for ${file}: ${await response.text()}`);
+    }
   } catch (error) {
     console.error(`Content notification failed for ${file}:`, error);
+    if (strict) process.exitCode = 1;
   }
 }

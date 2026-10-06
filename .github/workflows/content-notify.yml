@@ -1,0 +1,53 @@
+name: Content notifications
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/content/posts/**"
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Notify subscribed readers
+    if: contains(github.event.head_commit.message, '[notify]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check notification secrets
+        env:
+          BLOG_API_URL: ${{ secrets.BLOG_API_URL }}
+          SITE_COMMAND_SECRET: ${{ secrets.SITE_COMMAND_SECRET }}
+        run: |
+          test -n "$BLOG_API_URL" || { echo "Missing repository secret: BLOG_API_URL" >&2; exit 1; }
+          test -n "$SITE_COMMAND_SECRET" || { echo "Missing repository secret: SITE_COMMAND_SECRET" >&2; exit 1; }
+
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: "11.3.0"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Send content notifications
+        env:
+          BLOG_API_URL: ${{ secrets.BLOG_API_URL }}
+          SITE_COMMAND_SECRET: ${{ secrets.SITE_COMMAND_SECRET }}
+        run: node scripts/git-content-notify.mjs commit --strict

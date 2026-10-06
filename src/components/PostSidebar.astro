@@ -69,8 +69,8 @@ let sectionNumber = 0;
       >
         {title}
       </p>
-      <div class="mt-2 flex flex-col items-start gap-1">
-        <Datetime {pubDatetime} {modDatetime} {timezone} />
+      <div class="mt-1.5 flex items-center gap-2 whitespace-nowrap">
+        <Datetime {pubDatetime} {modDatetime} {timezone} size="xs" />
         <ArticleStats slug={postSlug} />
       </div>
     </div>
@@ -143,8 +143,9 @@ let sectionNumber = 0;
 <style>
   .post-sidebar-summary {
     position: relative;
-    min-height: 5.75rem;
+    min-height: 3.5rem;
     overflow: hidden;
+    margin-bottom: 0.75rem;
   }
 
   .post-sidebar-summary__content {
@@ -166,6 +167,11 @@ let sectionNumber = 0;
 
   .post-sidebar-summary__content :global(.article-stats) {
     font-size: 0.7rem;
+  }
+
+  .post-sidebar-summary__content :global(.article-stats svg) {
+    width: 0.875rem;
+    height: 0.875rem;
   }
 
   @media (prefers-reduced-motion: reduce) {

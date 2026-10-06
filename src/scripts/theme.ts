@@ -1,6 +1,7 @@
 const THEME_KEY = "theme";
 const LIGHT = "light";
 const DARK = "dark";
+const boundThemeButtons = new WeakSet<HTMLButtonElement>();
 
 function getPreferredTheme(): string {
   const stored = localStorage.getItem(THEME_KEY);
@@ -36,7 +37,10 @@ function reflect(): void {
 
 function setup(): void {
   reflect();
-  document.querySelector("#theme-btn")?.addEventListener("click", () => {
+  const button = document.querySelector<HTMLButtonElement>("#theme-btn");
+  if (!button || boundThemeButtons.has(button)) return;
+  boundThemeButtons.add(button);
+  button.addEventListener("click", () => {
     themeValue = themeValue === LIGHT ? DARK : LIGHT;
     persist();
   });

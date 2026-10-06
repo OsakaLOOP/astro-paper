@@ -74,6 +74,12 @@ Inside of AstroPaper, you'll see the following folders and files:
 
 All blog posts are stored in the `src/content/posts/` directory. You can organise posts into subdirectories — the subdirectory name becomes part of the post URL.
 
+## 首页 HotLinks
+
+首页在 Social Links 右侧显示 HotLinks，头像列表由 `src/data/hotlinks.json` 在构建时生成，按数组顺序排列。文件提供一个示例条目，可按实际需求替换或新增。
+
+每个条目包含 `name`（链接名称）、`url`（目标地址）、`avatar`（头像地址）。`avatar` 支持 `hotlinks/example.png`、`/hotlinks/example.png` 等相对地址，也支持完整的外部图片 URL；本地图片放在 `public/` 目录中。头像使用 32px 圆形裁切，点击区域为 40px，链接在新标签页打开。两组链接之间保留间距，窄屏自动换行；空数组会隐藏 HotLinks。修改 JSON 后重新构建即可更新网站。
+
 ## 📖 Documentation
 
 Documentation can be read in two formats\_ _markdown_ & _blog post_.

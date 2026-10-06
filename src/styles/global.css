@@ -195,6 +195,7 @@
 
 .comments-editor textarea {
   width: 100%;
+  min-height: 5lh;
   resize: vertical;
   border: 0;
   background: transparent;
@@ -566,7 +567,7 @@
 .comment-emoji {
   display: inline-block;
   width: auto;
-  height: auto;
+  height: max-content;
   max-width: 4rem;
   max-height: 4rem;
   margin: 0;
@@ -632,13 +633,13 @@
   background: transparent;
 }
 
-.comment-subscribe input:checked + .comment-check {
+.comment-subscribe input:checked+.comment-check {
   border-color: var(--accent);
   background: var(--accent);
   box-shadow: inset 0 0 0 2px var(--background);
 }
 
-.comment-subscribe input:focus-visible + .comment-check {
+.comment-subscribe input:focus-visible+.comment-check {
   outline: 2px dashed var(--accent);
   outline-offset: 2px;
 }

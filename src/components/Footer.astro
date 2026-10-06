@@ -1,7 +1,13 @@
 ---
+import { getCollection } from "astro:content";
 import type { HTMLAttributes } from "astro/types";
 import Socials from "./Socials.astro";
 import LinkButton from "@/components/LinkButton.astro";
+import IconClock3 from "@/assets/icons/IconClock3.svg";
+import IconEye from "@/assets/icons/IconEye.svg";
+import IconMessageCircle from "@/assets/icons/IconMessageCircle.svg";
+import { getPostSlug } from "@/utils/getPostPaths";
+import { postFilter } from "@/utils/postFilter";
 import { useTranslations } from "@/i18n";
 
 type Props = {
@@ -12,6 +18,11 @@ const { noMarginTop = false, class: className, ...attrs } = Astro.props;
 
 const t = useTranslations(Astro.currentLocale);
 const currentYear = new Date().getFullYear();
+const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
+const postSlugs = (await getCollection("posts"))
+  .filter(postFilter)
+  .map(post => getPostSlug(post.id, post.filePath));
+const uptimeStartedAt = "2026-09-29T14:33:19+08:00";
 ---
 
 <footer
@@ -22,7 +33,13 @@ const currentYear = new Date().getFullYear();
     class="border-border flex flex-col items-center justify-between border-t py-6 sm:flex-row-reverse sm:py-4"
   >
     <Socials />
-    <div class="my-2 flex flex-col items-center whitespace-nowrap sm:flex-row">
+    <div
+      class="my-2 flex flex-col items-center whitespace-nowrap sm:flex-row"
+      data-site-stats
+      data-stats-api={api}
+      data-stats-posts={JSON.stringify(postSlugs)}
+      data-uptime-start={uptimeStartedAt}
+    >
       <span
         aria-label="Copyleft icon"
         style={{ display: "inline-block", transform: "rotateY(180deg)" }}
@@ -49,6 +66,133 @@ const currentYear = new Date().getFullYear();
           萌ICP备20269164号
         </LinkButton>{" "}</span
       >
+      <span class="hidden sm:inline">&nbsp;|&nbsp;</span>
+      <span
+        class="inline-flex items-center gap-2 text-xs"
+        aria-label="Site statistics"
+      >
+        <span class="inline-flex items-center gap-1" title="Uptime">
+          <IconClock3 class="size-3.5" aria-hidden="true" />
+          <span class="sr-only">Uptime: </span>
+          <span data-site-uptime>—</span>
+        </span>
+        <span aria-hidden="true">·</span>
+        <span class="inline-flex items-center gap-1" title="Total views">
+          <IconEye class="size-3.5" aria-hidden="true" />
+          <span class="sr-only">Total views: </span>
+          <span data-site-views>—</span>
+        </span>
+        <span aria-hidden="true">·</span>
+        <span class="inline-flex items-center gap-1" title="Total comments">
+          <IconMessageCircle class="size-3.5" aria-hidden="true" />
+          <span class="sr-only">Total comments: </span>
+          <span data-site-comments>—</span>
+        </span>
+      </span>
     </div>
   </div>
 </footer>
+
+<script>
+  import { requestBlogApi } from "@/scripts/blog-api";
+
+  type AnalyticsPayload = {
+    items: { post_slug: string; views: number }[];
+  };
+  type CommentsPayload = { total: number };
+
+  const mounted = new Map<HTMLElement, number>();
+  const numberFormatter = new Intl.NumberFormat("en", {
+    maximumFractionDigits: 1,
+    notation: "compact",
+  });
+
+  function formatUptime(start: string): string {
+    const elapsedSeconds = Math.max(
+      0,
+      Math.floor((Date.now() - new Date(start).getTime()) / 1000)
+    );
+    const days = Math.floor(elapsedSeconds / 86_400);
+    const hours = Math.floor((elapsedSeconds % 86_400) / 3_600);
+    const minutes = Math.floor((elapsedSeconds % 3_600) / 60);
+    return `${days}d ${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m`;
+  }
+
+  function parsePostSlugs(node: HTMLElement): string[] {
+    try {
+      const slugs = JSON.parse(node.dataset.statsPosts ?? "[]");
+      return Array.isArray(slugs) &&
+        slugs.every(slug => typeof slug === "string")
+        ? [...new Set(slugs)]
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  async function loadSiteCounts(node: HTMLElement) {
+    const api = node.dataset.statsApi;
+    const slugs = parsePostSlugs(node);
+    if (!api || !slugs.length) return;
+
+    const views = node.querySelector<HTMLElement>("[data-site-views]");
+    const comments = node.querySelector<HTMLElement>("[data-site-comments]");
+
+    try {
+      const query = new URLSearchParams({ posts: slugs.join(",") });
+      const payload = await requestBlogApi<AnalyticsPayload>(
+        `${api}/blog/analytics?${query}`
+      );
+      if (payload && views) {
+        const total = payload.items.reduce((sum, item) => sum + item.views, 0);
+        views.textContent = numberFormatter.format(total);
+      }
+    } catch {}
+
+    const totals = await Promise.all(
+      slugs.map(async slug => {
+        try {
+          const query = new URLSearchParams({ post: slug, limit: "1" });
+          const payload = await requestBlogApi<CommentsPayload>(
+            `${api}/blog/comments?${query}`
+          );
+          return payload?.total;
+        } catch {
+          return undefined;
+        }
+      })
+    );
+    if (comments && totals.every(total => total !== undefined)) {
+      comments.textContent = numberFormatter.format(
+        totals.reduce((sum, total) => sum + (total ?? 0), 0)
+      );
+    }
+  }
+
+  function initSiteStats() {
+    for (const [node, timer] of mounted) {
+      if (!document.contains(node)) {
+        window.clearInterval(timer);
+        mounted.delete(node);
+      }
+    }
+
+    for (const node of document.querySelectorAll<HTMLElement>(
+      "[data-site-stats]"
+    )) {
+      if (mounted.has(node)) continue;
+      const uptime = node.querySelector<HTMLElement>("[data-site-uptime]");
+      if (!uptime) continue;
+      const renderUptime = () => {
+        uptime.textContent = formatUptime(node.dataset.uptimeStart ?? "");
+      };
+      renderUptime();
+      const timer = window.setInterval(renderUptime, 30_000);
+      mounted.set(node, timer);
+      void loadSiteCounts(node);
+    }
+  }
+
+  document.addEventListener("astro:page-load", initSiteStats);
+  initSiteStats();
+</script>

@@ -282,7 +282,7 @@ $$
 对于泛函极值问题, 为使 $\delta S[f;\eta]\geq0$, 考察其展开. 假设泛函是 Fréchet 可微的, 则应有:
 
 $$
-$S[f+\varepsilon \eta] - S[f] = \varepsilon \cdot \mathrm{d}S[f;\eta] + o(\varepsilon) \geq 0,
+S[f+\varepsilon \eta] - S[f] = \varepsilon \cdot \mathrm{d}S[f;\eta] + o(\varepsilon) \geq 0,
 
 $$
 

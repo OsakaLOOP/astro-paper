@@ -2,6 +2,7 @@
 @import "@fontsource-variable/noto-sans-sc";
 @import "./theme.css";
 @import "./typography.css";
+@import "katex/dist/katex.min.css";
 @import "rehype-callouts/theme/obsidian";
 
 @font-face {

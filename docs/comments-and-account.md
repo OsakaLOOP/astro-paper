@@ -26,8 +26,9 @@ links use the same hover, focus, dashed underline, and spacing rules as
 
 ## Comment behavior
 
-The comment heading uses `DISCUSSION`, an English count, and the editor label
-`Leave a comment`. The editor has `Preview`, `Write`, and `Send`; Markdown is
+The comment heading is the `comments.heading` string (`Leave a comment`), the
+count uses the `comments.count` template (`{{count}} comments`), and every label
+in the section comes from the `comments`/`account` groups in `src/i18n`. The editor has `Preview`, `Write`, and `Send`; Markdown is
 rendered with `marked` and sanitized with `DOMPurify` before it reaches the DOM.
 The backend stores the original Markdown for editing and notification excerpts.
 

@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## Fork — Loopo:443 (unreleased)
+
+Changes on top of upstream AstroPaper v6.1.0. This section is maintained by the
+fork author; the entries below it are upstream history.
+
+### Feat
+
+- comments with threaded replies, edits, deletion and a generated emoji picker
+- accounts, notification preferences and a Fastify + PostgreSQL service in `backends/`
+- article view analytics with a three-hour dedupe window, plus footer site statistics
+- post sidebar with a sticky table of contents, tag cloud and scroll summary
+- KaTeX display math, image captions, CJK-aware OG/QQ share images
+- HotLinks, page footer metadata, `theme-color` sync and nav-underline animation
+
+### Fix
+
+- escape the home page hero `>` so `eslint-plugin-astro` can parse the file
+- allow `no-console` in build scripts so `pnpm lint` matches upstream CI
+- format the repository with Prettier (CI `format:check` passes again)
+
+### Chore
+
+- centralise the blog API origin in the `astro:env` schema (`PUBLIC_BLOG_API`, `PUBLIC_COMMENTS_DEBUG`)
+- add `.env.example`, rewrite the README for the fork, remove unused dependencies
+- add fork documentation under `docs/`
+
 ## v6.1.0 (2026-06-06)
 
 ### Feat

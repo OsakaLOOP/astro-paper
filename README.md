@@ -1,6 +1,16 @@
-# AstroPaper 📄
+# Loopo:443 — an AstroPaper fork 📄
 
-![AstroPaper](public/default-og.jpg)
+> This repository is a personal fork of
+> [AstroPaper](https://github.com/satnaing/astro-paper) (v6.1) by
+> [Sat Naing](https://satnaing.dev). It keeps the theme's look and feel and adds
+> an optional self-hosted comment/account service, article analytics, an emoji
+> system, a post sidebar, KaTeX support and CJK-aware share images. See
+> [`docs/fork-feature-review.md`](docs/fork-feature-review.md) for what changed
+> and how it fits the upstream design, and
+> [`docs/comments-and-account.md`](docs/comments-and-account.md) for the service
+> specification.
+
+![Loopo:443](public/default-og.png)
 [![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)](https://www.figma.com/community/file/1356898632249991861)
 ![Typescript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![GitHub](https://img.shields.io/github/license/satnaing/astro-paper?color=%232F3741&style=for-the-badge)
@@ -28,6 +38,13 @@ Read [the blog posts](https://astro-paper.pages.dev/posts/) or check [the README
 - [x] highly customizable
 - [x] dynamic OG image generation for blog posts ([Blog Post](https://astro-paper.pages.dev/posts/dynamic-og-image-generation-in-astropaper-blog-posts/))
 - [x] i18n ready
+- [x] 文章侧栏目录与标签云
+- [x] comments with threaded replies, edits, deletion and emoji (`backends/`)
+- [x] accounts and notification preferences (OIDC login via the SM identity provider)
+- [x] article view analytics (3-hour per-visitor dedupe) and footer site statistics
+- [x] KaTeX math, image captions and callouts
+- [x] QQ/WeChat share images and HotLinks
+- [x] signed content notifications from Git hooks and GitHub Actions
 
 _Note: I've tested screen-reader accessibility of AstroPaper using **VoiceOver** on Mac and **TalkBack** on Android. I couldn't test all other screen-readers out there. However, accessibility enhancements in AstroPaper should be working fine on others as well._
 
@@ -45,6 +62,8 @@ Inside of AstroPaper, you'll see the following folders and files:
 
 ```bash
 /
+├── backends/              # optional comments/accounts API (Fastify + PostgreSQL)
+├── docs/                  # fork-specific specification and review notes
 ├── public/
 │   ├── pagefind/          # auto-generated on build
 │   ├── favicon.svg
@@ -54,6 +73,8 @@ Inside of AstroPaper, you'll see the following folders and files:
 │   │   ├── icons/
 │   │   └── images/
 │   ├── components/
+│   ├── data/
+│   │   └── hotlinks.json  # home page avatar links
 │   ├── content/
 │   │   ├── pages/
 │   │   │   └── about.md
@@ -68,6 +89,9 @@ Inside of AstroPaper, you'll see the following folders and files:
 │   ├── utils/
 │   ├── config.ts
 │   └── content.config.ts
+├── scripts/               # emoji manifest, content notifications, hook install
+├── .githooks/             # local content-notification hooks (optional)
+├── .env.example           # site environment variables (optional)
 ├── astro-paper.config.ts  # user-defined configurations
 └── astro.config.ts
 ```
@@ -89,12 +113,19 @@ QQ images are also generated for posts with a custom `ogImage`.
 
 ## 📖 Documentation
 
-Documentation can be read in two formats\_ _markdown_ & _blog post_.
+This fork removes the upstream posts that doubled as documentation, so the
+theme guides now live upstream:
 
-- Configuration - [markdown](src/content/posts/how-to-configure-astropaper-theme.md) | [blog post](https://astro-paper.pages.dev/posts/how-to-configure-astropaper-theme/)
-- Add Posts - [markdown](src/content/posts/adding-new-post.md) | [blog post](https://astro-paper.pages.dev/posts/adding-new-posts-in-astropaper-theme/)
-- Customize Color Schemes - [markdown](src/content/posts/customizing-astropaper-theme-color-schemes.md) | [blog post](https://astro-paper.pages.dev/posts/customizing-astropaper-theme-color-schemes/)
-- Predefined Color Schemes - [markdown](src/content/posts/predefined-color-schemes.md) | [blog post](https://astro-paper.pages.dev/posts/predefined-color-schemes/)
+- Configuration - [blog post](https://astro-paper.pages.dev/posts/how-to-configure-astropaper-theme/)
+- Add Posts - [blog post](https://astro-paper.pages.dev/posts/adding-new-posts-in-astropaper-theme/)
+- Customize Color Schemes - [blog post](https://astro-paper.pages.dev/posts/customizing-astropaper-theme-color-schemes/)
+- Predefined Color Schemes - [blog post](https://astro-paper.pages.dev/posts/predefined-color-schemes/)
+
+Fork-specific documentation:
+
+- Comments, accounts and notifications - [docs/comments-and-account.md](docs/comments-and-account.md)
+- Comments API, migrations and deployment - [backends/README.md](backends/README.md)
+- New features, design fit and known gaps - [docs/fork-feature-review.md](docs/fork-feature-review.md)
 
 ## 💻 Tech Stack
 
@@ -111,31 +142,26 @@ Documentation can be read in two formats\_ _markdown_ & _blog post_.
 
 ## 👨🏻‍💻 Running Locally
 
-You can start using this project locally by running the following command in your desired directory:
+Clone this repository (the published AstroPaper template does **not** include the
+comment service, analytics or emoji system):
 
 ```bash
-# pnpm
-pnpm create astro@latest --template satnaing/astro-paper
+git clone https://github.com/OsakaLOOP/astro-paper.git
+cd astro-paper
 
-# npm
-npm create astro@latest -- --template satnaing/astro-paper
-
-# yarn
-yarn create astro --template satnaing/astro-paper
-
-# bun
-bun create astro@latest -- --template satnaing/astro-paper
-```
-
-Then start the project by running the following commands:
-
-```bash
-# install dependencies if you haven't done so in the previous step.
+# install dependencies
 pnpm install
 
-# start running the project
+# optional: point the site at your own API origin
+cp .env.example .env
+
+# start the dev server
 pnpm dev
 ```
+
+The site is fully static and builds without the backend; comments, accounts,
+view counts and the footer statistics simply degrade until an API is reachable.
+To run the API as well, see [`backends/README.md`](backends/README.md).
 
 ## Google Site Verification (optional)
 
@@ -153,18 +179,35 @@ export default defineAstroPaperConfig({
 
 > See [this discussion](https://github.com/satnaing/astro-paper/discussions/334#discussioncomment-10139247) for adding AstroPaper to the Google Search Console.
 
+## 🔧 Environment variables
+
+Site variables live in `.env` (see [`.env.example`](.env.example)) and are
+declared in the `env.schema` of `astro.config.ts`:
+
+| Variable                          | Default                | Purpose                                        |
+| :-------------------------------- | :--------------------- | :--------------------------------------------- |
+| `PUBLIC_BLOG_API`                 | `https://api.loopo.cc` | Origin of the comments/accounts API            |
+| `PUBLIC_COMMENTS_DEBUG`           | `false`                | Log `[comments]` traces to the browser console |
+| `PUBLIC_GOOGLE_SITE_VERIFICATION` | –                      | Google Search Console verification meta tag    |
+
+The backend keeps its own secrets in `backends/.env` (see
+[`backends/.env.example`](backends/.env.example)).
+
 ## 🧞 Commands
 
 All commands are run from the root of the project, from a terminal:
 
-| Command          | Action                                                                                                                           |
-| :--------------- | :------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm install`   | Installs dependencies                                                                                                            |
-| `pnpm dev`       | Starts local dev server at `localhost:4321`                                                                                      |
-| `pnpm build`     | Type-checks, builds the site, runs Pagefind indexing, and copies the index to `public/pagefind/`                                 |
-| `pnpm preview`   | Preview your build locally, before deploying                                                                                     |
-| `pnpm sync`      | Generates TypeScript types for all Astro modules. [Learn more](https://docs.astro.build/en/reference/cli-reference/#astro-sync). |
-| `pnpm astro ...` | Run CLI commands like `astro add`, `astro check`                                                                                 |
+| Command               | Action                                                                                                                           |
+| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm install`        | Installs dependencies                                                                                                            |
+| `pnpm dev`            | Starts local dev server at `localhost:4321`                                                                                      |
+| `pnpm build`          | Type-checks, builds the site, runs Pagefind indexing, and copies the index to `public/pagefind/`                                 |
+| `pnpm preview`        | Preview your build locally, before deploying                                                                                     |
+| `pnpm sync`           | Generates TypeScript types for all Astro modules. [Learn more](https://docs.astro.build/en/reference/cli-reference/#astro-sync). |
+| `pnpm astro ...`      | Run CLI commands like `astro add`, `astro check`                                                                                 |
+| `pnpm emoji:generate` | Regenerate `public/emoji/manifest.json` from `public/emoji/<group>/`                                                             |
+| `pnpm emoji:rename`   | Rename emoji assets to their stable `<group>_<suffix>` identifiers, then regenerate the manifest                                 |
+| `pnpm hooks:install`  | Point `core.hooksPath` at `.githooks/` for local content notifications                                                           |
 
 ## ✨ Feedback & Suggestions
 

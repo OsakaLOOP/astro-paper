@@ -10,7 +10,7 @@
 
 | 维度 | 评分 | 一句话结论 |
 | --- | --- | --- |
-| **完整性** | ★★★★☆ 4.0 → ★★★★½ 4.5 | 功能闭环程度远超"主题美化"级别（评论/账户/通知/统计自成体系）。初评的四处收尾缺口（CI 红、README 断链、CHANGELOG 未同步、零测试）已在 §7 修复前三项，仅测试缺位保留。 |
+| **完整性** | ★★★★☆ 4.0 → ★★★★½ 4.5 | 功能闭环程度远超"主题美化"级别（评论/账户/通知/统计自成体系）。初评的四处收尾缺口——CI 红、README 断链、CHANGELOG 未同步、零测试——§7 已全部处理（测试为最小可用集，见 §7.9）。 |
 | **现代性** | ★★★★½ 4.5 | Astro 7 + Tailwind v4 CSS-first + View Transitions + OIDC PKCE BFF + 幂等/乐观锁 + `dvh`/`inert`/`AbortSignal.any`，属于 2026 年的前沿组合；残留少量手写 DOM 与 `confirm()` 式实现。 |
 | **风格吻合度** | ★★★★☆ 4.0 | *视觉与交互* 层面几乎无可挑剔地延续了上游语言（虚线分隔、等宽字体、dashed focus、reduced-motion），并有两处超越上游；*工程组织* 层面偏离明显：新增功能完全绕过上游的「类型化配置层 + i18n 层」，CSS 也搬到了全局。 |
 
@@ -149,7 +149,7 @@
 | ~~`account.astro`~~（§7 已修复：改用 `requestBlogApi` + 保存反馈） | `update()` 不检查 `response.ok`，保存没有成功/失败反馈；`Origin` 头手写（浏览器会忽略） | 静默失败，与评论区细致错误处理风格不一致 |
 | `Comments.astro` | 删除确认用 `confirm()`；列表渲染用字符串模板 + 手写 `escape` 拼 `innerHTML` | 与其"现代度"定位略不匹配（同一文件里表情渲染却用了 DOM API） |
 | ~~`backend` `server.ts`~~（§7 已改为 `TRUST_PROXY` 环境变量） | `trustProxy: ["172.30.0.2/32"]` 硬编码 Docker 对端 IP | 网关 IP 变化会把所有访客算成同一 IP（退化为全局 100/min 限流） |
-| `backends` | 无任何测试；无后端 CI；迁移靠手工按文件名顺序执行 | 回归风险集中在人工验收清单 |
+| ~~`backends`~~（§7.9 已补：`node:test` 用例 + backends CI job；迁移仍靠手工按文件名顺序执行） | 无任何测试；无后端 CI；迁移靠手工按文件名顺序执行 | 回归风险集中在人工验收清单 |
 | ~~`package.json`~~（§7 已移除） | `better-auth`、`gsap`、`optional` 三个依赖无任何引用 | 安装体积与安全扫描噪音（`gsap` 3.15 是 2026 年较新的包，但确实没用） |
 | ~~`sitemap`~~（§7 已排除） | 包含 `/account/` | 用户私有页被索引 |
 | `astro-paper.config.ts` | `shareLinks` 的 QQ 分享用 `http://connect.qq.com/...` | 历史遗留协议，无功能影响 |
@@ -170,7 +170,7 @@
 **缺口（按严重度）**
 1. ~~**CI 是红的**~~（§7 已修复）：初评时 `pnpm run lint` 报 8 个 error（`scripts/*.mjs` 的 `no-console` + `src/pages/index.astro:51` 的解析错误 `Unexpected token. Did you mean {'>'}?`——hero 标题开头那个 `>` 在 eslint-plugin-astro 的解析器里炸了，虽然 `astro build` 渲染正确）；`pnpm run format:check` 有 7 个文件未格式化。上游同样命令通过，因此这是分叉引入的。这两项直接决定了初评不给"完整性"满分。
 2. ~~**文档/元数据未同步**~~（§7 已修复）：README 四处断链、运行指引指向上游模板、CHANGELOG 与上游逐字节相同（没有任何分叉条目）、`astro-paper.config.ts` 的配置项说明缺席、新增环境变量（`PUBLIC_BLOG_API`、`PUBLIC_COMMENTS_DEBUG`）既未进 `env` schema 也未进任何 `.env.example`。
-3. **零自动化测试（仍然存在）**：无单元/集成/E2E；`backends/scripts/comments-load.mjs` 只是人工压测脚本。对一个含鉴权、签名、并发去重的服务来说，测试缺位是最大风险，§7 未处理。
+3. ~~**零自动化测试**~~（§7.9 已起步）：现在有 8 个 `node:test` 用例覆盖 `security.ts` 与计数接口，并进了 CI；但整体覆盖率仍低——鉴权、发信、迁移、前端组件都没有测试，`backends/scripts/comments-load.mjs` 仍只是人工压测脚本。
 4. ~~**文档与实现漂移**~~（§7 已修复）：规格文档说评论标题是 `DISCUSSION`，代码是 `Leave a comment`；`.comments-kicker`、`allRightsReversed` 是死代码/死键。
 
 ### 4.2 现代性：4.5 / 5
@@ -214,11 +214,11 @@
 2. `eslint.config.js` 为 `scripts/**`、`backends/scripts/**` 放开 `no-console`；`src/pages/index.astro` 的 hero 标题开头那个 `>` 包成 `{">"} ` 或改用 `&gt;`，消除 eslint-plugin-astro 的解析错误（`astro build` 本身能正确渲染，属于解析器差异）。
 3. 修 README 的四处断链（改为指向自己的 `docs/` 或上游线上文档），把 "Running Locally" 换成 `git clone` 本仓库 + `PUBLIC_BLOG_API` 说明，并补一份根级 `.env.example`。
 
-### P1（结构性，但收益明确）—— 4、5、6、8 已完成，7（测试）待办，见 §7
+### P1（结构性，但收益明确）—— 全部完成，见 §7
 4. 把散落的常量收敛成配置：`astro-paper.config.ts` 增加 `comments: { apiUrl }`、`site.brand/uptime/securityUrl` 之类的字段（`src/types/config.ts` 同步扩展），或至少把 `PUBLIC_BLOG_API` 提升为 `astro:env` schema 字段并集中到一个 `src/lib/blogApi.ts`。
 5. 给新增 UI 文案补 i18n key（含中文/日文占位符与邮件发件名），顺手删掉死键 `allRightsReversed` 与死 CSS `.comments-kicker`。
 6. 让 `account.astro` 复用 `requestBlogApi` 并给出保存反馈；统计页脚改成一次批量请求（评论数改用 `EXISTS`/聚合端点），去掉 N+1。
-7. 加最小测试与 CI：后端加一个 `vitest`/`node:test` 对 `security.ts`（seal/unseal、签名校验）与 `app.ts`（用 `fastify.inject` + 内存 pg mock）的用例；`.github/workflows/ci.yml` 增加 backends job（`npm ci && npm run check && npm test`）与 `node scripts/generate-emoji-manifest.mjs && git diff --exit-code` 的清单一致性校验。
+7. ✅ 加最小测试与 CI：后端加一个 `vitest`/`node:test` 对 `security.ts`（seal/unseal、签名校验）与 `app.ts`（用 `fastify.inject` + 内存 pg mock）的用例；`.github/workflows/ci.yml` 增加 backends job（`npm ci && npm run check && npm test`）与 `node scripts/generate-emoji-manifest.mjs && git diff --exit-code` 的清单一致性校验。
 8. 后端 `trustProxy` 改为从环境变量读取（`TRUST_PROXY`），避免硬编码网关 IP。
 
 ### P2（长期/可选）
@@ -329,8 +329,7 @@ cd dist && python3 -m http.server 4321 --bind 0.0.0.0
 
 | 项 | 原因 / 建议 |
 | --- | --- |
-| 自动化测试（§4.1 缺口 3） | 需要引入测试框架与 CI job，属于独立工作量；建议先覆盖 `security.ts`（seal/unseal、签名）与 `app.ts`（`fastify.inject` + mock pg） |
-| 页脚评论数的 N+1 | 现已并发化（不再串行等待），但根因是后端缺少「按 slug 批量取评论数」的聚合接口；建议新增 `GET /blog/comments/counts?posts=…` |
+| ~~页脚评论数的 N+1~~（§7.9 已修复） | 新增 `GET /blog/comments/counts?posts=…` 聚合接口（一次查询 `GROUP BY post_slug`），页脚改为**单次请求**，与已在用的 `/blog/analytics` 批量接口对称 |
 | 评论/账户的 DOM 渲染方式 | `confirm()`、字符串模板拼接仍是工作量大且易回归的重构，建议单独一个 PR |
 | 与上游的可合并性 | 本仓库历史是 squash 过的单提交，"恢复到可 rebase 上游"需要重建历史，风险高于收益，交由仓库所有者决定 |
 | 部署拓扑文档化 | `edgeone.json` + Docker 反代的实际拓扑只有站点所有者清楚，报告只能指出缺口 |
@@ -347,3 +346,14 @@ npx tsc --noEmit                # ✅ 0 error
 node scripts/generate-emoji-manifest.mjs && git status --porcelain public/emoji/manifest.json  # ✅ 无差异
 curl（静态预览）                 # ✅ /、/posts/dev-notes/、/account/、/og.png、/qq.png、/posts/dev-notes/qq.png 均 200
 ```
+
+### 7.9 第二轮：聚合接口、测试与后端 CI
+
+| 项 | 改动 | 验证 |
+| --- | --- | --- |
+| 页脚评论数 N+1 | `backends/src/app.ts` 新增 `GET /blog/comments/counts?posts=a,b,c`（单条 `GROUP BY post_slug` 聚合查询，≤100 个 slug，对未知 slug 补 0，仅统计未删除评论）；`Footer.astro` 由「每篇文章一次 `/blog/comments`」改为**一次**调用该接口，请求总数从 N+1 降到 2（统计 + 点赞数） | 构建后 `dist/_astro/Footer.*.js` 中只剩 `blog/comments/counts`；`blog/comments?post=` 只出现在文章页评论区（本就该按文章取） |
+| 后端测试 | 新增 `backends/test/security.test.ts`（seal/unseal 往返、每次密文不同、错密钥与篡改拒绝、webhook 签名窗口/格式/错密钥）与 `backends/test/comments-counts.test.ts`（用 stub `pg.Pool` + `app.inject` 验证批量、去重、零填充、400 分支） | `npm test` → 8 pass / 0 fail；`npm run check`（`tsconfig.test.json`，覆盖 `src/` + `test/`）0 error |
+| 后端 CI | `.github/workflows/ci.yml` 新增 `backend` job：`npm ci` → `npm run check` → `npm test`（Node 24，缓存 `backends/package-lock.json`） | 工作流语法与步骤与本地命令逐一对应；本沙箱 `npm ci` 因 npm 自身缺陷失败，改用等版本 pnpm 安装验证（`fastify 5.12.3` / `pg 8.23.0` / `tsx 4.23.13` / `typescript 5.9.3` 与 lock 完全一致） |
+| 文档 | `backends/README.md` 增加 Tests 一节与新接口说明 | — |
+
+生产镜像不受影响：`Dockerfile` 走 `npm run build`（`tsconfig.json` 只含 `src/`），测试目录不进入 `dist/`。

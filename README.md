@@ -191,7 +191,8 @@ declared in the `env.schema` of `astro.config.ts`:
 | `PUBLIC_GOOGLE_SITE_VERIFICATION` | –                      | Google Search Console verification meta tag    |
 
 The backend keeps its own secrets in `backends/.env` (see
-[`backends/.env.example`](backends/.env.example)).
+[`backends/.env.example`](backends/.env.example)). Backend checks run with their
+own runner: `cd backends && npm ci && npm run check && npm test`.
 
 ## 🧞 Commands
 

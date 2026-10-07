@@ -15,18 +15,23 @@ fork author; the entries below it are upstream history.
 - post sidebar with a sticky table of contents, tag cloud and scroll summary
 - KaTeX display math, image captions, CJK-aware OG/QQ share images
 - HotLinks, page footer metadata, `theme-color` sync and nav-underline animation
+- batched comment counts for the footer via `GET /blog/comments/counts`
 
 ### Fix
 
 - escape the home page hero `>` so `eslint-plugin-astro` can parse the file
 - allow `no-console` in build scripts so `pnpm lint` matches upstream CI
 - format the repository with Prettier (CI `format:check` passes again)
+- surface account save/subscribe failures instead of failing silently
+- make the backend `trustProxy` list configurable through `TRUST_PROXY`
 
 ### Chore
 
 - centralise the blog API origin in the `astro:env` schema (`PUBLIC_BLOG_API`, `PUBLIC_COMMENTS_DEBUG`)
 - add `.env.example`, rewrite the README for the fork, remove unused dependencies
 - add fork documentation under `docs/`
+- add `node:test` coverage for the backend security helpers and the comment
+  count route, and run `npm run check` + `npm test` in CI
 
 ## v6.1.0 (2026-06-06)
 

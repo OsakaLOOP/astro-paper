@@ -33,6 +33,7 @@ const posts = (await getCollection("posts")).filter(postFilter).map(post => ({
 <Layout
   title={`${t.account.title} | ${config.site.title}`}
   description={t.account.description}
+  noindex
 >
   <Header />
   <main

@@ -25,6 +25,8 @@ const labels = {
   removed: t.comments.removed,
   edited: t.comments.edited,
   deleteConfirm: t.comments.deleteConfirm,
+  confirmDelete: t.comments.confirmDelete,
+  cancel: t.comments.cancel,
   replyPlaceholder: t.comments.replyPlaceholder,
   editPlaceholder: t.comments.editPlaceholder,
   actionFailed: t.comments.actionFailed,
@@ -98,6 +100,7 @@ const labels = {
     requestBlogApi,
   } from "@/scripts/blog-api";
   import { tplStr } from "@/i18n/format";
+  import { confirmAction } from "@/scripts/confirm";
   import {
     createEmojiIndex,
     splitEmojiText,
@@ -819,7 +822,13 @@ const labels = {
           const id = target.dataset.delete;
           if (id) {
             const button = target as HTMLButtonElement;
-            if (button.disabled || !confirm(labels.deleteConfirm)) return;
+            if (button.disabled) return;
+            const accepted = await confirmAction({
+              message: labels.deleteConfirm,
+              confirm: labels.confirmDelete,
+              cancel: labels.cancel,
+            });
+            if (!accepted) return;
             button.disabled = true;
             clearFeedback();
             try {

@@ -15,6 +15,7 @@ fork author; the entries below it are upstream history.
 - post sidebar with a sticky table of contents, tag cloud and scroll summary
 - KaTeX display math, image captions, CJK-aware OG/QQ share images
 - HotLinks, page footer metadata, `theme-color` sync and nav-underline animation
+- themed `<dialog>` confirmation for destructive comment actions
 - batched comment counts for the footer via `GET /blog/comments/counts`
 
 ### Fix
@@ -24,6 +25,7 @@ fork author; the entries below it are upstream history.
 - format the repository with Prettier (CI `format:check` passes again)
 - surface account save/subscribe failures instead of failing silently
 - make the backend `trustProxy` list configurable through `TRUST_PROXY`
+- mark the private `/account/` page `noindex`
 
 ### Chore
 

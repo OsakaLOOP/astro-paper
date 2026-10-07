@@ -67,6 +67,8 @@ export interface UIStrings {
     edit: string;
     delete: string;
     deleteConfirm: string;
+    confirmDelete: string;
+    cancel: string;
     removed: string;
     edited: string;
     actionFailed: string;

@@ -13,6 +13,8 @@ type Props = {
   qqImage?: string;
   canonicalURL?: string;
   type?: "website" | "article";
+  /** Keep a page out of search indexes (e.g. the private account page). */
+  noindex?: boolean;
 };
 
 const { site } = config;
@@ -23,6 +25,7 @@ const {
   ogImage = resolveDefaultOgImagePath(config),
   qqImage = config.features.dynamicOgImage ? getAssetPath("qq.png") : ogImage,
   type = "website",
+  noindex = false,
 } = Astro.props;
 
 const canonicalUrl = new URL(
@@ -84,6 +87,7 @@ const wechatShareScript = [
     <meta name="title" content={title} />
     <meta name="description" itemprop="description" content={description} />
     <meta name="author" content={site.author} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="sitemap" href={getAssetPath("sitemap-index.xml")} />
 
     <!-- Open Graph -->

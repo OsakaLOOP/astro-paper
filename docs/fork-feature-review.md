@@ -11,7 +11,7 @@
 | 维度 | 评分 | 一句话结论 |
 | --- | --- | --- |
 | **完整性** | ★★★★☆ 4.0 → ★★★★½ 4.5 | 功能闭环程度远超"主题美化"级别（评论/账户/通知/统计自成体系）。初评的四处收尾缺口——CI 红、README 断链、CHANGELOG 未同步、零测试——§7 已全部处理（测试为最小可用集，见 §7.9）。 |
-| **现代性** | ★★★★½ 4.5 | Astro 7 + Tailwind v4 CSS-first + View Transitions + OIDC PKCE BFF + 幂等/乐观锁 + `dvh`/`inert`/`AbortSignal.any`，属于 2026 年的前沿组合；残留少量手写 DOM 与 `confirm()` 式实现。 |
+| **现代性** | ★★★★½ 4.5 | Astro 7 + Tailwind v4 CSS-first + View Transitions + OIDC PKCE BFF + 幂等/乐观锁 + `dvh`/`inert`/`AbortSignal.any`，属于 2026 年的前沿组合；§7.10 已把删除确认换成主题化 `<dialog>`，仅剩字符串模板渲染列表。 |
 | **风格吻合度** | ★★★★☆ 4.0 | *视觉与交互* 层面几乎无可挑剔地延续了上游语言（虚线分隔、等宽字体、dashed focus、reduced-motion），并有两处超越上游；*工程组织* 层面偏离明显：新增功能完全绕过上游的「类型化配置层 + i18n 层」，CSS 也搬到了全局。 |
 
 > **更新（同分支已修复）**：本报告初稿列出的 P0 项——`lint`/`format:check` 红灯、README 断链、运行指引指向上游模板、注释漂移——以及 P1 中的若干项（配置/环境变量收敛、i18n 补全、死代码清理、页脚 N+1、后端 `trustProxy` 硬编码、未使用依赖）均已在同一分支落地并通过实机验证，详见 **§7 修复记录**。修复后 `lint`、`format:check`、`astro check`、`astro build`、后端 `tsc --noEmit` 全部通过。
@@ -147,7 +147,7 @@
 | --- | --- | --- |
 | `Footer.astro` 统计脚本（§7 部分缓解：请求改为并发，仍未合并为单次聚合查询） | 评论总数是**按文章一篇一次请求**（N+1），且 `cache: "no-store"` | 现在 5 篇文章=6 次请求；文章变多会明显拖慢页脚 |
 | ~~`account.astro`~~（§7 已修复：改用 `requestBlogApi` + 保存反馈） | `update()` 不检查 `response.ok`，保存没有成功/失败反馈；`Origin` 头手写（浏览器会忽略） | 静默失败，与评论区细致错误处理风格不一致 |
-| `Comments.astro` | 删除确认用 `confirm()`；列表渲染用字符串模板 + 手写 `escape` 拼 `innerHTML` | 与其"现代度"定位略不匹配（同一文件里表情渲染却用了 DOM API） |
+| ~~`Comments.astro`~~（删除确认已在 §7.10 换成 `<dialog>`；列表渲染仍是字符串模板 + 手写 `escape`） | 删除确认用 `confirm()`；列表渲染用字符串模板 + 手写 `escape` 拼 `innerHTML` | 与其"现代度"定位略不匹配（同一文件里表情渲染却用了 DOM API） |
 | ~~`backend` `server.ts`~~（§7 已改为 `TRUST_PROXY` 环境变量） | `trustProxy: ["172.30.0.2/32"]` 硬编码 Docker 对端 IP | 网关 IP 变化会把所有访客算成同一 IP（退化为全局 100/min 限流） |
 | ~~`backends`~~（§7.9 已补：`node:test` 用例 + backends CI job；迁移仍靠手工按文件名顺序执行） | 无任何测试；无后端 CI；迁移靠手工按文件名顺序执行 | 回归风险集中在人工验收清单 |
 | ~~`package.json`~~（§7 已移除） | `better-auth`、`gsap`、`optional` 三个依赖无任何引用 | 安装体积与安全扫描噪音（`gsap` 3.15 是 2026 年较新的包，但确实没用） |
@@ -182,7 +182,7 @@
 - **前端工程**：统一 API 客户端（超时/退避/错误分类）、`Intl.NumberFormat` 紧凑计数、`aria-live`、tablist 键盘方向键、dialog 焦点陷阱、`sr-only` 文案齐全。
 
 **残留的"上一代"痕迹**
-- `confirm()` 删除确认、大量 `innerHTML` 字符串拼接 + 手写 `escape`（`Comments.astro`/`account.astro`）——现代 Astro 项目通常会选 islands（Preact/Svelte）或至少 DOM API 构建节点（作者本人在表情渲染里用了 DOM API，风格不统一）。
+- ~~`confirm()` 删除确认~~（§7.10 已换）~~、~~大量 `innerHTML` 字符串拼接 + 手写 `escape`（`Comments.astro`/`account.astro`）——现代 Astro 项目通常会选 islands（Preact/Svelte）或至少 DOM API 构建节点（作者本人在表情渲染里用了 DOM API，风格不统一）。
 - `account.astro` 完全不使用统一的 `requestBlogApi`，退化为裸 `fetch` 且不校验状态。
 - 没有使用内容集合的 `reference()`/`live collections`；`getStaticPaths` 仍是全量遍历（无 `astro:content` 增量考虑）。
 - 部署拓扑没有文档化：上游 README 写的是 Cloudflare Pages，分叉同时存在 `edgeone.json`（边缘重定向）与 Docker 化的 `backends/`，读者无法从仓库判断生产拓扑（静态站落在哪、反代在哪、SM 在哪）。
@@ -330,7 +330,7 @@ cd dist && python3 -m http.server 4321 --bind 0.0.0.0
 | 项 | 原因 / 建议 |
 | --- | --- |
 | ~~页脚评论数的 N+1~~（§7.9 已修复） | 新增 `GET /blog/comments/counts?posts=…` 聚合接口（一次查询 `GROUP BY post_slug`），页脚改为**单次请求**，与已在用的 `/blog/analytics` 批量接口对称 |
-| 评论/账户的 DOM 渲染方式 | `confirm()`、字符串模板拼接仍是工作量大且易回归的重构，建议单独一个 PR |
+| 评论/账户的 DOM 渲染方式 | 删除确认已换成主题化 `<dialog>`（§7.10）；列表仍用字符串模板拼接，属于工作量大且易回归的重构，建议单独一个 PR |
 | 与上游的可合并性 | 本仓库历史是 squash 过的单提交，"恢复到可 rebase 上游"需要重建历史，风险高于收益，交由仓库所有者决定 |
 | 部署拓扑文档化 | `edgeone.json` + Docker 反代的实际拓扑只有站点所有者清楚，报告只能指出缺口 |
 
@@ -357,3 +357,12 @@ curl（静态预览）                 # ✅ /、/posts/dev-notes/、/account/�
 | 文档 | `backends/README.md` 增加 Tests 一节与新接口说明 | — |
 
 生产镜像不受影响：`Dockerfile` 走 `npm run build`（`tsconfig.json` 只含 `src/`），测试目录不进入 `dist/`。
+
+### 7.10 第三轮：主题化确认弹窗与 `/account/` 收录控制
+
+| 项 | 改动 | 说明 |
+| --- | --- | --- |
+| 删除确认弹窗 | 新增 `src/scripts/confirm.ts`：用原生 `<dialog>` + `<form method="dialog">` 取代 `window.confirm()`，保留浏览器自带的焦点陷阱、Escape 与背景 inert，按钮与面板样式取自主题 token（`.confirm-dialog`，新增在 `global.css`） | 可见文案走 i18n 的 `comments.deleteConfirm` / `confirmDelete` / `cancel`；`ClientRouter` 替换 `<body>` 后弹窗会被摘除，`confirmAction` 会检测 `isConnected` 并重新挂载，重复调用（`open` 为真）直接返回 false 以避免 `showModal()` 抛错 |
+| 私有页收录 | `Layout` 新增可选 `noindex` 属性，`/account/` 传 `noindex` 输出 `<meta name="robots" content="noindex, nofollow">`（此前只在 sitemap 里排除） | 构建产物核对：`/account/` 有该 meta，首页与文章页没有 |
+
+仍未做：评论列表的字符串模板渲染（`innerHTML` + 手写 `escape`）保持原样，属于需要单独 PR 的重构；前端没有浏览器级测试，弹窗行为通过构建产物与代码审查验证。

@@ -1,8 +1,12 @@
 ---
 import IconEye from "@/assets/icons/IconEye.svg";
+import { blogApiOrigin } from "@/scripts/blog-api";
+import { useTranslations } from "@/i18n";
+import config from "@/config";
 
 const { slug, record = false } = Astro.props;
-const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
+const api = blogApiOrigin;
+const t = useTranslations(Astro.currentLocale ?? config.site.lang);
 ---
 
 <span
@@ -11,11 +15,11 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
   data-stats-api={api}
   data-post-slug={slug}
   data-record={record ? "true" : undefined}
-  aria-label="Article views"
+  aria-label={t.post.views}
 >
   <IconEye class="size-4" aria-hidden="true" />
   <span data-view-count>—</span>
-  <span>views</span>
+  <span>{t.post.views}</span>
 </span>
 
 <script>

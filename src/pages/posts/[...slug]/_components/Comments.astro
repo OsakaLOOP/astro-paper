@@ -1,10 +1,41 @@
 ---
 import EmojiPicker from "@/components/EmojiPicker.astro";
 import IconEdit from "@/assets/icons/IconEdit.svg";
+import { blogApiOrigin, commentsDebug } from "@/scripts/blog-api";
+import { useTranslations, tplStr } from "@/i18n";
+import config from "@/config";
 
 const { postSlug, postTitle } = Astro.props;
-const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
-const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
+const api = blogApiOrigin;
+const debug = commentsDebug;
+const t = useTranslations(Astro.currentLocale ?? config.site.lang);
+
+/**
+ * Strings the client script needs at runtime. They are serialised once on the
+ * section element so the markup and the script share the same i18n source.
+ */
+const labels = {
+  loading: t.comments.loading,
+  empty: t.comments.empty,
+  loadFailed: t.comments.loadFailed,
+  retry: t.comments.retry,
+  count: t.comments.count,
+  countLoading: t.comments.countLoading,
+  countUnavailable: t.comments.countUnavailable,
+  removed: t.comments.removed,
+  edited: t.comments.edited,
+  deleteConfirm: t.comments.deleteConfirm,
+  replyPlaceholder: t.comments.replyPlaceholder,
+  editPlaceholder: t.comments.editPlaceholder,
+  actionFailed: t.comments.actionFailed,
+  actionSend: t.comments.actionSend,
+  actionEdit: t.comments.actionEdit,
+  actionDelete: t.comments.actionDelete,
+  actionSubscription: t.comments.actionSubscription,
+  reply: t.comments.reply,
+  edit: t.comments.edit,
+  delete: t.comments.delete,
+};
 ---
 
 <section
@@ -14,19 +45,20 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
   data-post={postSlug}
   data-post-title={postTitle}
   data-comments-debug={debug ? "true" : undefined}
+  data-labels={JSON.stringify(labels)}
 >
   <div class="comments-heading">
-    <h2>Leave a comment</h2><span class="comments-count" data-count
-      >Loading</span
+    <h2>{t.comments.heading}</h2><span class="comments-count" data-count
+      >{t.comments.countLoading}</span
     >
   </div>
   <div class="comments-editor" data-editor hidden>
     <div class="comments-editor-header">
       <div class="comments-tabs">
         <button class="comments-tab" data-tab="write" aria-selected="true"
-          >Write</button
+          >{t.comments.write}</button
         ><button class="comments-tab" data-tab="preview" aria-selected="false"
-          >Preview(Markdown)</button
+          >{t.comments.preview}</button
         >
       </div>
       <EmojiPicker />
@@ -35,27 +67,26 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       data-input
       maxlength="2000"
       rows="4"
-      placeholder="写下你的想法，和读者交流一下吧。"
-    ></textarea>
+      placeholder={t.comments.inputPlaceholder}></textarea>
     <div class="comment-preview" data-preview hidden></div>
     <div class="comments-editor-footer">
       <label class="comment-subscribe"
         ><input type="checkbox" data-subscribe /><span
           class="comment-check"
-          aria-hidden="true"></span><span
-          >Email me about new comments on this article</span
-        ></label
-      ><button type="button" class="comment-submit" data-submit>Send</button>
+          aria-hidden="true"></span><span>{t.comments.subscribe}</span></label
+      ><button type="button" class="comment-submit" data-submit
+        >{t.comments.send}</button
+      >
     </div>
   </div>
   <div class="comments-login" data-login hidden>
-    <span>Log in to join the discussion.</span>
-    <a data-login-link>Log in</a>
+    <span>{t.comments.logInToJoin}</span>
+    <a data-login-link>{t.comments.logIn}</a>
   </div>
   <p class="comments-error" data-feedback role="alert" hidden></p>
   <span data-comment-edit-icon hidden><IconEdit /></span>
   <div class="comments-list" data-list aria-live="polite">
-    <p class="comments-loading">Loading comments…</p>
+    <p class="comments-loading">{t.comments.loading}</p>
   </div>
 </section>
 <script>
@@ -66,6 +97,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
     describeBlogError,
     requestBlogApi,
   } from "@/scripts/blog-api";
+  import { tplStr } from "@/i18n/format";
   import {
     createEmojiIndex,
     splitEmojiText,
@@ -133,7 +165,9 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         subscribe =
           section.querySelector<HTMLInputElement>("[data-subscribe]")!,
         feedback = section.querySelector<HTMLElement>("[data-feedback]")!,
-        editIcon = section.querySelector<HTMLElement>("[data-comment-edit-icon]")!,
+        editIcon = section.querySelector<HTMLElement>(
+          "[data-comment-edit-icon]"
+        )!,
         picker = section.querySelector<HTMLElement>("[data-emoji-picker]")!,
         emojiTrigger = picker.querySelector<HTMLButtonElement>(
           "[data-emoji-trigger]"
@@ -147,6 +181,10 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         emojiSwipeHint = picker.querySelector<HTMLElement>(
           "[data-emoji-swipe-hint]"
         )!;
+      const labels = JSON.parse(section.dataset.labels ?? "{}") as Record<
+        string,
+        string
+      >;
       let defaultPlaceholder = input.placeholder;
       const debugEnabled = section.dataset.commentsDebug === "true";
       const startedAt = performance.now();
@@ -548,7 +586,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         if (lifecycle.signal.aborted || !section.isConnected) return;
         if (error instanceof BlogRequestError && error.status === 401)
           showIdentity(false);
-        feedback.textContent = `${action} failed. ${describeBlogError(error)}`;
+        feedback.textContent = `${tplStr(labels.actionFailed, { action })} ${describeBlogError(error)}`;
         feedback.hidden = false;
         debugLog("action-error", { action, error: String(error) });
       };
@@ -559,8 +597,8 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
       const showError = (error: unknown) => {
         if (lifecycle.signal.aborted || !section.isConnected) return;
         rerenderComments = undefined;
-        count.textContent = "Unavailable";
-        list.innerHTML = `<div class="comments-error" role="alert"><p>Comments could not be loaded. ${safe(describeBlogError(error))}</p><button type="button" class="comment-action comments-retry" data-retry>Try again</button></div>`;
+        count.textContent = labels.countUnavailable;
+        list.innerHTML = `<div class="comments-error" role="alert"><p>${safe(labels.loadFailed)} ${safe(describeBlogError(error))}</p><button type="button" class="comment-action comments-retry" data-retry>${safe(labels.retry)}</button></div>`;
       };
       section.querySelectorAll<HTMLButtonElement>("[data-tab]").forEach(tab =>
         tab.addEventListener(
@@ -596,8 +634,8 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
         debugLog("comments-request-start", { reason, id });
         if (reason === "initial" || reason === "retry") {
           rerenderComments = undefined;
-          list.innerHTML = `<p class="comments-loading">Loading comments…</p>`;
-          count.textContent = "Loading";
+          list.innerHTML = `<p class="comments-loading">${safe(labels.loading)}</p>`;
+          count.textContent = labels.countLoading;
         }
         try {
           const payload = await requestBlogApi<any>(
@@ -621,7 +659,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
             viewer: Boolean(payload.viewer),
             id,
           });
-          count.textContent = `${payload.total} comments`;
+          count.textContent = tplStr(labels.count, { count: payload.total });
           subscribe.checked =
             payload.subscribed ||
             (!payload.subscription_configured &&
@@ -642,17 +680,22 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
                 dateStyle: "medium",
                 timeStyle: "short",
               });
-              const editedAt = item.updated_at ? new Date(item.updated_at) : null;
+              const editedAt = item.updated_at
+                ? new Date(item.updated_at)
+                : null;
               const editedLabel = editedAt
                 ? editedAt.toLocaleString(undefined, {
                     dateStyle: "medium",
                     timeStyle: "short",
                   })
                 : "";
+              const editedTitle = tplStr(labels.edited, {
+                time: editedLabel,
+              });
               const edited = editedAt
-                ? `<span class="comment-edited" title="Edited ${editedLabel}">${editIcon.innerHTML}<time datetime="${editedAt.toISOString()}">${editedLabel}</time></span>`
+                ? `<span class="comment-edited" title="${safe(editedTitle)}">${editIcon.innerHTML}<time datetime="${editedAt.toISOString()}">${editedLabel}</time></span>`
                 : "";
-              return `<article class="comment${item.parent_id ? " comment--reply" : ""}" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}" data-comment-body="${safe(item.body)}">${item.parent_id ? replyMarker : ""}<div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time datetime="${createdAt.toISOString()}">${formattedTime}</time>${edited}</div>${item.deleted_at ? `<p class="account-muted">Comment removed by an admin.</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">Edit</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">Delete</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">Reply</button>` : ""}</div></article>`;
+              return `<article class="comment${item.parent_id ? " comment--reply" : ""}" style="--comment-depth:${Math.min(depth, 3)}" data-comment-id="${safe(item.id)}" data-comment-body="${safe(item.body)}">${item.parent_id ? replyMarker : ""}<div class="comment-meta"><strong>${item.author_url ? `<a href="${safe(item.author_url)}" target="_blank" rel="noopener noreferrer">${safe(item.author_name)}</a>` : safe(item.author_name)}</strong><time datetime="${createdAt.toISOString()}">${formattedTime}</time>${edited}</div>${item.deleted_at ? `<p class="account-muted">${safe(labels.removed)}</p>` : `<div class="comment-content">${renderMarkdown(item.body)}</div>`}<div class="comment-actions">${item.can_edit ? `<button class="comment-action" data-edit="${safe(item.id)}" data-version="${item.version}">${safe(labels.edit)}</button>` : ""}${item.can_delete ? `<button class="comment-action" data-delete="${safe(item.id)}">${safe(labels.delete)}</button>` : ""}${!item.deleted_at ? `<button class="comment-action" data-reply="${safe(item.id)}">${safe(labels.reply)}</button>` : ""}</div></article>`;
             };
             const ordered: string[] = [];
             const flatten = (item: any, depth: number) => {
@@ -663,7 +706,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
             for (const item of byParent.get(null) ?? []) flatten(item, 0);
             list.innerHTML =
               ordered.join("") ||
-              `<p class="comments-empty">No comments yet. Be first to share your thoughts.</p>`;
+              `<p class="comments-empty">${safe(labels.empty)}</p>`;
             debugLog("comments-rendered", { items: ordered.length, id });
           };
           rerenderComments = renderCommentList;
@@ -701,7 +744,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
             );
           } catch (error) {
             if (!lifecycle.signal.aborted) subscribe.checked = !enabled;
-            showActionError("Updating subscription", error);
+            showActionError(labels.actionSubscription, error);
           } finally {
             subscribe.disabled = false;
           }
@@ -753,7 +796,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
             await loadComments("refresh");
           } catch (error) {
             showActionError(
-              editId ? "Editing comment" : "Sending comment",
+              editId ? labels.actionEdit : labels.actionSend,
               error
             );
           } finally {
@@ -776,7 +819,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           const id = target.dataset.delete;
           if (id) {
             const button = target as HTMLButtonElement;
-            if (button.disabled || !confirm("Delete this comment?")) return;
+            if (button.disabled || !confirm(labels.deleteConfirm)) return;
             button.disabled = true;
             clearFeedback();
             try {
@@ -786,7 +829,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
               });
               await loadComments("refresh");
             } catch (error) {
-              showActionError("Deleting comment", error);
+              showActionError(labels.actionDelete, error);
             } finally {
               button.disabled = false;
             }
@@ -795,7 +838,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
           if (target.dataset.reply) {
             section.dataset.replyTo = target.dataset.reply;
             input.focus();
-            input.placeholder = "Reply to this comment…";
+            input.placeholder = labels.replyPlaceholder;
             return;
           }
           if (target.dataset.edit) {
@@ -803,7 +846,7 @@ const debug = import.meta.env.PUBLIC_COMMENTS_DEBUG === "true";
             section.dataset.editId = target.dataset.edit;
             section.dataset.editVersion = target.dataset.version;
             input.value = article.dataset.commentBody ?? "";
-            input.placeholder = "Edit your comment…";
+            input.placeholder = labels.editPlaceholder;
             input.focus();
           }
         },

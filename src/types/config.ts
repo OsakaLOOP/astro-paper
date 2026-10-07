@@ -19,6 +19,11 @@ interface SiteConfig {
   dir?: "ltr" | "rtl" | "auto";
   /** Google Search Console verification meta tag value */
   googleVerification?: string;
+  /**
+   * URL of the identity provider's security/settings page, linked from
+   * `/account`. The security section is hidden when this is unset.
+   */
+  securityUrl?: string;
 }
 
 interface PostsConfig {
@@ -115,7 +120,7 @@ type ResolvedSiteConfig = Required<
     | "ogImage"
   >
 > &
-  Pick<SiteConfig, "profile" | "googleVerification">;
+  Pick<SiteConfig, "profile" | "googleVerification" | "securityUrl">;
 
 export interface ResolvedAstroPaperConfig {
   site: ResolvedSiteConfig;

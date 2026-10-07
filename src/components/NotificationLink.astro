@@ -1,9 +1,10 @@
 ---
 import { getRelativeLocaleUrl } from "astro:i18n";
+import { useTranslations } from "@/i18n";
+import { blogApiOrigin as api } from "@/scripts/blog-api";
 import config from "@/config";
-
-const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
 const locale = Astro.currentLocale ?? config.site.lang;
+const t = useTranslations(locale);
 const accountPath = `${getRelativeLocaleUrl(locale, "account")}#notifications`;
 const accountUrl = new URL(accountPath, Astro.url).href;
 const loginUrl = `${api}/blog/auth/login?returnTo=${encodeURIComponent(accountUrl)}`;
@@ -15,9 +16,10 @@ const loginUrl = `${api}/blog/auth/login?returnTo=${encodeURIComponent(accountUr
   data-api={api}
   data-account-url={accountPath}
   data-login-url={loginUrl}
+  data-label-manage={t.footer.manageNotifications}
   href={loginUrl}
 >
-  Log in to manage notifications
+  {t.footer.logInToManageNotifications}
 </a>
 
 <script>
@@ -36,7 +38,7 @@ const loginUrl = `${api}/blog/auth/login?returnTo=${encodeURIComponent(accountUr
         });
         if (!response.ok) continue;
         link.href = link.dataset.accountUrl!;
-        link.textContent = "Manage notifications";
+        link.textContent = link.dataset.labelManage ?? link.textContent;
       } catch {}
     }
   }

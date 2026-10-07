@@ -1,3 +1,10 @@
+---
+import { useTranslations } from "@/i18n";
+import config from "@/config";
+
+const t = useTranslations(Astro.currentLocale ?? config.site.lang);
+---
+
 <div class="emoji-picker" data-emoji-picker>
   <button
     type="button"
@@ -5,23 +12,23 @@
     data-emoji-trigger
     aria-expanded="false"
     aria-controls="emoji-panel"
-    aria-label="Insert emoji"
+    aria-label={t.comments.emoji.insert}
   >
-    Emoji
+    {t.comments.emoji.trigger}
   </button>
   <div
     class="emoji-panel"
     data-emoji-panel
     id="emoji-panel"
     role="dialog"
-    aria-label="Emoji picker"
+    aria-label={t.comments.emoji.picker}
     hidden
   >
     <div
       class="emoji-tabs"
       data-emoji-tabs
       role="tablist"
-      aria-label="Emoji groups"
+      aria-label={t.comments.emoji.groups}
     >
     </div>
     <div class="emoji-contents" data-emoji-contents></div>
@@ -50,6 +57,8 @@
         ></path>
       </svg>
     </div>
-    <p class="emoji-empty" data-emoji-empty hidden>Emoji are unavailable.</p>
+    <p class="emoji-empty" data-emoji-empty hidden>
+      {t.comments.emoji.unavailable}
+    </p>
   </div>
 </div>

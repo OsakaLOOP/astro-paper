@@ -37,8 +37,13 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      filter: page =>
-        config.features?.showArchives !== false || !page.endsWith("/archives/"),
+      filter: page => {
+        if (page.endsWith("/account/")) return false;
+        return (
+          config.features?.showArchives !== false ||
+          !page.endsWith("/archives/")
+        );
+      },
     }),
   ],
   i18n: {
@@ -131,6 +136,20 @@ export default defineConfig({
         access: "public",
         context: "client",
         optional: true,
+      }),
+      /** Origin of the comments/accounts API, consumed by `@/scripts/blog-api`. */
+      PUBLIC_BLOG_API: envField.string({
+        access: "public",
+        context: "client",
+        optional: true,
+        default: "https://api.loopo.cc",
+      }),
+      /** Enables verbose `[comments]` console tracing in the browser. */
+      PUBLIC_COMMENTS_DEBUG: envField.boolean({
+        access: "public",
+        context: "client",
+        optional: true,
+        default: false,
       }),
     },
   },

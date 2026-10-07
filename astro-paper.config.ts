@@ -7,6 +7,7 @@ export default defineAstroPaperConfig({
     description: "Personal blog of Loopo, a.k.a. Loop'Ōsaka, powered by Astro and AstroPaper, etc. Read the blog posts or check README for more info.",
     author: "Loopo",
     profile: "https://www.loopo.cc",
+    securityUrl: "https://auth.loopo.cc/sign-in",
     ogImage: "default-og.png",
     lang: "en",
     timezone: "Asia/Tokyo",

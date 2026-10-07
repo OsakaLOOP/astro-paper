@@ -1,3 +1,15 @@
+/**
+ * Blog API access.
+ *
+ * `blogApiOrigin` and `commentsDebug` come from `astro:env` (see the schema in
+ * `astro.config.ts`), so the origin only needs to be configured once — either
+ * through a `.env` file or the process environment.
+ */
+import { PUBLIC_BLOG_API, PUBLIC_COMMENTS_DEBUG } from "astro:env/client";
+
+export const blogApiOrigin = PUBLIC_BLOG_API;
+export const commentsDebug = PUBLIC_COMMENTS_DEBUG;
+
 export class BlogRequestError extends Error {
   constructor(
     readonly kind: "http" | "network" | "timeout" | "response",

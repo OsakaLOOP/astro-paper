@@ -19,6 +19,14 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     describeBlogError,
     requestBlogApi,
   } from "@/scripts/blog-api";
+  type Identity = { id: string; name: string };
+  type IdentityError = BlogRequestError & { retryAfterMs?: number };
+  const identityCache = new Map<
+    string,
+    { value?: Identity | null; expiresAt: number; request?: Promise<Identity | null>; blockedUntil: number }
+  >();
+  const identityTtl = 30_000;
+  const rateLimitBackoff = 15_000;
   const requests = new Map<HTMLElement, AbortController>();
   const bound = new WeakSet<HTMLElement>();
   function showError(control: HTMLElement, error: unknown) {
@@ -37,48 +45,79 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     const me = control.dataset.authMe;
     const api = control.dataset.authApi;
     if (!me || !api) return;
-    requests.get(control)?.abort();
-    const controller = new AbortController();
-    requests.set(control, controller);
-    const isCurrent = () =>
-      !controller.signal.aborted &&
-      control.isConnected &&
-      requests.get(control) === controller;
-    const showLogin = () => {
+    const cached = identityCache.get(me) ?? { expiresAt: 0, blockedUntil: 0 };
+    identityCache.set(me, cached);
+    const now = Date.now();
+    if (cached.request) {
+      try {
+        applyIdentityValue(control, api, await cached.request);
+      } catch (error) {
+        if (error instanceof BlogRequestError && error.status === 401)
+          showLogin(control, api);
+        else showError(control, error);
+      }
+      return;
+    }
+    if (cached.expiresAt > now && "value" in cached) {
+      applyIdentityValue(control, api, cached.value ?? null);
+      return;
+    }
+    if (cached.blockedUntil > now) {
+      showError(control, new BlogRequestError("http", 429, "RATE_LIMITED"));
+      return;
+    }
+    const request = requestBlogApi<Identity>(me)
+      .then(user => {
+        if (!user || typeof user.id !== "string" || typeof user.name !== "string")
+          throw new BlogRequestError("response");
+        cached.value = user;
+        cached.expiresAt = Date.now() + identityTtl;
+        cached.blockedUntil = 0;
+        return user;
+      })
+      .catch(error => {
+        const typed = error as IdentityError;
+        if (typed.status === 429)
+          cached.blockedUntil = Date.now() + (typed.retryAfterMs || rateLimitBackoff);
+        throw error;
+      })
+      .finally(() => {
+        cached.request = undefined;
+      });
+    cached.request = request;
+    try {
+      applyIdentityValue(control, api, await request);
+    } catch (error) {
+      if (error instanceof BlogRequestError && error.status === 401)
+        showLogin(control, api);
+      else showError(control, error);
+    }
+  }
+  function showLogin(control: HTMLElement, api: string) {
+    const link = document.createElement("a");
+    link.className = "group inline-flex items-center gap-1 hover:text-accent auth-link";
+    link.href = `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href)}`;
+    link.textContent = "Log in";
+    control.replaceChildren(link);
+  }
+  function applyIdentityValue(control: HTMLElement, api: string, user: Identity | null) {
+    if (!user) {
       const link = document.createElement("a");
-      link.className =
-        "group inline-flex items-center gap-1 hover:text-accent auth-link";
+      link.className = "group inline-flex items-center gap-1 hover:text-accent auth-link";
       link.href = `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href)}`;
       link.textContent = "Log in";
       control.replaceChildren(link);
-    };
-    try {
-      const user = await requestBlogApi<{ id: string; name: string }>(me, {
-        signal: controller.signal,
-      });
-      if (!isCurrent()) return;
-      if (!user || typeof user.id !== "string" || typeof user.name !== "string")
-        throw new BlogRequestError("response");
-      let accountLink =
-        control.querySelector<HTMLAnchorElement>("[data-auth-link]");
-      if (!accountLink) {
-        control.innerHTML = `<a class="auth-name nav-link" data-auth-link href="/account"><span class="auth-name-label"></span></a><span class="auth-divider" aria-hidden="true">·</span><button class="auth-link auth-button" type="button" data-auth-logout>Log out</button>`;
-        accountLink =
-          control.querySelector<HTMLAnchorElement>("[data-auth-link]")!;
-      }
-      const displayName = user.name || "Reader";
-      accountLink.querySelector<HTMLElement>(".auth-name-label")!.textContent =
-        displayName;
-      accountLink.title = displayName;
-      document.dispatchEvent(new CustomEvent("auth:updated"));
-    } catch (error) {
-      if (!isCurrent()) return;
-      if (error instanceof BlogRequestError && error.status === 401)
-        showLogin();
-      else showError(control, error);
-    } finally {
-      if (requests.get(control) === controller) requests.delete(control);
+      return;
     }
+    let accountLink = control.querySelector<HTMLAnchorElement>("[data-auth-link]");
+    if (!accountLink) {
+      control.innerHTML = `<a class="auth-name nav-link" data-auth-link href="/account"><span class="auth-name-label"></span></a><span class="auth-divider" aria-hidden="true">·</span><button class="auth-link auth-button" type="button" data-auth-logout>Log out</button>`;
+      accountLink = control.querySelector<HTMLAnchorElement>("[data-auth-link]")!;
+    }
+    const displayName = user.name || "Reader";
+    accountLink.querySelector<HTMLElement>(".auth-name-label")!.textContent = displayName;
+    accountLink.title = displayName;
+    document.dispatchEvent(new CustomEvent("auth:updated"));
   }
   function initAuthControls() {
     for (const control of document.querySelectorAll<HTMLElement>(
@@ -104,6 +143,7 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
               `${control.dataset.authApi}/blog/auth/logout`,
               { method: "POST", signal: controller.signal }
             );
+            identityCache.delete(control.dataset.authMe ?? "");
             if (!controller.signal.aborted && control.isConnected)
               location.reload();
           } catch (error) {
@@ -119,7 +159,6 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     }
   }
   document.addEventListener("astro:before-swap", () => {
-    for (const controller of requests.values()) controller.abort();
     requests.clear();
   });
   document.addEventListener("astro:page-load", initAuthControls);

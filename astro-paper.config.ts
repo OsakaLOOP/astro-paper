@@ -2,11 +2,11 @@ import { defineAstroPaperConfig } from "./src/types/config";
 
 export default defineAstroPaperConfig({
   site: {
-    url: "https://loopo.cc/",
+    url: "https://www.loopo.cc/",
     title: "Loopo:443",
     description: "Personal blog of Loopo, a.k.a. Loop'Ōsaka, powered by Astro and AstroPaper, etc. Read the blog posts or check README for more info.",
     author: "Loopo",
-    profile: "https://loopo.cc",
+    profile: "https://www.loopo.cc",
     ogImage: "default-og.png",
     lang: "en",
     timezone: "Asia/Tokyo",

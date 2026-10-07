@@ -9,6 +9,15 @@ export class BlogRequestError extends Error {
   }
 }
 
+const retryAfterMs = (response: Response) => {
+  const value = response.headers.get("Retry-After");
+  if (!value) return 0;
+  const seconds = Number(value);
+  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000);
+  const date = Date.parse(value);
+  return Number.isNaN(date) ? 0 : Math.max(0, date - Date.now());
+};
+
 export async function requestBlogApi<Payload>(
   url: string,
   options: RequestInit = {}
@@ -39,7 +48,14 @@ export async function requestBlogApi<Payload>(
         )
           code = payload.error;
       } catch {}
-      throw new BlogRequestError("http", response.status, code);
+      const error = new BlogRequestError("http", response.status, code);
+      if (response.status === 429) {
+        Object.defineProperty(error, "retryAfterMs", {
+          value: retryAfterMs(response),
+          enumerable: false,
+        });
+      }
+      throw error;
     }
     if (response.status === 204 || response.status === 205) return;
     try {

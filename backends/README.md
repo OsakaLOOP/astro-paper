@@ -34,9 +34,23 @@ is required.
 a rolling three-hour window. Authenticated visitors use their user ID and
 anonymous visitors use an HMAC of their IP; a recent match on either the user
 or IP also suppresses the event. Only aggregate counts are exposed by
-`GET /blog/analytics`.
+`GET /blog/analytics`. Comment totals for the footer are read in one request from
+`GET /blog/comments/counts?posts=slug-a,slug-b` (at most 100 slugs), which
+counts only non-deleted comments and returns zeros for unknown slugs.
 The SM-only signed analytics endpoint returns article totals, daily counts,
 authenticated users, and recent visits. IP addresses are HMAC-hashed before
 storage and are not exposed in the report.
+
+## Tests
+
+```sh
+npm run check   # tsc over src/ and test/ (tsconfig.test.json)
+npm test        # node:test via tsx — security helpers and the HTTP routes
+```
+
+`npm test` starts the Fastify app with a stubbed `pg.Pool` and drives it with
+`app.inject`, so no database or network is required. The Docker image only
+compiles `src/` (`tsconfig.json`), the test folder is not part of the production
+build.
 
 For local development set `SITE_ISSUER=http://127.0.0.1:3000/api/auth`, `SITE_API_URL=http://127.0.0.1:4100`, and `FRONTEND_ORIGINS=http://127.0.0.1:4321`.

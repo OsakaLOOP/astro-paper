@@ -109,7 +109,9 @@ const uptimeStartedAt = "2026-09-29T14:33:19+08:00";
   type AnalyticsPayload = {
     items: { post_slug: string; views: number }[];
   };
-  type CommentsPayload = { total: number };
+  type CommentCountsPayload = {
+    items: { post_slug: string; total: number }[];
+  };
 
   const mounted = new Map<HTMLElement, number>();
   const numberFormatter = new Intl.NumberFormat("en", {
@@ -159,26 +161,17 @@ const uptimeStartedAt = "2026-09-29T14:33:19+08:00";
       }
     } catch {}
 
-    // One request per article is acceptable for a small blog, but the requests
-    // are issued together so the footer only waits for the slowest one.
-    const totals = await Promise.all(
-      slugs.map(async slug => {
-        try {
-          const query = new URLSearchParams({ post: slug, limit: "1" });
-          const payload = await requestBlogApi<CommentsPayload>(
-            `${api}/blog/comments?${query}`
-          );
-          return payload?.total;
-        } catch {
-          return undefined;
-        }
-      })
-    );
-    if (comments && totals.every(total => total !== undefined)) {
-      comments.textContent = numberFormatter.format(
-        totals.reduce((sum, total) => sum + (total ?? 0), 0)
+    try {
+      const query = new URLSearchParams({ posts: slugs.join(",") });
+      const payload = await requestBlogApi<CommentCountsPayload>(
+        `${api}/blog/comments/counts?${query}`
       );
-    }
+      if (payload && comments) {
+        comments.textContent = numberFormatter.format(
+          payload.items.reduce((sum, item) => sum + item.total, 0)
+        );
+      }
+    } catch {}
   }
 
   function initSiteStats() {

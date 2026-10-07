@@ -10,7 +10,8 @@
     "build": "tsc -p tsconfig.json",
     "load": "node scripts/comments-load.mjs",
     "start": "node --env-file-if-exists=.env dist/server.js",
-    "check": "tsc --noEmit"
+    "check": "tsc -p tsconfig.test.json",
+    "test": "node --import tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.3.0",

@@ -421,6 +421,45 @@ export async function buildApp(options: AppOptions) {
         };
       }
     );
+    api.get<{ Querystring: { posts?: string } }>(
+      "/blog/comments/counts",
+      {
+        schema: {
+          querystring: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              posts: { type: "string", minLength: 1, maxLength: 6000 },
+            },
+          },
+        },
+      },
+      async request => {
+        const slugs = (request.query.posts ?? "")
+          .split(",")
+          .map(value => value.trim())
+          .filter(Boolean);
+        const uniqueSlugs = [...new Set(slugs)];
+        if (!uniqueSlugs.length || uniqueSlugs.length > 100)
+          throw new HttpError(400, "POSTS_REQUIRED");
+        const rows = (
+          await options.pool.query<{ post_slug: string; total: string }>(
+            `SELECT post_slug, count(*)::bigint AS total
+             FROM site_blog.comments
+             WHERE post_slug=ANY($1::text[]) AND deleted_at IS NULL
+             GROUP BY post_slug`,
+            [uniqueSlugs]
+          )
+        ).rows;
+        const bySlug = new Map(rows.map(row => [row.post_slug, Number(row.total)]));
+        return {
+          items: uniqueSlugs.map(slug => ({
+            post_slug: slug,
+            total: bySlug.get(slug) ?? 0,
+          })),
+        };
+      }
+    );
     api.get<{ Querystring: { post: string; after?: string; limit?: number } }>(
       "/blog/comments",
       {

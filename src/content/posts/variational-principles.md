@@ -152,13 +152,13 @@ $$
 
 对**等时变分**, $\displaystyle{\delta t=0\Leftrightarrow \frac{\mathrm{d}}{\mathrm{d} t} (\delta y)=\delta \left(\frac{\mathrm{d}}{\mathrm{d} t}y\right)}$
 
--**乘积法则**:
+- **乘积法则**:
 
 $$
 \delta(u \cdot v) = \varepsilon \left.\frac{\mathrm{d}}{\mathrm{d}\varepsilon} \big[ (u+\varepsilon\eta_u)(v+\varepsilon\eta_v) \big] \right|_{\varepsilon=0}= \varepsilon(\eta_u v + u \eta_v) = (\delta u)v + u(\delta v);
 $$
 
--**链式法则**:
+- **链式法则**:
 
 $$
  \delta F(x, y, y') \coloneqq \varepsilon \left. \frac{\mathrm{d}}{\mathrm{d} \varepsilon} F\big(x, y+\varepsilon \eta, y'+\varepsilon \eta'\big) \right|_{\varepsilon=0} = \varepsilon \left( \frac{\partial F}{\partial y}\eta + \frac{\partial F}{\partial y'}\eta' \right) = \frac{\partial F}{\partial y}\delta y + \frac{\partial F}{\partial y'}\delta y'.

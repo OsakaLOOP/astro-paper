@@ -18,5 +18,10 @@ export default [
     },
   },
   { rules: { "no-console": "error" } },
+  {
+    // Build/ops scripts report progress and failures on stdout/stderr.
+    files: ["scripts/**", "backends/scripts/**"],
+    rules: { "no-console": "off" },
+  },
   { ignores: ["dist/**", ".astro/**", "public/pagefind/**"] },
 ];

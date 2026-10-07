@@ -9,7 +9,8 @@
   --color-border: var(--border);
   --color-highlight: #39c5bb;
   --color-highlight-text: var(--highlight-text);
-  --font-app: "Google Sans Code", "Noto Sans SC Variable", "Noto Sans SC",
+  --font-app:
+    "Google Sans Code", "Noto Sans SC Variable", "Noto Sans SC",
     "Source Han Sans SC", "Microsoft YaHei", sans-serif;
   --text-xs: 0.8125rem;
   --text-sm: 0.9375rem;

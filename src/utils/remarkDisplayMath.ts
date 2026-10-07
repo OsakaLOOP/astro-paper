@@ -58,9 +58,7 @@ const toDisplayMath = (node: Node): Node => ({
 const transformNode = (node: Node, file: FileLike): Node[] => {
   if (!node.children) return [node];
 
-  const children = node.children.flatMap(child =>
-    transformNode(child, file)
-  );
+  const children = node.children.flatMap(child => transformNode(child, file));
 
   if (node.type !== "paragraph") {
     return [{ ...node, children }];

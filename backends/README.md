@@ -12,7 +12,10 @@ For comment reminders, set `SM_MAIL_URL=https://auth.loopo.cc/internal/site-mail
 use the same random value for `SM_MAIL_SECRET` and SM's `BLOG_MAIL_SECRET`.
 Blog notifications pass a type-specific sender display name; authentication mail
 continues to use the sender configured by `SMTP_FROM` in SM.
-`AUTHOR_EMAIL` receives all article comment notices; `AUTHOR_USER_ID` enables
+Set `TRUST_PROXY` to the reverse proxy address (or CIDR list) Fastify may trust
+for `X-Forwarded-For`/`X-Forwarded-Proto`. Rate limiting, the analytics IP hash
+and `Secure;` cookies all depend on it; it defaults to the compose ingress
+subnet `172.30.0.2/32`. `AUTHOR_EMAIL` receives all article comment notices; `AUTHOR_USER_ID` enables
 moderator deletion for the SM author account. Apply migrations in filename order,
 including `004_notifications.sql`, before restarting the container. The blog
 migrations are site-owned and must be applied with the SM migration role; they

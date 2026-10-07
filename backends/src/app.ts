@@ -40,6 +40,11 @@ export interface AppOptions {
   sendMail?: (message: MailMessage) => Promise<void>;
   logger?: boolean;
   commentsDebug?: boolean;
+  /**
+   * Addresses Fastify may trust for `X-Forwarded-*` headers, e.g. the reverse
+   * proxy in front of this service. Defaults to the compose ingress subnet.
+   */
+  trustProxy?: string[];
 }
 const uuid = { type: "string", format: "uuid" };
 const post = {
@@ -91,7 +96,7 @@ export async function buildApp(options: AppOptions) {
         }
       : false,
     bodyLimit: 16_384,
-    trustProxy: ["172.30.0.2/32"],
+    trustProxy: options.trustProxy ?? ["172.30.0.2/32"],
     requestTimeout: 10_000,
   });
   const debugComments = (

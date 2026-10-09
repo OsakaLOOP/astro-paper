@@ -8,7 +8,6 @@ import IconEye from "@/assets/icons/IconEye.svg";
 import IconMessageCircle from "@/assets/icons/IconMessageCircle.svg";
 import { getPostSlug } from "@/utils/getPostPaths";
 import { postFilter } from "@/utils/postFilter";
-import { useTranslations } from "@/i18n";
 
 type Props = {
   noMarginTop?: boolean;
@@ -16,7 +15,6 @@ type Props = {
 
 const { noMarginTop = false, class: className, ...attrs } = Astro.props;
 
-const t = useTranslations(Astro.currentLocale);
 const currentYear = new Date().getFullYear();
 const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
 const postSlugs = (await getCollection("posts"))
@@ -102,6 +100,7 @@ const uptimeStartedAt = "2026-09-29T14:33:19+08:00";
   type CommentsPayload = { total: number };
 
   const mounted = new Map<HTMLElement, number>();
+  const statsObservers = new Map<HTMLElement, IntersectionObserver>();
   const numberFormatter = new Intl.NumberFormat("en", {
     maximumFractionDigits: 1,
     notation: "compact",
@@ -173,6 +172,8 @@ const uptimeStartedAt = "2026-09-29T14:33:19+08:00";
     for (const [node, timer] of mounted) {
       if (!document.contains(node)) {
         window.clearInterval(timer);
+        statsObservers.get(node)?.disconnect();
+        statsObservers.delete(node);
         mounted.delete(node);
       }
     }
@@ -189,7 +190,17 @@ const uptimeStartedAt = "2026-09-29T14:33:19+08:00";
       renderUptime();
       const timer = window.setInterval(renderUptime, 30_000);
       mounted.set(node, timer);
-      void loadSiteCounts(node);
+      const observer = new IntersectionObserver(
+        entries => {
+          if (!entries.some(entry => entry.isIntersecting)) return;
+          observer.disconnect();
+          statsObservers.delete(node);
+          void loadSiteCounts(node);
+        },
+        { rootMargin: "400px 0px" }
+      );
+      statsObservers.set(node, observer);
+      observer.observe(node);
     }
   }
 

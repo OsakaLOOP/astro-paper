@@ -23,24 +23,23 @@ const loginUrl = `${api}/blog/auth/login?returnTo=${encodeURIComponent(accountUr
 <script>
   const initialized = new WeakSet<HTMLAnchorElement>();
 
-  async function initNotificationLink() {
+  function initNotificationLink() {
     for (const link of document.querySelectorAll<HTMLAnchorElement>(
       "[data-notification-link]"
     )) {
       if (initialized.has(link)) continue;
       initialized.add(link);
-      try {
-        const response = await fetch(`${link.dataset.api}/blog/auth/me`, {
-          credentials: "include",
-          cache: "no-store",
-        });
-        if (!response.ok) continue;
-        link.href = link.dataset.accountUrl!;
-        link.textContent = "Manage notifications";
-      } catch {}
     }
   }
 
+  document.addEventListener("auth:updated", () => {
+    for (const link of document.querySelectorAll<HTMLAnchorElement>(
+      "[data-notification-link]"
+    )) {
+      link.href = link.dataset.accountUrl!;
+      link.textContent = "Manage notifications";
+    }
+  });
   document.addEventListener("astro:page-load", initNotificationLink);
   initNotificationLink();
 </script>

@@ -2,8 +2,6 @@
 @import "@fontsource-variable/noto-sans-sc";
 @import "./theme.css";
 @import "./typography.css";
-@import "katex/dist/katex.min.css";
-@import "rehype-callouts/theme/obsidian";
 
 @font-face {
   font-family: "Google Sans Code";
@@ -634,13 +632,13 @@
   background: transparent;
 }
 
-.comment-subscribe input:checked+.comment-check {
+.comment-subscribe input:checked + .comment-check {
   border-color: var(--accent);
   background: var(--accent);
   box-shadow: inset 0 0 0 2px var(--background);
 }
 
-.comment-subscribe input:focus-visible+.comment-check {
+.comment-subscribe input:focus-visible + .comment-check {
   outline: 2px dashed var(--accent);
   outline-offset: 2px;
 }

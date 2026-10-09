@@ -4,6 +4,8 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 import { resolveDefaultOgImagePath } from "@/utils/resolveDefaultOgImagePath";
 import { getAssetPath } from "@/utils/withBase";
 import config from "@/config";
+import googleSansCode400 from "@/assets/fonts/google-sans-code-400.ttf?url";
+import googleSansCode700 from "@/assets/fonts/google-sans-code-700.ttf?url";
 import "@/styles/global.css";
 
 type Props = {
@@ -71,6 +73,20 @@ const wechatShareScript = [
     />
     <link rel="canonical" href={canonicalUrl} />
     <meta name="generator" content={Astro.generator} />
+    <link
+      rel="preload"
+      as="font"
+      type="font/ttf"
+      href={googleSansCode400}
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/ttf"
+      href={googleSansCode700}
+      crossorigin
+    />
 
     <!-- QQ / non-Open Graph sharing -->
     <meta itemprop="name" content={title} />
@@ -152,23 +168,6 @@ const wechatShareScript = [
     <script>
       import "@/scripts/theme";
       import "@/scripts/math-scroll";
-    </script>
-    <script is:inline>
-      document.addEventListener("astro:before-preparation", () => {
-        const viewportHeight = window.innerHeight;
-
-        document.querySelectorAll("[style]").forEach(element => {
-          const transitionName = getComputedStyle(element).viewTransitionName;
-          if (!transitionName || transitionName === "none") return;
-
-          const { top, bottom } = element.getBoundingClientRect();
-          const outsideViewport = bottom <= 0 || top >= viewportHeight;
-          if (outsideViewport) {
-            // 视口外的共享元素不参与本次位移动画，避免长距离快速移动。
-            element.style.viewTransitionName = "none";
-          }
-        });
-      });
     </script>
   </body>
 </html>

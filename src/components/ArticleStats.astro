@@ -20,10 +20,8 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
 
 <script>
   const initialized = new WeakSet<HTMLElement>();
-  async function loadArticleStats() {
-    const nodes = [
-      ...document.querySelectorAll<HTMLElement>("[data-article-stats]"),
-    ];
+  let statsObserver: IntersectionObserver | undefined;
+  async function loadArticleStats(nodes: HTMLElement[]) {
     const groups = new Map<string, HTMLElement[]>();
     for (const node of nodes) {
       if (initialized.has(node)) continue;
@@ -77,6 +75,25 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       if ((await recording).some(Boolean)) await loadCounts();
     }
   }
-  document.addEventListener("astro:page-load", loadArticleStats);
-  loadArticleStats();
+
+  function initArticleStats() {
+    statsObserver?.disconnect();
+    statsObserver = new IntersectionObserver(
+      entries => {
+        const visible = entries
+          .filter(entry => entry.isIntersecting)
+          .map(entry => entry.target as HTMLElement);
+        if (!visible.length) return;
+        visible.forEach(node => statsObserver?.unobserve(node));
+        void loadArticleStats(visible);
+      },
+      { rootMargin: "300px 0px" }
+    );
+    document
+      .querySelectorAll<HTMLElement>("[data-article-stats]")
+      .forEach(node => statsObserver?.observe(node));
+  }
+
+  document.addEventListener("astro:page-load", initArticleStats);
+  initArticleStats();
 </script>

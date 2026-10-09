@@ -23,7 +23,12 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
   type IdentityError = BlogRequestError & { retryAfterMs?: number };
   const identityCache = new Map<
     string,
-    { value?: Identity | null; expiresAt: number; request?: Promise<Identity | null>; blockedUntil: number }
+    {
+      value?: Identity | null;
+      expiresAt: number;
+      request?: Promise<Identity | null>;
+      blockedUntil: number;
+    }
   >();
   const identityTtl = 30_000;
   const rateLimitBackoff = 15_000;
@@ -68,7 +73,11 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     }
     const request = requestBlogApi<Identity>(me)
       .then(user => {
-        if (!user || typeof user.id !== "string" || typeof user.name !== "string")
+        if (
+          !user ||
+          typeof user.id !== "string" ||
+          typeof user.name !== "string"
+        )
           throw new BlogRequestError("response");
         cached.value = user;
         cached.expiresAt = Date.now() + identityTtl;
@@ -78,7 +87,8 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       .catch(error => {
         const typed = error as IdentityError;
         if (typed.status === 429)
-          cached.blockedUntil = Date.now() + (typed.retryAfterMs || rateLimitBackoff);
+          cached.blockedUntil =
+            Date.now() + (typed.retryAfterMs || rateLimitBackoff);
         throw error;
       })
       .finally(() => {
@@ -95,27 +105,36 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
   }
   function showLogin(control: HTMLElement, api: string) {
     const link = document.createElement("a");
-    link.className = "group inline-flex items-center gap-1 hover:text-accent auth-link";
+    link.className =
+      "group inline-flex items-center gap-1 hover:text-accent auth-link";
     link.href = `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href)}`;
     link.textContent = "Log in";
     control.replaceChildren(link);
   }
-  function applyIdentityValue(control: HTMLElement, api: string, user: Identity | null) {
+  function applyIdentityValue(
+    control: HTMLElement,
+    api: string,
+    user: Identity | null
+  ) {
     if (!user) {
       const link = document.createElement("a");
-      link.className = "group inline-flex items-center gap-1 hover:text-accent auth-link";
+      link.className =
+        "group inline-flex items-center gap-1 hover:text-accent auth-link";
       link.href = `${api}/blog/auth/login?returnTo=${encodeURIComponent(location.href)}`;
       link.textContent = "Log in";
       control.replaceChildren(link);
       return;
     }
-    let accountLink = control.querySelector<HTMLAnchorElement>("[data-auth-link]");
+    let accountLink =
+      control.querySelector<HTMLAnchorElement>("[data-auth-link]");
     if (!accountLink) {
       control.innerHTML = `<a class="auth-name nav-link" data-auth-link href="/account"><span class="auth-name-label"></span></a><span class="auth-divider" aria-hidden="true">·</span><button class="auth-link auth-button" type="button" data-auth-logout>Log out</button>`;
-      accountLink = control.querySelector<HTMLAnchorElement>("[data-auth-link]")!;
+      accountLink =
+        control.querySelector<HTMLAnchorElement>("[data-auth-link]")!;
     }
     const displayName = user.name || "Reader";
-    accountLink.querySelector<HTMLElement>(".auth-name-label")!.textContent = displayName;
+    accountLink.querySelector<HTMLElement>(".auth-name-label")!.textContent =
+      displayName;
     accountLink.title = displayName;
     document.dispatchEvent(new CustomEvent("auth:updated"));
   }
@@ -158,9 +177,30 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       void loadIdentity(control);
     }
   }
+
+  function scheduleAuthControls() {
+    const run = () => initAuthControls();
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (
+        callback: () => void,
+        options?: { timeout: number }
+      ) => number;
+    };
+    if (idleWindow.requestIdleCallback) {
+      idleWindow.requestIdleCallback(run, { timeout: 5000 });
+    } else {
+      window.setTimeout(run, 5000);
+    }
+  }
+
   document.addEventListener("astro:before-swap", () => {
     requests.clear();
   });
-  document.addEventListener("astro:page-load", initAuthControls);
-  if (document.readyState === "complete") initAuthControls();
+  document.addEventListener("astro:page-load", scheduleAuthControls);
+  document
+    .querySelector("#menu-btn")
+    ?.addEventListener("click", initAuthControls, {
+      once: true,
+    });
+  if (document.readyState === "complete") scheduleAuthControls();
 </script>

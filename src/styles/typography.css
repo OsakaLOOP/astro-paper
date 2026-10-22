@@ -20,13 +20,17 @@
 
     p,
     span,
-    strong,
     ol,
     ul,
     figcaption,
     table,
     code {
       @apply text-foreground;
+    }
+
+    strong {
+      @apply text-foreground;
+      margin-inline: 0.25em;
     }
 
     a {

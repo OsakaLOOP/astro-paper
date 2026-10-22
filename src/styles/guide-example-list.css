@@ -1,0 +1,230 @@
+.guide-example-list {
+  display: grid;
+  gap: 0;
+  width: 100%;
+  margin: 1.5rem 0 2.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.guide-example-list .guide-example-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  padding: 0.7rem 0;
+}
+
+.guide-example-list .guide-example-row + .guide-example-row {
+  border-top: 1px solid
+    color-mix(in srgb, var(--border) 55%, transparent);
+}
+
+.guide-example-list .guide-example-row--explanation {
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: start;
+  column-gap: 8px;
+}
+
+.guide-example-list .guide-example {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: baseline;
+  column-gap: 8px;
+  min-width: 0;
+  margin: 0;
+}
+
+.guide-example-list .guide-example__bookmark {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: baseline;
+  justify-self: center;
+  color: var(--accent);
+}
+
+.guide-example-list .guide-example__text {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.guide-example-list .guide-example__index {
+  display: inline-block;
+  margin-inline-end: 0.55em;
+  color: var(--accent);
+  font-family: "Google Sans Code", monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  vertical-align: 0.18em;
+}
+
+.guide-example-list .guide-example__sentence {
+  color: var(--foreground);
+  font-size: 1.25rem;
+  font-weight: 650;
+  line-height: 1.85;
+}
+
+.guide-example-list ruby rt {
+  color: var(--muted-foreground);
+  font-size: 0.5em;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.guide-example-list ruby rp {
+  display: none;
+}
+
+.guide-example-list .guide-example__source {
+  display: block;
+  margin-top: 0.12rem;
+  color: var(--muted-foreground);
+  font-size: 0.79rem;
+  line-height: 1.55;
+}
+
+.guide-example-list .guide-example__translation {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15em 0.5em;
+  margin: 0.12rem 0 0;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.guide-example-list .guide-example__label,
+.guide-example-list .guide-explanation__label {
+  flex: none;
+  color: var(--accent);
+  font-family: "Google Sans Code", monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.85;
+}
+
+.guide-example-list .guide-example__note {
+  position: relative;
+  grid-column: 1;
+  grid-row: 2;
+  align-self: baseline;
+  justify-self: center;
+  line-height: 1;
+}
+
+.guide-example-list .guide-example__note button {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--accent);
+  cursor: help;
+}
+
+.guide-example-list .guide-example__note button:hover,
+.guide-example-list .guide-example__note button:focus-visible {
+  background: var(--muted);
+  color: var(--accent);
+}
+
+.guide-example-list .guide-example__tooltip {
+  position: absolute;
+  bottom: calc(100% + 0.45rem);
+  left: 0;
+  z-index: 20;
+  display: none;
+  width: min(20rem, calc(100vw - 3rem));
+  padding: 0.62rem 0.72rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--background);
+  box-shadow: 0 4px 14px
+    color-mix(in srgb, var(--foreground) 14%, transparent);
+  color: var(--foreground);
+  font-size: 0.79rem;
+  line-height: 1.7;
+  pointer-events: none;
+  white-space: normal;
+}
+
+.guide-example-list .guide-example__note:hover .guide-example__tooltip,
+.guide-example-list .guide-example__note:focus-within .guide-example__tooltip {
+  display: block;
+}
+
+.guide-example-list .guide-example__tooltip-label {
+  display: block;
+  margin-bottom: 0.1rem;
+  color: var(--accent);
+  font-family: "Google Sans Code", monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.guide-example-list .guide-item-icon {
+  align-self: start;
+  justify-self: center;
+  padding-top: 0.62rem;
+  color: var(--accent);
+}
+
+.guide-example-list .guide-explanation__body {
+  margin: 0;
+  padding: 0.55rem 0.8rem;
+  border-left: 2px solid
+    color-mix(in srgb, var(--accent) 48%, var(--border));
+  border-radius: 0 4px 4px 0;
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  color: var(--muted-foreground);
+  font-size: 0.88rem;
+  line-height: 1.8;
+}
+
+.guide-example-list .guide-explanation__label {
+  margin-inline-end: 0.55em;
+}
+
+.guide-example-list .guide-explanation__text {
+  color: color-mix(in srgb, var(--foreground) 82%, var(--muted-foreground));
+}
+
+.guide-example-list .guide-example__inline-code {
+  padding: 0.08em 0.28em;
+  border-radius: 3px;
+  background: var(--muted);
+  color: var(--foreground);
+  font-size: 0.88em;
+}
+
+.guide-example-list strong {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .guide-example-list {
+    margin-block: 1.25rem 1.8rem;
+  }
+
+  .guide-example-list .guide-example__sentence {
+    font-size: 1.15rem;
+    line-height: 1.8;
+  }
+
+  .guide-example-list .guide-example__tooltip {
+    left: -0.45rem;
+    width: min(19rem, calc(100vw - 2.5rem));
+  }
+}

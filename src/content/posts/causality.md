@@ -2,7 +2,7 @@
 title: 关于「因果性」操作和定义的讨论
 author: Loopo
 pubDatetime: 2026-10-07T12:00:00+08:00
-slug: hello-world
+slug: causality
 featured: true
 draft: true
 notify: false

@@ -48,6 +48,7 @@ const tocHeadings = headings.filter(
   heading => heading.depth >= 2 && heading.depth <= 4 && heading.slug
 );
 const firstDepth = Math.min(...tocHeadings.map(heading => heading.depth));
+const numberedHeadingPattern = /^\s*(?:\d+(?:[.．]\d+)+|\d+[.．、)）])\s*/;
 let sectionNumber = 0;
 ---
 
@@ -85,14 +86,58 @@ let sectionNumber = 0;
         <nav
           id="post-toc"
           aria-label={t.post.tableOfContents}
-          class="max-h-48 overflow-y-auto pe-1 pt-1 lg:max-h-[min(55vh,36rem)]"
+          class="max-h-48 overflow-y-auto px-2 pt-2 lg:max-h-[min(55vh,36rem)]"
         >
           <div id="toc-track" class="relative py-1">
             <span id="toc-focus" class="toc-focus" aria-hidden="true" />
-            <ol class="relative space-y-0.5">
+            <div id="toc-twin-tails" class="toc-twin-tails" aria-hidden="true">
+              {["left", "right"].map(side => (
+                <span class={`toc-twin-tail toc-twin-tail--${side}`}>
+                  <svg
+                    class="toc-twin-tie"
+                    viewBox="0 0 112 112"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <defs>
+                      <clipPath id={`toc-tie-rear-${side}`}>
+                        <path
+                          d="M -8 -8 H 144 V 144 H -8 Z M 21 56 H 79 V 144 H 21 Z"
+                          clip-rule="evenodd"
+                        />
+                      </clipPath>
+                    </defs>
+                    {[
+                      {
+                        d: "M 14.667 62.333 L 26.333 50.667 L 97.333 121.667 L 85.667 133.333 Z",
+                        clip: `url(#toc-tie-rear-${side})`,
+                      },
+                      {
+                        d: "M 14.667 62.333 L 26.333 50.667 L 97.333 121.667 L 85.667 133.333",
+                        clip: undefined,
+                      },
+                    ].map(({ d, clip }) => (
+                      <g clip-path={clip}>
+                        <path d={d} stroke="#171219" stroke-width="8" />
+                        <path d={d} stroke="#a8195b" stroke-width="2" />
+                      </g>
+                    ))}
+                  </svg>
+                </span>
+              ))}
+            </div>
+            <ol class="relative space-y-0.5 pt-10">
               {tocHeadings.map(heading => {
                 const level = heading.depth - firstDepth;
+                const hasOwnNumber = numberedHeadingPattern.test(heading.text);
                 if (level === 0) sectionNumber += 1;
+                const marker = hasOwnNumber
+                  ? null
+                  : level === 0
+                    ? sectionNumber
+                    : level === 1
+                      ? "•"
+                      : "·";
                 return (
                   <li>
                     <a
@@ -104,12 +149,14 @@ let sectionNumber = 0;
                         level === 0 ? "ps-2" : level === 1 ? "ps-5" : "ps-8",
                       ]}
                     >
-                      <span
-                        class="text-muted-foreground mt-px w-4 shrink-0 text-center text-xs"
-                        aria-hidden="true"
-                      >
-                        {level === 0 ? sectionNumber : level === 1 ? "•" : "·"}
-                      </span>
+                      {marker !== null && (
+                        <span
+                          class="text-muted-foreground mt-px w-4 shrink-0 text-center text-xs"
+                          aria-hidden="true"
+                        >
+                          {marker}
+                        </span>
+                      )}
                       <span class="min-w-0 wrap-break-word">
                         {heading.text}
                       </span>
@@ -195,9 +242,97 @@ let sectionNumber = 0;
     height: var(--focus-height, 0px);
     transform: translateY(var(--focus-y, 0px));
     border: 2px dashed var(--color-highlight);
+    overflow: hidden;
     pointer-events: none;
     opacity: 0;
     transition: opacity 180ms ease;
+    z-index: 0;
+  }
+
+  .toc-focus::before {
+    content: "";
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    height: var(--progress-height, 0px);
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-highlight) 44%, transparent) 0%,
+      color-mix(in srgb, var(--color-highlight) 16%, transparent) 46%,
+      color-mix(in srgb, var(--color-highlight) 2%, transparent) 100%
+    );
+    pointer-events: none;
+  }
+
+  #toc-track > ol {
+    position: relative;
+    z-index: 2;
+  }
+
+  .toc-twin-tails {
+    position: absolute;
+    inset-inline: 4px;
+    top: 0;
+    transform: translateY(var(--tail-top, 0px));
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .toc-twin-tail {
+    --tail-color: var(--color-highlight);
+    position: absolute;
+    top: 0;
+    width: 20%;
+    height: max(36px, var(--tail-progress, 36px));
+  }
+
+  .toc-twin-tail::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 58%;
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--tail-color) 34%, transparent),
+      color-mix(in srgb, var(--tail-color) 27%, transparent) 62%,
+      color-mix(in srgb, var(--tail-color) 23%, transparent)
+    );
+  }
+
+  .toc-twin-tail--left {
+    left: 0;
+  }
+
+  .toc-twin-tail--left::before {
+    left: 0;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), 82% 100%, 0 100%);
+  }
+
+  .toc-twin-tail--right {
+    right: 0;
+  }
+
+  .toc-twin-tail--right::before {
+    right: 0;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 18% 100%, 0 calc(100% - 10px));
+  }
+
+  .toc-twin-tie {
+    position: absolute;
+    top: 0;
+    left: -21%;
+    width: 112%;
+    height: auto;
+    display: block;
+    overflow: visible;
+    transform: translateY(-50%);
+  }
+
+  .toc-twin-tail--right .toc-twin-tie {
+    left: auto;
+    right: -21%;
+    transform: translateY(-50%) scaleX(-1);
   }
 
   .toc-focus[data-active="true"] {
@@ -252,8 +387,9 @@ let sectionNumber = 0;
     const nav = document.getElementById("post-toc");
     const track = document.getElementById("toc-track");
     const focus = document.getElementById("toc-focus");
+    const twinTails = document.getElementById("toc-twin-tails");
     const article = document.getElementById("article");
-    if (!nav || !track || !focus || !article) return;
+    if (!nav || !track || !focus || !twinTails || !article) return;
 
     const links = Array.from(
       nav.querySelectorAll<HTMLAnchorElement>("[data-heading-id]")
@@ -269,30 +405,59 @@ let sectionNumber = 0;
     let focusFrame = 0;
     let focusTop = 0;
     let focusBottom = 0;
+    let progressTop = 0;
+    let progressOrigin = 0;
     let targetTop = 0;
     let targetBottom = 0;
+    let targetProgressTop = 0;
+    let targetProgressOrigin = 0;
     const paintFocus = () => {
+      const origin = Math.max(focusTop, progressOrigin);
+      const progressHeight = Math.max(
+        0,
+        Math.min(progressTop, focusBottom) - focusTop
+      );
       focus.style.setProperty("--focus-y", `${focusTop}px`);
       focus.style.setProperty("--focus-height", `${focusBottom - focusTop}px`);
+      focus.style.setProperty(
+        "--progress-height",
+        `${progressTop <= origin ? 0 : progressHeight}px`
+      );
+      twinTails.style.setProperty("--tail-top", `${focusTop}px`);
+      const tailHeight = Math.max(36, progressTop - focusTop);
+      twinTails.style.setProperty("--tail-progress", `${tailHeight}px`);
     };
     const animateFocus = () => {
       focusTop += (targetTop - focusTop) * 0.22;
       focusBottom += (targetBottom - focusBottom) * 0.22;
+      progressTop += (targetProgressTop - progressTop) * 0.22;
+      progressOrigin += (targetProgressOrigin - progressOrigin) * 0.22;
       if (
         Math.abs(targetTop - focusTop) < 0.5 &&
-        Math.abs(targetBottom - focusBottom) < 0.5
+        Math.abs(targetBottom - focusBottom) < 0.5 &&
+        Math.abs(targetProgressTop - progressTop) < 0.5 &&
+        Math.abs(targetProgressOrigin - progressOrigin) < 0.5
       ) {
         focusTop = targetTop;
         focusBottom = targetBottom;
+        progressTop = targetProgressTop;
+        progressOrigin = targetProgressOrigin;
         focusFrame = 0;
       } else {
         focusFrame = requestAnimationFrame(animateFocus);
       }
       paintFocus();
     };
-    const moveFocus = (top: number, bottom: number) => {
+    const moveFocus = (
+      top: number,
+      bottom: number,
+      progress: number,
+      origin: number
+    ) => {
       targetTop = top;
       targetBottom = bottom;
+      targetProgressTop = progress;
+      targetProgressOrigin = origin;
       if (
         focus.dataset.active !== "true" ||
         window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -301,11 +466,44 @@ let sectionNumber = 0;
         focusFrame = 0;
         focusTop = top;
         focusBottom = bottom;
+        progressTop = progress;
+        progressOrigin = origin;
         paintFocus();
       } else if (!focusFrame) {
         focusFrame = requestAnimationFrame(animateFocus);
       }
       focus.dataset.active = "true";
+    };
+    const getProgressPosition = () => {
+      const trackTop = track.getBoundingClientRect().top;
+      const scrollTop = window.scrollY;
+      let index = 0;
+      while (
+        index < sections.length - 1 &&
+        sections[index + 1].heading.getBoundingClientRect().top <= 0
+      ) {
+        index += 1;
+      }
+
+      const current = sections[index];
+      const next = sections[index + 1];
+      const currentHeadingTop =
+        scrollTop + current.heading.getBoundingClientRect().top;
+      const nextHeadingTop = next
+        ? scrollTop + next.heading.getBoundingClientRect().top
+        : scrollTop + article.getBoundingClientRect().bottom;
+      const currentLinkTop =
+        current.link.getBoundingClientRect().top - trackTop;
+      const nextLinkTop = next
+        ? next.link.getBoundingClientRect().top - trackTop
+        : track.getBoundingClientRect().height;
+      const sectionHeight = Math.max(1, nextHeadingTop - currentHeadingTop);
+      const ratio = Math.min(
+        1,
+        Math.max(0, (scrollTop - currentHeadingTop) / sectionHeight)
+      );
+
+      return currentLinkTop + (nextLinkTop - currentLinkTop) * ratio;
     };
     const update = () => {
       frame = 0;
@@ -346,7 +544,9 @@ let sectionNumber = 0;
         activeLinks[activeLinks.length - 1].getBoundingClientRect();
       moveFocus(
         Math.max(0, firstRect.top - trackRect.top - 4),
-        lastRect.bottom - trackRect.top + 4
+        lastRect.bottom - trackRect.top + 4,
+        getProgressPosition(),
+        firstRect.top - trackRect.top
       );
       const activeHeight = lastRect.bottom - firstRect.top;
       let shift = 0;

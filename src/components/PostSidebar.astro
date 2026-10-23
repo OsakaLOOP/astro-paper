@@ -83,90 +83,97 @@ let sectionNumber = 0;
         <h2 class="border-border mb-3 border-b pb-2 text-sm font-semibold">
           {t.post.tableOfContents}
         </h2>
-        <nav
-          id="post-toc"
-          aria-label={t.post.tableOfContents}
-          class="max-h-48 overflow-y-auto px-2 pt-2 lg:max-h-[min(55vh,36rem)]"
-        >
-          <div id="toc-track" class="relative py-1">
-            <span id="toc-focus" class="toc-focus" aria-hidden="true" />
-            <div id="toc-twin-tails" class="toc-twin-tails" aria-hidden="true">
-              {["left", "right"].map(side => (
-                <span class={`toc-twin-tail toc-twin-tail--${side}`}>
-                  <svg
-                    class="toc-twin-tie"
-                    viewBox="0 0 112 112"
-                    fill="none"
-                    aria-hidden="true"
-                  >
-                    <defs>
-                      <clipPath id={`toc-tie-rear-${side}`}>
-                        <path
-                          d="M -8 -8 H 144 V 144 H -8 Z M 21 56 H 79 V 144 H 21 Z"
-                          clip-rule="evenodd"
-                        />
-                      </clipPath>
-                    </defs>
-                    {[
-                      {
-                        d: "M 14.667 62.333 L 26.333 50.667 L 97.333 121.667 L 85.667 133.333 Z",
-                        clip: `url(#toc-tie-rear-${side})`,
-                      },
-                      {
-                        d: "M 14.667 62.333 L 26.333 50.667 L 97.333 121.667 L 85.667 133.333",
-                        clip: undefined,
-                      },
-                    ].map(({ d, clip }) => (
-                      <g clip-path={clip}>
+        <div class="relative">
+          <div id="toc-twin-tails" class="toc-twin-tails" aria-hidden="true">
+            {["left", "right"].map(side => (
+              <span class={`toc-twin-tail toc-twin-tail--${side}`}>
+                <svg
+                  class="toc-twin-tie"
+                  viewBox="0 0 112 112"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <defs>
+                    <clipPath id={`toc-tie-rear-${side}`}>
+                      <path
+                        d="M -8 -8 H 144 V 144 H -8 Z M 21 56 H 81 V 144 H 21 Z"
+                        clip-rule="evenodd"
+                      />
+                    </clipPath>
+                  </defs>
+                  {/* 上边 112、下边 104、高 16；下边居中，再整体旋转 45°。 */}
+                  {[
+                    {
+                      d: "M 4 72 L 0 56 L 112 56 L 108 72 Z",
+                      clip: `url(#toc-tie-rear-${side})`,
+                    },
+                    {
+                      d: "M 4 72 L 0 56 L 112 56 L 108 72",
+                      clip: undefined,
+                    },
+                  ].map(({ d, clip }) => (
+                    <g clip-path={clip}>
+                      <g transform="translate(0 10.03) rotate(45 56 64)">
                         <path d={d} stroke="#171219" stroke-width="8" />
-                        <path d={d} stroke="#a8195b" stroke-width="2" />
+                        <path d={d} stroke="#ce2071" stroke-width="2" />
                       </g>
-                    ))}
-                  </svg>
-                </span>
-              ))}
-            </div>
-            <ol class="relative space-y-0.5 pt-10">
-              {tocHeadings.map(heading => {
-                const level = heading.depth - firstDepth;
-                const hasOwnNumber = numberedHeadingPattern.test(heading.text);
-                if (level === 0) sectionNumber += 1;
-                const marker = hasOwnNumber
-                  ? null
-                  : level === 0
-                    ? sectionNumber
-                    : level === 1
-                      ? "•"
-                      : "·";
-                return (
-                  <li>
-                    <a
-                      href={`#${heading.slug}`}
-                      data-heading-id={heading.slug}
-                      data-depth={heading.depth}
-                      class:list={[
-                        "toc-link text-muted-foreground hover:text-foreground flex min-w-0 items-start gap-2 px-2 py-1.5 text-sm leading-snug transition-colors",
-                        level === 0 ? "ps-2" : level === 1 ? "ps-5" : "ps-8",
-                      ]}
-                    >
-                      {marker !== null && (
-                        <span
-                          class="text-muted-foreground mt-px w-4 shrink-0 text-center text-xs"
-                          aria-hidden="true"
-                        >
-                          {marker}
-                        </span>
-                      )}
-                      <span class="min-w-0 wrap-break-word">
-                        {heading.text}
-                      </span>
-                    </a>
-                  </li>
-                );
-              })}
-            </ol>
+                    </g>
+                  ))}
+                </svg>
+              </span>
+            ))}
           </div>
-        </nav>
+          <nav
+            id="post-toc"
+            aria-label={t.post.tableOfContents}
+            class="max-h-48 overflow-y-auto px-2 pt-2 lg:max-h-[min(55vh,36rem)]"
+          >
+            <div id="toc-track" class="relative py-1">
+              <span id="toc-focus" class="toc-focus" aria-hidden="true" />
+              <ol class="relative space-y-0.5 pt-10">
+                {tocHeadings.map(heading => {
+                  const level = heading.depth - firstDepth;
+                  const hasOwnNumber = numberedHeadingPattern.test(
+                    heading.text
+                  );
+                  if (level === 0) sectionNumber += 1;
+                  const marker = hasOwnNumber
+                    ? null
+                    : level === 0
+                      ? sectionNumber
+                      : level === 1
+                        ? "•"
+                        : "·";
+                  return (
+                    <li>
+                      <a
+                        href={`#${heading.slug}`}
+                        data-heading-id={heading.slug}
+                        data-depth={heading.depth}
+                        class:list={[
+                          "toc-link text-muted-foreground hover:text-foreground flex min-w-0 items-start gap-2 px-2 py-1.5 text-sm leading-snug transition-colors",
+                          level === 0 ? "ps-2" : level === 1 ? "ps-5" : "ps-8",
+                        ]}
+                      >
+                        {marker !== null && (
+                          <span
+                            class="text-muted-foreground mt-px w-4 shrink-0 text-center text-xs"
+                            aria-hidden="true"
+                          >
+                            {marker}
+                          </span>
+                        )}
+                        <span class="min-w-0 wrap-break-word">
+                          {heading.text}
+                        </span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          </nav>
+        </div>
       </section>
     )
   }
@@ -271,11 +278,11 @@ let sectionNumber = 0;
 
   .toc-twin-tails {
     position: absolute;
-    inset-inline: 4px;
+    inset-inline: 12px;
     top: 0;
     transform: translateY(var(--tail-top, 0px));
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
   }
 
   .toc-twin-tail {
@@ -283,7 +290,7 @@ let sectionNumber = 0;
     position: absolute;
     top: 0;
     width: 20%;
-    height: max(36px, var(--tail-progress, 36px));
+    height: var(--tail-progress, 36px);
   }
 
   .toc-twin-tail::before {
@@ -291,7 +298,7 @@ let sectionNumber = 0;
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 58%;
+    width: 60%;
     background: linear-gradient(
       to bottom,
       color-mix(in srgb, var(--tail-color) 34%, transparent),
@@ -411,6 +418,16 @@ let sectionNumber = 0;
     let targetBottom = 0;
     let targetProgressTop = 0;
     let targetProgressOrigin = 0;
+    let trackOffset = 0;
+    const paintTails = () => {
+      twinTails.style.setProperty(
+        "--tail-top",
+        `${trackOffset + focusTop - nav.scrollTop}px`
+      );
+      // 发束末端始终领先进度 36px。
+      const tailHeight = Math.max(0, progressTop - focusTop + 36);
+      twinTails.style.setProperty("--tail-progress", `${tailHeight}px`);
+    };
     const paintFocus = () => {
       const origin = Math.max(focusTop, progressOrigin);
       const progressHeight = Math.max(
@@ -423,9 +440,7 @@ let sectionNumber = 0;
         "--progress-height",
         `${progressTop <= origin ? 0 : progressHeight}px`
       );
-      twinTails.style.setProperty("--tail-top", `${focusTop}px`);
-      const tailHeight = Math.max(36, progressTop - focusTop);
-      twinTails.style.setProperty("--tail-progress", `${tailHeight}px`);
+      paintTails();
     };
     const animateFocus = () => {
       focusTop += (targetTop - focusTop) * 0.22;
@@ -539,6 +554,8 @@ let sectionNumber = 0;
 
       const navRect = nav.getBoundingClientRect();
       const trackRect = track.getBoundingClientRect();
+      trackOffset = trackRect.top - navRect.top + nav.scrollTop;
+      twinTails.style.width = `${trackRect.width - 8}px`;
       const firstRect = activeLinks[0].getBoundingClientRect();
       const lastRect =
         activeLinks[activeLinks.length - 1].getBoundingClientRect();
@@ -564,9 +581,11 @@ let sectionNumber = 0;
     };
 
     update();
+    nav.addEventListener("scroll", paintTails, { passive: true });
     window.addEventListener("scroll", scheduleUpdate, { passive: true });
     window.addEventListener("resize", scheduleUpdate);
     removeListeners = () => {
+      nav.removeEventListener("scroll", paintTails);
       window.removeEventListener("scroll", scheduleUpdate);
       window.removeEventListener("resize", scheduleUpdate);
       cancelAnimationFrame(frame);

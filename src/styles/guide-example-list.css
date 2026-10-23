@@ -26,7 +26,7 @@
 
 .guide-example-list .guide-example {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
+  grid-template-columns: 24px minmax(0, 1fr) 24px;
   grid-template-rows: auto auto;
   align-items: baseline;
   column-gap: 8px;
@@ -36,8 +36,8 @@
 
 .guide-example-list .guide-example__bookmark {
   grid-column: 1;
-  grid-row: 1;
-  align-self: baseline;
+  grid-row: 1 / -1;
+  align-self: center;
   justify-self: center;
   color: var(--accent);
 }
@@ -46,7 +46,10 @@
   grid-column: 2;
   grid-row: 1;
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
 }
 
 .guide-example-list .guide-example__index {
@@ -62,10 +65,12 @@
 }
 
 .guide-example-list .guide-example__sentence {
+  display: inline-block;
   color: var(--foreground);
   font-size: 1.25rem;
   font-weight: 650;
   line-height: 1.85;
+  white-space: nowrap;
 }
 
 .guide-example-list ruby rt {
@@ -112,9 +117,9 @@
 
 .guide-example-list .guide-example__note {
   position: relative;
-  grid-column: 1;
-  grid-row: 2;
-  align-self: baseline;
+  grid-column: 3;
+  grid-row: 1 / -1;
+  align-self: center;
   justify-self: center;
   line-height: 1;
 }
@@ -141,7 +146,7 @@
 .guide-example-list .guide-example__tooltip {
   position: absolute;
   bottom: calc(100% + 0.45rem);
-  left: 0;
+  right: 0;
   z-index: 20;
   display: none;
   width: min(20rem, calc(100vw - 3rem));
@@ -174,9 +179,8 @@
 }
 
 .guide-example-list .guide-item-icon {
-  align-self: start;
+  align-self: center;
   justify-self: center;
-  padding-top: 0.62rem;
   color: var(--accent);
 }
 
@@ -224,7 +228,7 @@
   }
 
   .guide-example-list .guide-example__tooltip {
-    left: -0.45rem;
+    right: -0.45rem;
     width: min(19rem, calc(100vw - 2.5rem));
   }
 }

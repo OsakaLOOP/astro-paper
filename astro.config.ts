@@ -20,6 +20,7 @@ import { transformerFileName } from "./src/utils/transformers/fileName";
 import config from "./astro-paper.config";
 import { rehypeEmoji, type EmojiManifest } from "./src/utils/emoji";
 import { rehypeImageCaptions } from "./src/utils/rehypeImageCaptions";
+import { rehypeStrongSpacing } from "./src/utils/rehypeStrongSpacing";
 
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -57,6 +58,7 @@ export default defineConfig({
         rehypeKatex,
         rehypeEmoji(emojiManifest),
         rehypeImageCaptions,
+        rehypeStrongSpacing,
       ],
     }),
     shikiConfig: {

@@ -32,6 +32,14 @@
     strong {
       @apply text-foreground;
       margin-inline: 0.25em;
+
+      &.strong--flush-start {
+        margin-inline-start: 0;
+      }
+
+      &.strong--flush-end {
+        margin-inline-end: 0;
+      }
     }
 
     a {

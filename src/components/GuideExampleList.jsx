@@ -5,6 +5,7 @@ import {
   render,
   renderJSX,
 } from "astro/runtime/server/index.js";
+import { strongSpacingClassNames } from "../utils/strongSpacing";
 import "../styles/guide-example-list.css";
 
 const KANJI_RUN = /[\u3400-\u9fff々〆ヵヶ]+$/;
@@ -26,7 +27,15 @@ function inlineMarkup(text) {
         <code class="guide-example__inline-code">{token.slice(1, -1)}</code>
       );
     } else {
-      nodes.push(<strong>{token.slice(2, -2)}</strong>);
+      const classNames = strongSpacingClassNames(
+        text[index - 1],
+        text[index + token.length]
+      );
+      nodes.push(
+        <strong class={classNames.length ? classNames.join(" ") : undefined}>
+          {token.slice(2, -2)}
+        </strong>
+      );
     }
     cursor = index + token.length;
   }

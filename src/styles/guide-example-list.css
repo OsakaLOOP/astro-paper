@@ -75,12 +75,11 @@
 
 .guide-example-list .guide-example__sentence {
   display: inline-block;
-  min-width: max-content;
   color: var(--foreground);
   font-size: 1.25rem;
   font-weight: 650;
   line-height: 1.85;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .guide-example-list ruby rt {

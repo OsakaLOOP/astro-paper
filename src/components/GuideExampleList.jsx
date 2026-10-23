@@ -173,12 +173,14 @@ const GuideExampleList = createComponent(async (result, props) => {
                 {item?.id && (
                   <span class="guide-example__index">{item.id}</span>
                 )}
-                <span class="guide-example__sentence" lang="ja">
-                  {japaneseText(item?.ja)}
-                </span>
-                {item?.source && (
-                  <span class="guide-example__source">{item.source}</span>
-                )}
+                <div class="guide-example__scroll">
+                  <span class="guide-example__sentence" lang="ja">
+                    {japaneseText(item?.ja)}
+                  </span>
+                  {item?.source && (
+                    <span class="guide-example__source">{item.source}</span>
+                  )}
+                </div>
               </div>
               {item?.note && (
                 <span class="guide-example__note">

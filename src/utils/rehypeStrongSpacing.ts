@@ -1,7 +1,4 @@
-import {
-  startsWithSymbol,
-  strongSpacingClassNames,
-} from "./strongSpacing";
+import { strongSpacingClassNames } from "./strongSpacing";
 
 type Node = {
   type: string;
@@ -18,7 +15,8 @@ const edgeText = (node: Node | undefined, side: Side): string => {
   if (node.type === "text") return node.value ?? "";
   if (!node.children?.length) return "";
 
-  const children = side === "start" ? node.children : node.children.toReversed();
+  const children =
+    side === "start" ? node.children : node.children.toReversed();
   for (const child of children) {
     const value = edgeText(child, side);
     if (value) return value;

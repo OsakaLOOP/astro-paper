@@ -16,7 +16,7 @@
     }
 
     h3 {
-      @apply italic;
+      font-style: normal;
     }
 
     p,

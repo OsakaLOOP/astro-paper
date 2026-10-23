@@ -83,7 +83,7 @@ let sectionNumber = 0;
         <h2 class="border-border mb-3 border-b pb-2 text-sm font-semibold">
           {t.post.tableOfContents}
         </h2>
-        <div class="relative">
+        <div class="toc-clip relative">
           <div id="toc-twin-tails" class="toc-twin-tails" aria-hidden="true">
             {["left", "right"].map(side => (
               <span class={`toc-twin-tail toc-twin-tail--${side}`}>
@@ -283,6 +283,10 @@ let sectionNumber = 0;
     transform: translateY(var(--tail-top, 0px));
     pointer-events: none;
     z-index: 1;
+  }
+
+  .toc-clip {
+    clip-path: inset(-0.75rem 0 0 0);
   }
 
   .toc-twin-tail {

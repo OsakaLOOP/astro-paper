@@ -5,6 +5,7 @@
   .app-prose {
     @apply prose;
     font-size: 1.125rem;
+    font-weight: 380;
 
     h1,
     h2,

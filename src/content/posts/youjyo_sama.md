@@ -25,10 +25,8 @@ description: 内容と深みが互いに妥協し踏み躙り合うなかで、�
 <br/>
 <br/>
 <br/>
-<br/>
-<br/>
-<br/>
-<br/>
+
+![この人は、ロ○コンです！](/_assets/lolicon.jpg)
 
 <br/>
 <br/>

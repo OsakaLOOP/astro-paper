@@ -89,6 +89,8 @@ QQ images are also generated for posts with a custom `ogImage`.
 
 ## 📖 Documentation
 
+Bangumi 作品卡片的 MDX 用法、后端代理、数据同步及令牌邮件提醒见 [接入说明](docs/bangumi.md)。
+
 Documentation can be read in two formats\_ _markdown_ & _blog post_.
 
 - Configuration - [markdown](src/content/posts/how-to-configure-astropaper-theme.md) | [blog post](https://astro-paper.pages.dev/posts/how-to-configure-astropaper-theme/)

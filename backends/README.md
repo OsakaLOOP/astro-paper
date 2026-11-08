@@ -1,5 +1,7 @@
 # Blog comments service
 
+Bangumi 作品接口与令牌邮件提醒由同一服务提供，配置及部署方式见 [Bangumi 接入说明](../docs/bangumi.md)。
+
 The service keeps the blog session exchange and comments on the local PostgreSQL instance. Identity is delegated to SM through OIDC Authorization Code + PKCE; it never has access to SM's auth tables.
 
 1. Register the service in SM as `blog`, origin `https://api.loopo.cc`, redirect URI `https://api.loopo.cc/blog/auth/callback`.

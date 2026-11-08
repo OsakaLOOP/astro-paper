@@ -20,7 +20,7 @@ const lines = (value: string) => esc(value).replace(/\r\n|\r|\n/g, "<br>");
 type Context = { author: string; content: string };
 
 type NotificationSender =
-  "评论通知" | "回复通知" | "评论删除通知" | "新文章通知" | "文章更新通知";
+  "评论通知" | "回复通知" | "评论删除通知" | "新文章通知" | "文章更新通知" | "Bangumi 令牌提醒";
 
 function notificationTemplate(input: {
   fromName: NotificationSender;
@@ -125,6 +125,22 @@ function notificationTemplate(input: {
 </body>
 </html>`;
   return { fromName, subject, text, html };
+}
+
+export function bangumiTokenMailTemplate(expired: boolean, expiresAt?: string) {
+  return notificationTemplate({
+    fromName: "Bangumi 令牌提醒",
+    title: expired ? "Bangumi 访问令牌已失效" : "Bangumi 访问令牌即将到期",
+    url: process.env.PUBLIC_BLOG_ORIGIN ?? "https://www.loopo.cc/",
+    action: "令牌维护提醒",
+    content: [
+      expired ? "Bangumi 访问令牌已失效，博主收藏状态暂时无法更新。" : "Bangumi 访问令牌将在 14 天内到期，请及时更换。",
+      expiresAt ? `配置的到期时间：${expiresAt}` : "",
+      "请在 https://next.bgm.tv/demo/access-token 创建新令牌，更新后端 .env 中的 BANGUMI_ACCESS_TOKEN 和 BANGUMI_TOKEN_EXPIRES_AT，然后重启服务。",
+      "作品卡片继续显示公开作品资料及已保存的信息。",
+    ].filter(Boolean).join("\n\n"),
+    linkLabel: "查看博客",
+  });
 }
 
 export function commentMailTemplate(

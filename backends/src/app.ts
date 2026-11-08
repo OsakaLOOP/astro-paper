@@ -8,6 +8,7 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 import { HttpError } from "./errors.js";
+import { registerBangumi } from "./bangumi.js";
 import {
   commentMailTemplate,
   commentRemovedMailTemplate,
@@ -145,6 +146,7 @@ export async function buildApp(options: AppOptions) {
     await options.pool.query("SELECT user_id FROM site_blog.profiles LIMIT 0");
     return { status: "ready", mail_configured: Boolean(options.sendMail) };
   });
+  await registerBangumi(app, options);
   const current = async (request: FastifyRequest) => {
     const user = await options.getUser(request, true);
     if (!user) throw new HttpError(401, "AUTH_REQUIRED");

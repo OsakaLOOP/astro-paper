@@ -16,7 +16,17 @@ description: 内容と深みが互いに妥協し踏み躙り合うなかで、�
 
 import BangumiCard from "@/components/BangumiCard.astro";
 
-<style>{`.zh-paragraph { display: block; font-size: 80%; color: color-mix(in srgb, currentColor 85%, blue); }`}</style>
+<style>{`
+  .zh-paragraph {
+    display: block;
+    font-size: 80%;
+    color: color-mix(in srgb, currentColor 85%, blue);
+  }
+
+  [data-theme="dark"] .zh-paragraph {
+    color: color-mix(in srgb, currentColor 85%, lightskyblue);
+  }
+`}</style>
 
 > [!WARNING] ネタバレ注意・剧透注意
 

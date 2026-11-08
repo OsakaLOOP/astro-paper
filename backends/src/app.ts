@@ -331,10 +331,10 @@ export async function buildApp(options: AppOptions) {
             `INSERT INTO site_blog.article_view_visitors(post_slug,visitor_key,user_id,ip_hash)
              SELECT $1,$2,$3,$4
              WHERE NOT EXISTS (
-               SELECT 1 FROM site_blog.article_view_visitors
-               WHERE post_slug=$1
-                 AND last_viewed_at > now() - interval '3 hours'
-                 AND (visitor_key=$2 OR ip_hash=$4)
+                 SELECT 1 FROM site_blog.article_view_visitors
+                 WHERE post_slug=$1
+                   AND last_viewed_at > now() - interval '3 hours'
+                 AND (visitor_key=$2 OR ($3::text IS NULL AND ip_hash=$4))
              )
              ON CONFLICT(post_slug,visitor_key) DO UPDATE SET
                last_viewed_at=now(), view_count=site_blog.article_view_visitors.view_count+1,
@@ -861,15 +861,22 @@ export async function buildApp(options: AppOptions) {
           [...values, limit, offset]
         ),
         options.pool.query(
-          `SELECT e.user_id, COALESCE(p.display_name,'Reader') AS display_name,
-                  p.email, count(*)::bigint AS views,
-                  count(DISTINCT e.post_slug)::bigint AS articles,
-                  max(e.viewed_at) AS last_viewed_at
-           FROM site_blog.article_view_events e
-           LEFT JOIN site_blog.profiles p ON p.user_id=e.user_id
-           WHERE ${where} AND e.user_id IS NOT NULL
-           GROUP BY e.user_id,p.display_name,p.email
-           ORDER BY views DESC,e.user_id
+          `SELECT u.user_id, COALESCE(p.display_name,u.display_name,'Reader') AS display_name,
+                  COALESCE(p.email,u.email) AS email,
+                  COALESCE(e.views,0)::bigint AS views,
+                  COALESCE(e.articles,0)::bigint AS articles,
+                  e.last_viewed_at
+           FROM site_blog.analytics_users u
+           LEFT JOIN site_blog.profiles p ON p.user_id=u.user_id
+           LEFT JOIN (
+             SELECT e.user_id, count(*)::bigint AS views,
+                    count(DISTINCT e.post_slug)::bigint AS articles,
+                    max(e.viewed_at) AS last_viewed_at
+             FROM site_blog.article_view_events e
+             WHERE ${where.replace(/\b(post_slug|viewed_at)\b/g, "e.$1")} AND e.user_id IS NOT NULL
+             GROUP BY e.user_id
+           ) e ON e.user_id=u.user_id
+           ORDER BY views DESC,u.display_name,u.user_id
            LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
           [...values, limit, offset]
         ),

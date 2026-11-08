@@ -10,8 +10,12 @@ The service keeps the blog session exchange and comments on the local PostgreSQL
 
 For comment reminders, set `SM_MAIL_URL=https://auth.loopo.cc/internal/site-mail` and
 use the same random value for `SM_MAIL_SECRET` and SM's `BLOG_MAIL_SECRET`.
-Blog notifications pass a type-specific sender display name; authentication mail
-continues to use the sender configured by `SMTP_FROM` in SM.
+Blog notifications pass a type-specific sender display name; SM authentication
+templates also set their own names (邮箱验证 / 密码重置). In SM's `.env`, set
+`SMTP_FROM` to the bare sender address, without a display name or angle brackets.
+SM combines that address with each message's display name. Rebuild and recreate
+both SM `core` and `worker` after mail-code changes; recreating only the blog
+container leaves SM's old mail handling and environment in effect.
 `AUTHOR_EMAIL` receives all article comment notices; `AUTHOR_USER_ID` enables
 moderator deletion for the SM author account. Apply migrations in filename order,
 including `004_notifications.sql`, before restarting the container. The blog

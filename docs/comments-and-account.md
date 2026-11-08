@@ -209,8 +209,11 @@ The blog service sends a signed service request to SM's internal mail endpoint. 
 validates the service secret, calls the existing `Jobs.mail` queue, and never gives
 the blog service SMTP credentials. The request contains recipient, sender display
 name, subject, text, HTML, event id, and a five-minute timestamp window. The sender
-display name is used only for blog notifications; authentication emails continue
-to use the configured SMTP sender. The blog service retries only transport
+display name is chosen per message: 邮箱验证, 密码重置, 评论通知, 回复通知,
+评论删除通知, 新文章通知, or 文章更新通知. SM's `SMTP_FROM` provides only the
+sender address (a bare email, without a display name); it does not override the
+template's display name. Rebuild and recreate both SM `core` and `worker` when
+deploying mail changes, with SM's `.env` passed to Compose. The blog service retries only transport
 failures; SM owns delivery retries and Message-ID generation.
 
 The content endpoint is `POST /blog/hooks/content`. It accepts `new_article` and
@@ -221,7 +224,10 @@ under `src/content/posts`; install them with `npm run hooks:install`. Hooks are
 non-blocking: a mail outage is reported to stderr but does not prevent a commit
 or merge. Content mail is sent only when the triggering commit message contains
 `[notify]`. A post's Front Matter `notify` field suppresses that post when set to
-`false`; omitted `notify` defaults to `true`. Front Matter is read from the
+`false`; omitted `notify` defaults to `true` for published, non-draft posts.
+Drafts, future publication dates, and underscore-prefixed filenames never send
+notifications, even with `notify: true`. Invalid metadata is skipped and fails
+strict mode rather than sending a potentially private article. Front Matter is read from the
 committed file, not the working tree, and supports YAML comments and multiline
 values.
 
@@ -251,8 +257,14 @@ Publish an article with a final commit message such as
 `docs: publish an article [notify]`. The existing script compares only
 `HEAD^..HEAD`: when pushing multiple commits it inspects only the last one. For a
 squash or merge commit, include `[notify]` in that resulting commit's message.
-Deleted articles do not trigger mail. `notify: false` suppresses an article;
-`draft` and future publication dates do not, so suppress those explicitly.
+Deleted articles do not trigger mail. `notify: false`, `draft: true`, and future
+publication dates each independently suppress an article. Boolean flags must be
+YAML booleans (`false`, not `"false"`).
+
+Preview the exact per-file decisions without sending mail or loading secrets:
+`node scripts/git-content-notify.mjs commit --dry-run --strict`. To inspect an
+earlier commit, add `--commit <sha>`. Each skipped file includes its reason in
+the output; dry-run payloads include the selected article title and slug.
 
 Recipients must enable **Email me about new articles and content updates** in
 `/account`; the comment notification switch is independent. The workflow uses

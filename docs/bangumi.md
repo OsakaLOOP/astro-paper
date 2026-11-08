@@ -30,6 +30,8 @@ NO_PROXY=localhost,127.0.0.1,::1,host.docker.internal
 
 配置完成后重启博客后端；Docker 部署需重新构建镜像。现有的 `/blog/*` 反向代理规则覆盖作品接口。
 
+封面通过 `GET /blog/bangumi/subjects/:id/cover` 从博客后端加载。后端使用环境代理下载图片，在 `cache/bangumi/` 保存图片和缓存时间，每 24 小时更新；更新失败时继续提供已有图片。Compose 的 `bangumi-covers` 数据卷保存封面，容器重建后继续使用。直接运行 Node 时，服务工作目录应允许创建和写入 `cache/bangumi/`。
+
 ## 数据同步与故障处理
 
 在 `backends` 目录执行 `npm run bangumi:sync`，脚本自动读取 MDX 中 `<BangumiCard subjectId={数字} />` 的作品 ID，生成 `src/data/bangumi/<作品ID>.json`，再构建和发布博客。生成文件仅包含公开展示内容，可随文章提交；访问令牌始终保存在 Git 忽略的 `.env` 中。

@@ -121,9 +121,8 @@ export async function buildApp(options: AppOptions) {
   });
   await app.register(rateLimit, { max: 100, timeWindow: "1 minute" });
   app.addHook("onSend", async (_req, reply) => {
-    reply
-      .header("Cache-Control", "no-store")
-      .header("X-Content-Type-Options", "nosniff");
+    if (!reply.hasHeader("Cache-Control")) reply.header("Cache-Control", "no-store");
+    reply.header("X-Content-Type-Options", "nosniff");
   });
   app.setErrorHandler(
     (error: Error & { statusCode?: number }, request, reply) => {

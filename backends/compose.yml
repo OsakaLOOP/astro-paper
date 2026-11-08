@@ -14,6 +14,8 @@ services:
     ports: ["127.0.0.1:4100:4100"]
     extra_hosts: ["host.docker.internal:host-gateway"]
     read_only: true
+    volumes:
+      - bangumi-covers:/app/cache/bangumi
     tmpfs: [/tmp]
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
@@ -27,6 +29,8 @@ services:
     logging:
       driver: json-file
       options: { max-size: 10m, max-file: '3' }
+volumes:
+  bangumi-covers:
 networks:
   database:
     external: true

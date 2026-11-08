@@ -59,7 +59,9 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
       <span aria-hidden="true">暂无封面</span>
       <img
         data-cover
-        src={subject?.image || undefined}
+        src={subject?.image
+          ? new URL(`/blog/bangumi/subjects/${subjectId}/cover`, api).href
+          : undefined}
         alt={subject?.name ?? title ?? "作品封面"}
         width="120"
         height="174"

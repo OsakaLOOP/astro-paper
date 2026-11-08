@@ -1,5 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { randomUUID } from "node:crypto";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import type { AppOptions } from "./app.js";
 import { bangumiTokenMailTemplate } from "./mail.js";
 
@@ -70,6 +72,8 @@ export function createBangumiService(env = process.env) {
   const expires = Date.parse(env.BANGUMI_TOKEN_EXPIRES_AT ?? "");
   const cache = new Map<number, { data: BangumiCardData; until: number }>();
   const pending = new Map<number, Promise<BangumiCardData>>();
+  const covers = new Map<number, Promise<{ body: Buffer; type: string }>>();
+  const coverDirectory = resolve("cache/bangumi");
 
   function tokenWarning() {
     return !token
@@ -134,7 +138,10 @@ export function createBangumiService(env = process.env) {
         id,
         name: raw.name,
         nameCn: raw.name_cn,
-        image: raw.images.common ?? raw.images.large ?? "",
+        image:
+          raw.images.common || raw.images.large
+            ? `/blog/bangumi/subjects/${id}/cover`
+            : "",
         summary: raw.summary
           .replaceAll("&amp;", "&")
           .replace(/\s+/g, " ")
@@ -233,6 +240,65 @@ export function createBangumiService(env = process.env) {
     pending.set(id, task);
     return task;
   }
+  async function loadCover(id: number) {
+    const imagePath = resolve(coverDirectory, `${id}.image`);
+    const metadataPath = resolve(coverDirectory, `${id}.json`);
+    let cached: { body: Buffer; type: string; updatedAt: number } | undefined;
+    try {
+      const [body, metadata] = await Promise.all([
+        readFile(imagePath),
+        readFile(metadataPath, "utf8"),
+      ]);
+      cached = { body, ...JSON.parse(metadata) };
+      if (Date.now() - cached!.updatedAt < 86400_000) return cached!;
+    } catch {
+      /* 首次请求时下载封面。 */
+    }
+    try {
+      const response = await fetch(
+        `${api}/v0/subjects/${id}/image?type=common`,
+        {
+          headers: { "User-Agent": userAgent },
+          signal: AbortSignal.timeout(15_000),
+        }
+      );
+      if (!response.ok) throw new BangumiError(response.status);
+      const type = response.headers.get("Content-Type")?.split(";")[0] ?? "";
+      if (
+        ![
+          "image/jpeg",
+          "image/png",
+          "image/webp",
+          "image/gif",
+          "image/avif",
+        ].includes(type)
+      )
+        throw new Error("Bangumi 封面响应格式无效");
+      const body = Buffer.from(await response.arrayBuffer());
+      await mkdir(coverDirectory, { recursive: true });
+      await Promise.all([
+        writeFile(imagePath, body),
+        writeFile(
+          metadataPath,
+          JSON.stringify({ type, updatedAt: Date.now() }),
+          "utf8"
+        ),
+      ]);
+      return { body, type };
+    } catch (error) {
+      if (cached) return cached;
+      throw error;
+    }
+  }
+  function getCover(id: number) {
+    if (!covers.has(id)) {
+      covers.set(
+        id,
+        loadCover(id).finally(() => covers.delete(id))
+      );
+    }
+    return covers.get(id)!;
+  }
   async function checkToken() {
     const warning = tokenWarning();
     if (warning === "token_missing" || warning === "token_expired")
@@ -246,7 +312,7 @@ export function createBangumiService(env = process.env) {
         : "collection_unavailable";
     }
   }
-  return { get, checkToken };
+  return { get, getCover, checkToken };
 }
 
 export async function registerBangumi(
@@ -300,6 +366,43 @@ export async function registerBangumi(
       clearInterval(timer);
     });
   }
+  app.get<{ Params: { id: number } }>(
+    "/blog/bangumi/subjects/:id/cover",
+    {
+      schema: {
+        params: {
+          type: "object",
+          required: ["id"],
+          properties: {
+            id: {
+              type: "integer",
+              minimum: 1,
+              maximum: Number.MAX_SAFE_INTEGER,
+            },
+          },
+        },
+      },
+    },
+    async (request, reply) => {
+      try {
+        const cover = await service.getCover(request.params.id);
+        return reply
+          .type(cover.type)
+          .header("Cache-Control", "public, max-age=86400")
+          .send(cover.body);
+      } catch (error) {
+        request.log.warn(
+          { subject: request.params.id },
+          "Bangumi 封面获取失败，请检查代理和缓存目录权限"
+        );
+        return reply
+          .code(
+            error instanceof BangumiError && error.status === 404 ? 404 : 503
+          )
+          .send({ error: "BANGUMI_COVER_UNAVAILABLE" });
+      }
+    }
+  );
   app.get<{ Params: { id: number } }>(
     "/blog/bangumi/subjects/:id",
     {

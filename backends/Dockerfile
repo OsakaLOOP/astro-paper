@@ -11,5 +11,6 @@ WORKDIR /app
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
 COPY package.json ./
+RUN mkdir -p /app/cache/bangumi && chown -R node:node /app/cache
 USER node
 CMD ["node", "dist/server.js"]

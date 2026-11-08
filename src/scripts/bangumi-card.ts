@@ -46,7 +46,11 @@ function updateCard(card: HTMLElement, data: BangumiCardData) {
   element("original").hidden = !subject.nameCn;
   const cover = element<HTMLImageElement>("cover");
   cover.hidden = !subject.image;
-  if (subject.image) cover.src = subject.image;
+  if (subject.image)
+    cover.src = new URL(
+      `/blog/bangumi/subjects/${subject.id}/cover`,
+      card.dataset.api
+    ).href;
   cover.alt = subject.name;
   const meta = element("meta");
   meta.replaceChildren(

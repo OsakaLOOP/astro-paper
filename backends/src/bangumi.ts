@@ -66,10 +66,6 @@ class BangumiError extends Error {
 }
 
 export function createBangumiService(env = process.env) {
-  const ids = (env.BANGUMI_SUBJECT_IDS ?? "")
-    .split(",")
-    .map(Number)
-    .filter(id => Number.isSafeInteger(id) && id > 0);
   const token = env.BANGUMI_ACCESS_TOKEN;
   const expires = Date.parse(env.BANGUMI_TOKEN_EXPIRES_AT ?? "");
   const cache = new Map<number, { data: BangumiCardData; until: number }>();
@@ -166,8 +162,8 @@ export function createBangumiService(env = process.env) {
         episodes: raw.eps || raw.total_episodes,
         volumes: raw.volumes,
       };
-    } catch {
-      if (!previous) throw new Error("Bangumi 作品暂时无法获取");
+    } catch (error) {
+      if (!previous) throw error;
       return { ...previous, stale: true, warning: "upstream_unavailable" };
     }
 
@@ -221,12 +217,12 @@ export function createBangumiService(env = process.env) {
   }
 
   async function get(id: number): Promise<BangumiCardData> {
-    if (!ids.includes(id)) throw new BangumiError(404);
     const cached = cache.get(id);
     if (cached && cached.until > Date.now()) return cached.data;
     if (pending.has(id)) return pending.get(id)!;
     const task = refresh(id)
       .then(data => {
+        if (cache.size >= 128) cache.delete(cache.keys().next().value!);
         cache.set(id, {
           data,
           until: Date.now() + (data.stale || data.warning ? 60_000 : 1800_000),
@@ -250,7 +246,7 @@ export function createBangumiService(env = process.env) {
         : "collection_unavailable";
     }
   }
-  return { ids, get, checkToken };
+  return { get, checkToken };
 }
 
 export async function registerBangumi(
@@ -289,7 +285,7 @@ export async function registerBangumi(
       sending = false;
     }
   }
-  if (service.ids.length) {
+  if (process.env.BANGUMI_ACCESS_TOKEN) {
     const check = async () => {
       await notify(await service.checkToken());
     };
@@ -311,7 +307,13 @@ export async function registerBangumi(
         params: {
           type: "object",
           required: ["id"],
-          properties: { id: { type: "integer", minimum: 1 } },
+          properties: {
+            id: {
+              type: "integer",
+              minimum: 1,
+              maximum: Number.MAX_SAFE_INTEGER,
+            },
+          },
         },
       },
     },
@@ -327,9 +329,7 @@ export async function registerBangumi(
         return data;
       } catch (error) {
         if (error instanceof BangumiError && error.status === 404)
-          return reply
-            .code(404)
-            .send({ error: "BANGUMI_SUBJECT_NOT_CONFIGURED" });
+          return reply.code(404).send({ error: "BANGUMI_SUBJECT_NOT_FOUND" });
         request.log.warn(
           { subject: request.params.id },
           "Bangumi 作品暂时无法获取，请检查代理配置"

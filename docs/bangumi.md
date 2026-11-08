@@ -18,14 +18,13 @@ import BangumiCard from "@/components/BangumiCard.astro";
 
 ```dotenv
 BANGUMI_ACCESS_TOKEN=填写令牌
-BANGUMI_SUBJECT_IDS=229343
 BANGUMI_TOKEN_EXPIRES_AT=2027-11-08T00:00:00+08:00
 HTTPS_PROXY=http://host.docker.internal:10809
 HTTP_PROXY=http://host.docker.internal:10809
 NO_PROXY=localhost,127.0.0.1,::1,host.docker.internal
 ```
 
-多个作品 ID 使用逗号分隔。公开接口 `GET /blog/bangumi/subjects/:id` 仅允许配置中的作品，返回经过筛选的展示字段。私有收藏、邮箱及收藏短评均保留在后端。前端继续通过 `PUBLIC_BLOG_API` 使用现有博客 API 地址。
+作品 ID 由文章内的 `<BangumiCard subjectId={229343} />` 配置。公开接口 `GET /blog/bangumi/subjects/:id` 根据组件传入的 ID 获取作品，返回经过筛选的展示字段。私有收藏、邮箱及收藏短评均保留在后端。前端继续通过 `PUBLIC_BLOG_API` 使用现有博客 API 地址。
 
 服务端使用 Node 24 的环境代理支持；npm 启动命令包含 `--use-env-proxy`，Docker 设置 `NODE_USE_ENV_PROXY=1`。容器通过项目已有的 `host.docker.internal:host-gateway` 访问宿主机，代理端口应填写服务器实际端口，且应允许容器网段连接。直接在宿主机启动时可使用 `127.0.0.1:10809`。数据库及其他内网服务地址应加入 `NO_PROXY`。
 
@@ -33,7 +32,7 @@ NO_PROXY=localhost,127.0.0.1,::1,host.docker.internal
 
 ## 数据同步与故障处理
 
-在 `backends` 目录执行 `npm run bangumi:sync`，生成 `src/data/bangumi/<作品ID>.json`，再构建和发布博客。生成文件仅包含公开展示内容，可随文章提交；访问令牌始终保存在 Git 忽略的 `.env` 中。
+在 `backends` 目录执行 `npm run bangumi:sync`，脚本自动读取 MDX 中 `<BangumiCard subjectId={数字} />` 的作品 ID，生成 `src/data/bangumi/<作品ID>.json`，再构建和发布博客。生成文件仅包含公开展示内容，可随文章提交；访问令牌始终保存在 Git 忽略的 `.env` 中。
 
 静态页面直接显示数据快照，浏览器随后请求后端更新。后端正常缓存 30 分钟，同一作品的并发请求共用一次更新。网络故障时使用已有缓存；前端遇到超时、非正常响应或接口不可用时保留文章快照，并显示更新提示。封面加载失败时显示占位内容。
 

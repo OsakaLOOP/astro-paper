@@ -26,7 +26,7 @@ description: 内容と深みが互いに妥協し踏み躙り合うなかで、�
 <br/>
 <br/>
 
-![この人は、ロ○コンです！](_assets\lolicon.jpg)
+![この人は、ロ○コンです！](./_assets/lolicon.jpg)
 
 <br/>
 <br/>

@@ -138,9 +138,18 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
         }
       </div>
     </aside>
-    <p class="bangumi-summary" data-summary hidden={!subject?.summary}>
-      {subject?.summary.replaceAll("&amp;", "&")}
-    </p>
+    <div class="bangumi-description">
+      <p class="bangumi-summary" data-summary hidden={!subject?.summary}>
+        {subject?.summary.replaceAll("&amp;", "&")}
+      </p>
+      <button
+        class="bangumi-summary-toggle"
+        type="button"
+        data-summary-toggle
+        aria-expanded="false"
+        hidden>展开简介</button
+      >
+    </div>
   </div>
   <footer class="bangumi-footer">
     <div class="bangumi-personal" data-personal hidden={!collection}>
@@ -209,7 +218,8 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
   .bangumi-card a:hover {
     color: var(--accent);
   }
-  .bangumi-card a:focus-visible {
+  .bangumi-card a:focus-visible,
+  .bangumi-summary-toggle:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
   }
@@ -365,8 +375,11 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     font-size: 0.6rem;
     line-height: 18px;
   }
-  .bangumi-summary {
+  .bangumi-description {
     grid-column: 1 / -1;
+    min-width: 0;
+  }
+  .bangumi-summary {
     display: -webkit-box;
     overflow: hidden;
     margin: 0;
@@ -374,6 +387,18 @@ const api = import.meta.env.PUBLIC_BLOG_API ?? "https://api.loopo.cc";
     white-space: pre-line;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    overflow-wrap: anywhere;
+  }
+  .bangumi-summary.is-expanded {
+    display: block;
+    -webkit-line-clamp: unset;
+  }
+  .bangumi-summary-toggle {
+    margin-top: 0.35rem;
+    padding: 0.2rem 0;
+    color: var(--accent);
+    font: inherit;
+    cursor: pointer;
   }
   .bangumi-footer {
     display: flex;

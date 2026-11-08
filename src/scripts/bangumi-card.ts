@@ -7,6 +7,26 @@ import {
 
 const initialized = new WeakSet<HTMLElement>();
 
+function updateSummary(card: HTMLElement) {
+  const summary = card.querySelector<HTMLElement>("[data-summary]")!;
+  const toggle = card.querySelector<HTMLButtonElement>(
+    "[data-summary-toggle]"
+  )!;
+  toggle.hidden =
+    summary.hidden ||
+    (!summary.classList.contains("is-expanded") &&
+      summary.scrollHeight <= summary.clientHeight);
+}
+
+const summaryObserver = new ResizeObserver(entries => {
+  for (const entry of entries) {
+    updateSummary(entry.target.closest<HTMLElement>("[data-bangumi-card]")!);
+  }
+});
+document.addEventListener("astro:before-swap", () =>
+  summaryObserver.disconnect()
+);
+
 function updateCard(card: HTMLElement, data: BangumiCardData) {
   const { subject, collection } = data;
   card.dataset.subjectType = String(subject.type);
@@ -56,6 +76,7 @@ function updateCard(card: HTMLElement, data: BangumiCardData) {
   });
   text("summary", subject.summary.replaceAll("&amp;", "&"));
   element("summary").hidden = !subject.summary;
+  updateSummary(card);
   // 收藏接口暂时失效时，继续显示文章内的公开收藏快照。
   if (collection || !data.warning || data.warning === "token_expiring") {
     element("personal").hidden = !collection;
@@ -97,6 +118,17 @@ function updateCard(card: HTMLElement, data: BangumiCardData) {
 async function loadCard(card: HTMLElement) {
   if (initialized.has(card)) return;
   initialized.add(card);
+  const summary = card.querySelector<HTMLElement>("[data-summary]")!;
+  const toggle = card.querySelector<HTMLButtonElement>(
+    "[data-summary-toggle]"
+  )!;
+  toggle.addEventListener("click", () => {
+    const expanded = summary.classList.toggle("is-expanded");
+    toggle.setAttribute("aria-expanded", String(expanded));
+    toggle.textContent = expanded ? "收起简介" : "展开简介";
+  });
+  summaryObserver.observe(summary);
+  updateSummary(card);
   const cover = card.querySelector<HTMLImageElement>("[data-cover]");
   cover?.addEventListener("error", () => {
     cover.hidden = true;
